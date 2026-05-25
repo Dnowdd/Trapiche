@@ -9,7 +9,6 @@ import InicioTab from "./_components/inicio-tab";
 import ListasTab from "./_components/listas-tab";
 import ProfileCard from "./_components/profile-card";
 import ReleiturasTab from "./_components/releituras-tab";
-import "../styles.css";
 
 const Profile = () => {
   const [tab, setTab] = useState("inicio");

@@ -49,6 +49,25 @@
 }
 
 :root {
+  /* Trapiche design tokens */
+  --yellow: #ffe767;
+  --yellow-deep: #f5dd5c;
+  --yellow-soft: #fff1a8;
+  --cream: #fff8d5;
+  --cream-card: #fffddf;
+  --cream-deep: #f8e99d;
+  --ink: #343600;
+  --ink-2: #433e12;
+  --ink-3: #66623d;
+  --ink-4: #7c7d58;
+  --ink-5: #918b59;
+  --rule: #ecedde;
+  --rule-yellow: #f5dd5c;
+  --shadow-card:
+    0 1px 0 rgba(67, 62, 18, 0.04), 0 8px 24px -16px rgba(67, 62, 18, 0.18);
+  --shadow-lift:
+    0 1px 0 rgba(67, 62, 18, 0.04), 0 24px 60px -28px rgba(67, 62, 18, 0.3);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

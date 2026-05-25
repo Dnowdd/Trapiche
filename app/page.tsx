@@ -5,7 +5,6 @@ import Lists from "./_components/lists";
 import Popular from "./_components/popular";
 import Quote from "./_components/quote";
 import Reviews from "./_components/reviews";
-import "./styles.css";
 
 export default function Home() {
   return (
