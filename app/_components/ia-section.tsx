@@ -11,7 +11,7 @@ const IASection = () => {
         <div className="absolute inset-0 bg-[radial-gradient(50%_60%_at_50%_0%,rgba(255,231,103,0.45),transparent_70%)] pointer-events-none" />
 
         <div className="text-center flex flex-col items-center gap-3 relative">
-          <div className="font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-4) tracking-[0.08em] uppercase inline-flex items-center gap-2 py-1.5 px-3 bg-[rgba(67,62,18,0.06)] rounded-full">
+          <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.08em] uppercase inline-flex items-center gap-2 py-1.5 px-3 bg-[rgba(67,62,18,0.06)] rounded-full">
             <svg
               width="11"
               height="11"
@@ -49,7 +49,7 @@ const IASection = () => {
                     : "w-32.5 h-[195px] rounded-lg relative flex items-center justify-center flex-col gap-2 border-[1.5px] border-dashed border-[rgba(67,62,18,0.25)] bg-[rgba(67,62,18,0.025)] text-(--ink-4) cursor-pointer transition-[background,border-color] duration-150 hover:bg-(--yellow-soft) hover:border-(--ink-3) hover:text-(--ink-2)"
                 }
               >
-                <span className="absolute -top-2.5 -left-2.5 w-5.5 h-5.5 rounded-full bg-(--ink-2) text-(--yellow) font-['JetBrains_Mono',monospace] text-[10px] font-semibold flex items-center justify-center border-2 border-(--cream-card)">
+                <span className="absolute -top-2.5 -left-2.5 w-5.5 h-5.5 rounded-full bg-(--ink-2) text-(--yellow) font-mono text-[10px] font-semibold flex items-center justify-center border-2 border-(--cream-card)">
                   {i + 1}
                 </span>
                 {book ? (
@@ -60,7 +60,7 @@ const IASection = () => {
                   />
                 ) : (
                   <>
-                    <span className="font-['JetBrains_Mono',monospace] text-[11px] tracking-[0.08em]">
+                    <span className="font-mono text-[11px] tracking-[0.08em]">
                       0{i + 1}
                     </span>
 
@@ -73,7 +73,7 @@ const IASection = () => {
         </div>
 
         <div className="flex items-center gap-4 relative">
-          <span className="font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-4) tracking-[0.04em]">
+          <span className="font-mono text-[11px] text-(--ink-4) tracking-[0.04em]">
             <strong className="text-(--ink-2)">{filled}</strong>/5 selecionados
           </span>
 

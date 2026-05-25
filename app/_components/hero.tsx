@@ -62,7 +62,7 @@ const Hero = () => {
       data-screen-label="02 Hero"
     >
       <div>
-        <div className="font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-3) tracking-[0.08em] uppercase mb-4 flex items-center gap-2.5">
+        <div className="font-mono text-[11px] text-(--ink-3) tracking-[0.08em] uppercase mb-4 flex items-center gap-2.5">
           <span className="w-1.5 h-1.5 rounded-full bg-(--ink-3)"></span>
           Trapiche · indie brasileiro de leitura
         </div>
@@ -127,7 +127,7 @@ const Hero = () => {
           </a>
         </div>
 
-        <div className="mt-9 flex gap-8 font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-4) tracking-[0.04em]">
+        <div className="mt-9 flex gap-8 font-mono text-[11px] text-(--ink-4) tracking-[0.04em]">
           <div>
             <strong className="block font-['Inter',sans-serif] text-[20px] font-bold text-(--ink-2) tracking-[-0.01em] mb-0.5">
               14.8k

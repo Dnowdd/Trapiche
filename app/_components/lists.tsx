@@ -42,7 +42,7 @@ const Lists = () => {
     <section className="px-12.5" data-screen-label="04 Listas">
       <div className="flex items-end justify-between px-7.5 pb-4">
         <div>
-          <div className="font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
+          <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
             Suas estantes
           </div>
 
@@ -77,7 +77,7 @@ const Lists = () => {
             </div>
 
             <div className="flex flex-col gap-1">
-              <div className="font-['JetBrains_Mono',monospace] text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
+              <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
                 {l.kind} · {l.count} livros
               </div>
 

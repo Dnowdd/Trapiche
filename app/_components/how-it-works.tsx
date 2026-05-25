@@ -144,7 +144,7 @@ const HowItWorks = () => {
     >
       <div className="flex items-end justify-between px-7.5 pb-4">
         <div>
-          <div className="font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
+          <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
             Como funciona
           </div>
 
@@ -160,7 +160,7 @@ const HowItWorks = () => {
             className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] pt-7 px-7 pb-8 flex flex-col gap-3.5 relative min-h-55"
             key={i}
           >
-            <div className="font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-4) tracking-[0.08em]">
+            <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.08em]">
               PASSO {s.n}
             </div>
 

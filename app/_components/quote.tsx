@@ -14,7 +14,7 @@ const Quote = () => {
         que era quase febre.
       </blockquote>
 
-      <cite className="inline-flex items-center gap-3 not-italic font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-4) tracking-[0.08em] uppercase">
+      <cite className="inline-flex items-center gap-3 not-italic font-mono text-[11px] text-(--ink-4) tracking-[0.08em] uppercase">
         <span className="w-7 h-px bg-(--ink-4)"></span>
         Jorge Amado · Capitães da Areia
         <span className="w-7 h-px bg-(--ink-4)"></span>

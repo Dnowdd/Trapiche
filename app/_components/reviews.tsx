@@ -33,7 +33,7 @@ const Reviews = () => {
           style={{ padding: "0 0 8px" }}
         >
           <div>
-            <div className="font-['JetBrains_Mono',monospace] text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
+            <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
               Últimas avaliações
             </div>
 
@@ -88,7 +88,7 @@ const Reviews = () => {
                   </span>
                 </div>
 
-                <span className="text-(--ink-4) font-['JetBrains_Mono',monospace] text-[10px] tracking-[0.04em]">
+                <span className="text-(--ink-4) font-mono text-[10px] tracking-[0.04em]">
                   {r.date}
                 </span>
               </div>
