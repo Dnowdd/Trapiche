@@ -39,7 +39,7 @@ const Popular = () => {
             const reads = 3200 - i * 280;
             return (
               <div className="flex flex-col gap-2.5 cursor-pointer" key={b.id}>
-                <BookCover book={b} size="md" />
+                <BookCover book={b} size="md" style={{ width: "100%", aspectRatio: "2/3" }} />
 
                 <div className="flex justify-between items-center font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
                   <span>{reads.toLocaleString("pt-BR")} leitoras</span>

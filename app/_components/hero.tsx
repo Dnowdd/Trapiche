@@ -62,11 +62,6 @@ const Hero = () => {
       data-screen-label="02 Hero"
     >
       <div>
-        <div className="font-mono text-[11px] text-(--ink-3) tracking-[0.08em] uppercase mb-4 flex items-center gap-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-(--ink-3)"></span>
-          Trapiche · indie brasileiro de leitura
-        </div>
-
         <h1 className="m-0 mb-6 text-[64px] font-extrabold leading-[0.98] tracking-[-0.025em] text-(--ink-2)">
           O porto seguro
           <br />
