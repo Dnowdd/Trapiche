@@ -49,12 +49,12 @@ const BookCover = ({ book, size = "lg", style }: BookCoverProps) => {
     >
       <div className="cover-top flex justify-between items-start gap-2">
         {p.pub && (
-          <span className="cover-pub font-['JetBrains_Mono',monospace] text-[9px] tracking-[0.08em] opacity-60 uppercase">
+          <span className="cover-pub font-mono text-[9px] tracking-[0.08em] opacity-60 uppercase">
             {p.pub}
           </span>
         )}
 
-        <span className="cover-glyph font-['JetBrains_Mono',monospace] text-[9px] opacity-60">
+        <span className="cover-glyph font-mono text-[9px] opacity-60">
           {book.glyph}
         </span>
       </div>
