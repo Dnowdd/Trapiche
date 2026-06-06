@@ -24,7 +24,10 @@ export default function LoginForm({
   submit,
 }: LoginFormProps) {
   return (
-    <form className="animate-[modeIn_0.4s_cubic-bezier(0.2,0.7,0.2,1)]" onSubmit={submit}>
+    <form
+      className="animate-[modeIn_0.4s_cubic-bezier(0.2,0.7,0.2,1)]"
+      onSubmit={submit}
+    >
       <div className="mb-7">
         <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.08em] uppercase flex items-center gap-2 mb-3.5">
           <span className="w-1.25 h-1.25 rounded-full bg-(--ink-3)"></span>

@@ -73,14 +73,6 @@ export default function Poster() {
       <div className="relative z-[1] flex items-center justify-between">
         <div className="text-[26px] font-extrabold tracking-[-0.02em] text-(--cream) flex items-baseline gap-2">
           Trapiche
-          <span className="font-mono text-[10px] font-normal text-(--yellow) tracking-[0.06em]">
-            indie·br
-          </span>
-        </div>
-        <div className="font-mono text-[10px] text-[rgba(255,248,213,0.5)] tracking-[0.1em] uppercase text-right leading-[1.7]">
-          Salvador · BA
-          <br />
-          12°58′S · 38°30′W
         </div>
       </div>
 
@@ -91,7 +83,12 @@ export default function Poster() {
           style={{ cursor: "pointer" }}
         >
           {picked.map((b, i) => (
-            <BookCover key={b.id + seed} book={b} size="lg" style={POSITIONS[i]} />
+            <BookCover
+              key={b.id + seed}
+              book={b}
+              size="lg"
+              style={POSITIONS[i]}
+            />
           ))}
           <div className="absolute bottom-[-18px] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] text-[rgba(255,248,213,0.55)] tracking-[0.06em] border border-[rgba(255,248,213,0.18)] rounded-full py-[5px] px-3 inline-flex items-center gap-[7px] bg-[rgba(43,39,16,0.6)] [backdrop-filter:blur(4px)]">
             <span className="w-[5px] h-[5px] rounded-full bg-(--yellow)"></span>
@@ -102,7 +99,7 @@ export default function Poster() {
 
       <div className="relative z-[1] max-w-[460px]">
         <span className="text-[56px] leading-[0.4] text-(--yellow) opacity-60 font-bold block mb-[18px]">
-          "
+          &quot;
         </span>
         <blockquote className="m-0 mb-[18px] text-[19px] leading-normal text-[rgba(255,248,213,0.92)] tracking-[-0.005em] [text-wrap:pretty]">
           Lia-os todos numa ânsia que era quase febre. Os livros lhe traziam

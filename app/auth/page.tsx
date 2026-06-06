@@ -140,7 +140,7 @@ export default function AuthPage() {
         </div>
 
         <div className="flex items-center justify-between font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase">
-          <span>© 2026 Trapiche</span>
+          <span>© {new Date().getFullYear()} Trapiche</span>
           <div className="flex gap-4.5">
             <a href="#" className="hover:text-(--ink-2)">
               Termos
