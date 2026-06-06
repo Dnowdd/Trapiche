@@ -1,4 +1,4 @@
-import { BOOKS } from "../mock";
+import { BOOKS } from "@/app/mock";
 
 const BOOK = BOOKS.find((b) => b.id === "capitaes")!;
 

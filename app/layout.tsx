@@ -20,17 +20,10 @@ export default function RootLayout({
   return (
     <html
       lang="pt-br"
-      className={cn(
-        "h-full",
-        "antialiased",
-        "font-sans",
-        inter.variable,
-      )}
+      className={cn("h-full", "antialiased", "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col bg-(--yellow) text-(--ink-2) min-w-360 font-features-['ss01','cv11'] [text-rendering:optimizeLegibility]">
-        <Header />
         <main>{children}</main>
-        <Footer />
       </body>
     </html>
   );

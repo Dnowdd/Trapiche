@@ -1,5 +1,5 @@
 import BookCover from "@/components/shared/book-cover";
-import { REVIEWS } from "../mock";
+import { REVIEWS } from "../../mock";
 
 const Stars = ({ n }: { n: number }) => {
   return (

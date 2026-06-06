@@ -1,5 +1,5 @@
 import BookCover from "@/components/shared/book-cover";
-import { LISTS } from "../mock";
+import { LISTS } from "../../mock";
 
 const STACK_POSITIONS: React.CSSProperties[] = [
   {

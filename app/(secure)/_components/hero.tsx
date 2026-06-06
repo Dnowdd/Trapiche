@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BOOKS } from "../mock";
+import { BOOKS } from "../../mock";
 import BookCover from "@/components/shared/book-cover";
 
 function shuffle<T>(arr: T[]): T[] {

@@ -1,5 +1,5 @@
 import BookCover from "@/components/shared/book-cover";
-import { BOOKS } from "../mock";
+import { BOOKS } from "../../mock";
 
 const Popular = () => {
   const density = 8;
