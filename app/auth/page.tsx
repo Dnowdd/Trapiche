@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Poster from "./_components/poster";
 import LoginForm from "./_components/login-form";
 import RegisterForm from "./_components/register-form";
@@ -9,10 +10,16 @@ import ResetForm from "./_components/reset-form";
 import SentCard from "./_components/sent-card";
 import { scorePassword } from "./_components/password-strength";
 import type { AuthMode, SentContext } from "./_components/types";
+import { authClient } from "@/lib/auth-client";
 
-export default function AuthPage() {
+function AuthContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [mode, setMode] = useState<AuthMode>("login");
   const [sentContext, setSentContext] = useState<SentContext>("forgot");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -24,16 +31,59 @@ export default function AuthPage() {
   const [agree, setAgree] = useState(false);
 
   const score = scorePassword(pw);
-  const go = (m: AuthMode) => setMode(m);
+  const go = (m: AuthMode) => { setMode(m); setError(""); };
 
-  const submit = (e: { preventDefault(): void }) => {
+  // If the URL has a token, go straight to the reset form
+  useEffect(() => {
+    if (searchParams.get("token")) setMode("reset");
+  }, [searchParams]);
+
+  const submit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
-    if (mode === "forgot") {
-      setSentContext("forgot");
-      setMode("sent");
-    } else if (mode === "reset") {
-      setSentContext("reset");
-      setMode("sent");
+    setError("");
+    setLoading(true);
+
+    try {
+      if (mode === "register") {
+        const { error } = await authClient.signUp.email({
+          email,
+          password: pw,
+          name,
+          handle,
+        } as Parameters<typeof authClient.signUp.email>[0]);
+        if (error) { setError(error.message ?? "Erro ao criar conta."); return; }
+        setSentContext("verify");
+        setMode("sent");
+
+      } else if (mode === "login") {
+        const { error } = await authClient.signIn.email({
+          email,
+          password: pw,
+        });
+        if (error) { setError(error.message ?? "E-mail ou senha inválidos."); return; }
+        router.push("/");
+
+      } else if (mode === "forgot") {
+        const { error } = await authClient.requestPasswordReset({
+          email,
+          redirectTo: `${window.location.origin}/auth`,
+        });
+        if (error) { setError(error.message ?? "Erro ao enviar e-mail."); return; }
+        setSentContext("forgot");
+        setMode("sent");
+
+      } else if (mode === "reset") {
+        const token = searchParams.get("token") ?? "";
+        const { error } = await authClient.resetPassword({
+          newPassword: pw,
+          token,
+        });
+        if (error) { setError(error.message ?? "Erro ao redefinir senha."); return; }
+        setSentContext("reset");
+        setMode("sent");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,6 +126,12 @@ export default function AuthPage() {
         </div>
 
         <div className="flex-1 flex flex-col justify-center max-w-100 w-full mx-auto py-7.5">
+          {error && (
+            <div className="mb-4 px-4 py-3 rounded-[10px] bg-red-50 border border-red-200 text-[13px] text-red-700">
+              {error}
+            </div>
+          )}
+
           {mode === "login" && (
             <LoginForm
               key="login"
@@ -155,5 +211,13 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense>
+      <AuthContent />
+    </Suspense>
   );
 }

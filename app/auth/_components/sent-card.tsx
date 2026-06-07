@@ -35,7 +35,9 @@ export default function SentCard({ email, context, go }: SentCardProps) {
       ) : (
         <>
           <p className="text-[14px] text-(--ink-3) leading-[1.55] m-0 mb-1">
-            Enviamos um link de recuperação para
+            {context === "verify"
+              ? "Enviamos um link de ativação para"
+              : "Enviamos um link de recuperação para"}
           </p>
           <div className="inline-block font-mono text-[12px] text-(--ink-2) bg-(--cream-deep) rounded-[6px] py-1.5 px-3 my-1 tracking-[0.02em]">
             {email || "voce@email.com"}
