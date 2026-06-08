@@ -31,7 +31,10 @@ function AuthContent() {
   const [agree, setAgree] = useState(false);
 
   const score = scorePassword(pw);
-  const go = (m: AuthMode) => { setMode(m); setError(""); };
+  const go = (m: AuthMode) => {
+    setMode(m);
+    setError("");
+  };
 
   // If the URL has a token, go straight to the reset form
   useEffect(() => {
@@ -45,40 +48,54 @@ function AuthContent() {
 
     try {
       if (mode === "register") {
-        const { error } = await authClient.signUp.email({
+        const { data, error } = await authClient.signUp.email({
           email,
           password: pw,
           name,
           handle,
         } as Parameters<typeof authClient.signUp.email>[0]);
-        if (error) { setError(error.message ?? "Erro ao criar conta."); return; }
+        if (error) {
+          setError(error.message ?? "Erro ao criar conta.");
+          return;
+        }
+        // token presente → SKIP_EMAIL_VERIFICATION=true, sessão criada direto
+        if (data?.token) {
+          router.push("/");
+          return;
+        }
         setSentContext("verify");
         setMode("sent");
-
       } else if (mode === "login") {
         const { error } = await authClient.signIn.email({
           email,
           password: pw,
         });
-        if (error) { setError(error.message ?? "E-mail ou senha inválidos."); return; }
+        if (error) {
+          setError(error.message ?? "E-mail ou senha inválidos.");
+          return;
+        }
         router.push("/");
-
       } else if (mode === "forgot") {
         const { error } = await authClient.requestPasswordReset({
           email,
           redirectTo: `${window.location.origin}/auth`,
         });
-        if (error) { setError(error.message ?? "Erro ao enviar e-mail."); return; }
+        if (error) {
+          setError(error.message ?? "Erro ao enviar e-mail.");
+          return;
+        }
         setSentContext("forgot");
         setMode("sent");
-
       } else if (mode === "reset") {
         const token = searchParams.get("token") ?? "";
         const { error } = await authClient.resetPassword({
           newPassword: pw,
           token,
         });
-        if (error) { setError(error.message ?? "Erro ao redefinir senha."); return; }
+        if (error) {
+          setError(error.message ?? "Erro ao redefinir senha.");
+          return;
+        }
         setSentContext("reset");
         setMode("sent");
       }
@@ -141,6 +158,7 @@ function AuthContent() {
               setPw={setPw}
               showPw={showPw}
               setShowPw={setShowPw}
+              loading={loading}
               go={go}
               submit={submit}
             />
@@ -161,6 +179,7 @@ function AuthContent() {
               score={score}
               agree={agree}
               setAgree={setAgree}
+              loading={loading}
               go={go}
               submit={submit}
             />
@@ -170,6 +189,7 @@ function AuthContent() {
               key="forgot"
               email={email}
               setEmail={setEmail}
+              loading={loading}
               go={go}
               submit={submit}
             />
@@ -186,6 +206,7 @@ function AuthContent() {
               showPw2={showPw2}
               setShowPw2={setShowPw2}
               score={score}
+              loading={loading}
               go={go}
               submit={submit}
             />

@@ -1,4 +1,4 @@
-import { LockIcon, Arrow } from "./icons";
+import { LockIcon, Arrow, Loader } from "./icons";
 import Field from "./field";
 import PasswordStrength from "./password-strength";
 import type { AuthMode } from "./types";
@@ -13,6 +13,7 @@ interface ResetFormProps {
   showPw2: boolean;
   setShowPw2: (v: boolean) => void;
   score: number;
+  loading: boolean;
   go: (mode: AuthMode) => void;
   submit: (e: { preventDefault(): void }) => void;
 }
@@ -27,13 +28,17 @@ export default function ResetForm({
   showPw2,
   setShowPw2,
   score,
+  loading,
   submit,
 }: ResetFormProps) {
   const match = pw.length > 0 && pw === pw2;
   const mismatch = pw2.length > 0 && pw !== pw2;
 
   return (
-    <form className="animate-[modeIn_0.4s_cubic-bezier(0.2,0.7,0.2,1)]" onSubmit={submit}>
+    <form
+      className="animate-[modeIn_0.4s_cubic-bezier(0.2,0.7,0.2,1)]"
+      onSubmit={submit}
+    >
       <div className="mb-7">
         <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.08em] uppercase flex items-center gap-2 mb-3.5">
           <span className="w-1.25 h-1.25 rounded-full bg-(--ink-3)"></span>
@@ -74,7 +79,11 @@ export default function ResetForm({
             <span
               className="text-[11px]"
               style={{
-                color: mismatch ? "#9a4a2a" : match ? "#5E8A2E" : "var(--ink-4)",
+                color: mismatch
+                  ? "#9a4a2a"
+                  : match
+                    ? "#5E8A2E"
+                    : "var(--ink-4)",
               }}
             >
               {mismatch
@@ -88,10 +97,17 @@ export default function ResetForm({
       />
 
       <button
-        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) cursor-pointer flex items-center justify-center gap-2.25 transition-[transform,box-shadow] duration-100 hover:-translate-y-px hover:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] [&_svg]:w-3.75 [&_svg]:h-3.75 mt-2"
+        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) flex items-center justify-center gap-2.25 transition-[transform,box-shadow,opacity] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:w-3.75 [&_svg]:h-3.75 mt-2"
         type="submit"
+        disabled={loading}
       >
-        Redefinir senha <Arrow />
+        {loading ? (
+          <Loader className="animate-spin" />
+        ) : (
+          <>
+            Redefinir senha <Arrow />
+          </>
+        )}
       </button>
     </form>
   );

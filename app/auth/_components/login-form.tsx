@@ -1,4 +1,4 @@
-import { MailIcon, LockIcon, GoogleMark, Arrow, Check } from "./icons";
+import { MailIcon, LockIcon, GoogleMark, Arrow, Check, Loader } from "./icons";
 import Field from "./field";
 import type { AuthMode } from "./types";
 
@@ -9,6 +9,7 @@ interface LoginFormProps {
   setPw: (v: string) => void;
   showPw: boolean;
   setShowPw: (v: boolean) => void;
+  loading: boolean;
   go: (mode: AuthMode) => void;
   submit: (e: { preventDefault(): void }) => void;
 }
@@ -20,6 +21,7 @@ export default function LoginForm({
   setPw,
   showPw,
   setShowPw,
+  loading,
   go,
   submit,
 }: LoginFormProps) {
@@ -43,7 +45,8 @@ export default function LoginForm({
 
       <button
         type="button"
-        className="w-full h-11.5 rounded-[10px] border border-[rgba(67,62,18,0.16)] bg-(--cream-card) text-(--ink-2) text-[14px] font-semibold flex items-center justify-center gap-2.5 cursor-pointer transition-[background,transform] duration-150 hover:bg-(--yellow-soft) hover:-translate-y-px [&_svg]:w-4.5 [&_svg]:h-4.5"
+        disabled
+        className="w-full h-11.5 rounded-[10px] border border-[rgba(67,62,18,0.10)] bg-(--cream-card) text-(--ink-4) text-[14px] font-semibold flex items-center justify-center gap-2.5 cursor-not-allowed opacity-50 [&_svg]:w-4.5 [&_svg]:h-4.5"
       >
         <GoogleMark /> Continuar com Google
       </button>
@@ -93,10 +96,17 @@ export default function LoginForm({
       </label>
 
       <button
-        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) cursor-pointer flex items-center justify-center gap-2.25 transition-[transform,box-shadow] duration-100 hover:-translate-y-px hover:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] [&_svg]:w-3.75 [&_svg]:h-3.75"
+        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) flex items-center justify-center gap-2.25 transition-[transform,box-shadow,opacity] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:w-3.75 [&_svg]:h-3.75"
         type="submit"
+        disabled={loading}
       >
-        Entrar <Arrow />
+        {loading ? (
+          <Loader className="animate-spin" />
+        ) : (
+          <>
+            Entrar <Arrow />
+          </>
+        )}
       </button>
 
       <div className="mt-5.5 text-center text-[12px] text-(--ink-4) leading-normal">

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Eye } from "./icons";
+import { Eye, EyeOff } from "lucide-react";
 
 interface FieldProps {
   label?: string;
@@ -31,7 +31,7 @@ export default function Field({
   return (
     <div className="mb-4">
       {label && (
-        <label className="block font-mono text-[10px] text-(--ink-3) tracking-[0.06em] uppercase mb-1.75">
+        <label className="block font-mono text-[10px] text-(--ink-3) tracking-[0.06em] uppercase mb-1">
           {label}
         </label>
       )}
@@ -52,9 +52,9 @@ export default function Field({
             className="absolute right-3 text-(--ink-4) cursor-pointer flex p-1 rounded-[6px] transition-[color,background] duration-120 hover:text-(--ink-2) hover:bg-[rgba(67,62,18,0.06)]"
             onClick={onToggle}
             role="button"
-            aria-label="mostrar senha"
+            aria-label={shown ? "ocultar senha" : "mostrar senha"}
           >
-            <Eye open={!!shown} />
+            {shown ? <EyeOff size={16} /> : <Eye size={16} />}
           </span>
         )}
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BOOKS } from "../../mock";
 import BookCover from "@/components/shared/book-cover";
 
@@ -54,7 +54,11 @@ const BOOK_POSITIONS: React.CSSProperties[] = [
 
 const Hero = () => {
   const [seed, setSeed] = useState(0);
-  const picked = useMemo(() => shuffle(BOOKS).slice(0, 3), [seed]);
+  const [picked, setPicked] = useState(() => BOOKS.slice(0, 3));
+
+  useEffect(() => {
+    setPicked(shuffle(BOOKS).slice(0, 3));
+  }, [seed]);
 
   return (
     <section

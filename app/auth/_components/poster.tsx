@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BOOKS } from "@/app/mock";
 import BookCover from "@/components/shared/book-cover";
 
@@ -65,8 +65,13 @@ const POSITIONS: React.CSSProperties[] = [
 ];
 
 export default function Poster() {
-  const [seed, setSeed] = useState(0);
-  const picked = useMemo(() => shuffle(BOOKS).slice(0, 3), [seed]);
+  const [picked, setPicked] = useState(() => BOOKS.slice(0, 3));
+
+  useEffect(() => {
+    setPicked(shuffle(BOOKS).slice(0, 3));
+  }, []);
+
+  const reshuffle = () => setPicked(shuffle(BOOKS).slice(0, 3));
 
   return (
     <div className="relative bg-[#2b2710] text-(--cream) py-12 px-14 flex flex-col justify-between overflow-hidden min-h-screen before:content-[''] before:absolute before:inset-0 before:[background:radial-gradient(120%_80%_at_75%_15%,rgba(255,231,103,0.16),transparent_55%),radial-gradient(90%_70%_at_10%_100%,rgba(255,231,103,0.07),transparent_60%)] before:pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(rgba(255,248,213,0.05)_1px,transparent_1px)] after:[background-size:4px_4px] after:mix-blend-overlay after:pointer-events-none">
@@ -79,16 +84,11 @@ export default function Poster() {
       <div className="relative z-[1] flex-1 flex items-center justify-center my-5">
         <div
           className="relative w-[420px] h-[360px]"
-          onClick={() => setSeed((s) => s + 1)}
+          onClick={reshuffle}
           style={{ cursor: "pointer" }}
         >
           {picked.map((b, i) => (
-            <BookCover
-              key={b.id + seed}
-              book={b}
-              size="lg"
-              style={POSITIONS[i]}
-            />
+            <BookCover key={b.id} book={b} size="lg" style={POSITIONS[i]} />
           ))}
           <div className="absolute bottom-[-18px] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] text-[rgba(255,248,213,0.55)] tracking-[0.06em] border border-[rgba(255,248,213,0.18)] rounded-full py-[5px] px-3 inline-flex items-center gap-[7px] bg-[rgba(43,39,16,0.6)] [backdrop-filter:blur(4px)]">
             <span className="w-[5px] h-[5px] rounded-full bg-(--yellow)"></span>

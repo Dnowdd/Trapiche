@@ -1,10 +1,11 @@
-import { MailIcon, Arrow, ArrowBack } from "./icons";
+import { MailIcon, Arrow, ArrowBack, Loader } from "./icons";
 import Field from "./field";
 import type { AuthMode } from "./types";
 
 interface ForgotFormProps {
   email: string;
   setEmail: (v: string) => void;
+  loading: boolean;
   go: (mode: AuthMode) => void;
   submit: (e: { preventDefault(): void }) => void;
 }
@@ -12,11 +13,15 @@ interface ForgotFormProps {
 export default function ForgotForm({
   email,
   setEmail,
+  loading,
   go,
   submit,
 }: ForgotFormProps) {
   return (
-    <form className="animate-[modeIn_0.4s_cubic-bezier(0.2,0.7,0.2,1)]" onSubmit={submit}>
+    <form
+      className="animate-[modeIn_0.4s_cubic-bezier(0.2,0.7,0.2,1)]"
+      onSubmit={submit}
+    >
       <span
         className="inline-flex items-center gap-1.75 text-[12px] text-(--ink-3) cursor-pointer mb-5.5 hover:text-(--ink-2) [&_svg]:w-3.25 [&_svg]:h-3.25"
         onClick={() => go("login")}
@@ -48,10 +53,17 @@ export default function ForgotForm({
       />
 
       <button
-        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) cursor-pointer flex items-center justify-center gap-2.25 transition-[transform,box-shadow] duration-100 hover:-translate-y-px hover:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] [&_svg]:w-3.75 [&_svg]:h-3.75 mt-2"
+        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) flex items-center justify-center gap-2.25 transition-[transform,box-shadow,opacity] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:w-3.75 [&_svg]:h-3.75 mt-2"
         type="submit"
+        disabled={loading}
       >
-        Enviar link de recuperação <Arrow />
+        {loading ? (
+          <Loader className="animate-spin" />
+        ) : (
+          <>
+            Enviar link de recuperação <Arrow />
+          </>
+        )}
       </button>
 
       <div className="mt-5.5 text-center text-[12px] text-(--ink-4) leading-normal">
