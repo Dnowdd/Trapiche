@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import { BOOKS } from "../../mock";
 import BookCover from "@/components/shared/book-cover";
 
@@ -53,6 +55,10 @@ const BOOK_POSITIONS: React.CSSProperties[] = [
 ];
 
 const Hero = () => {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const user = session?.user;
+
   const [seed, setSeed] = useState(0);
   const [picked, setPicked] = useState(() => BOOKS.slice(0, 3));
 
@@ -83,9 +89,15 @@ const Hero = () => {
         </p>
 
         <div className="flex items-center gap-3.5">
-          <a
-            className="bg-(--yellow) text-(--ink) py-3 px-5.5 rounded-lg text-[14px] font-semibold inline-flex items-center gap-2 border border-(--yellow-deep) transition-[transform,box-shadow] duration-[120ms] hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(67,62,18,0.4)]"
-            href="#"
+          <button
+            className="bg-(--yellow) text-(--ink) py-3 px-5.5 rounded-lg text-[14px] font-semibold inline-flex items-center gap-2 border border-(--yellow-deep) transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(67,62,18,0.4)]"
+            onClick={() => {
+              if (user) {
+                document.getElementById("header-search")?.focus();
+              } else {
+                router.push("/auth?mode=register");
+              }
+            }}
           >
             <svg
               width="14"
@@ -103,27 +115,49 @@ const Hero = () => {
               <path d="M8 22h8"></path>
             </svg>
             Atracar meus livros
-          </a>
+          </button>
 
-          <a
-            className="text-[14px] text-(--ink-3) font-medium inline-flex items-center gap-1.5 hover:text-(--ink-2)"
-            href="#como-funciona"
-          >
-            Como funciona
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {user ? (
+            <button
+              className="text-[14px] text-(--ink-3) font-medium inline-flex items-center gap-1.5 hover:text-(--ink-2)"
+              onClick={() => router.push("/profile")}
             >
-              <path d="M5 12h14"></path>
-              <path d="m12 5 7 7-7 7"></path>
-            </svg>
-          </a>
+              Meu perfil
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </button>
+          ) : (
+            <a
+              className="text-[14px] text-(--ink-3) font-medium inline-flex items-center gap-1.5 hover:text-(--ink-2)"
+              href="#como-funciona"
+            >
+              Como funciona
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </a>
+          )}
         </div>
 
         <div className="mt-9 flex gap-8 font-mono text-[11px] text-(--ink-4) tracking-[0.04em]">

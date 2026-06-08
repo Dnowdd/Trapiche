@@ -3,9 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 const SESSION_COOKIE = "better-auth.session_token";
 
 const PUBLIC_PATHS = ["/auth", "/api/auth"];
+const PUBLIC_EXACT = ["/"];
 
 function isPublic(pathname: string) {
-  return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  return (
+    PUBLIC_EXACT.includes(pathname) ||
+    PUBLIC_PATHS.some((p) => pathname.startsWith(p))
+  );
 }
 
 export function proxy(request: NextRequest) {
