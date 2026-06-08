@@ -1,9 +1,37 @@
-import { BOOKS } from "@/app/mock";
+import type { Book } from "@/lib/types/book";
 
-const BOOK = BOOKS.find((b) => b.id === "capitaes")!;
+const PALETTES = [
+  { bg: "#2A2920", fg: "#FFF8D5", pub: "Companhia das Letras" },
+  { bg: "#5B3A1E", fg: "#F8E99D", pub: "Record" },
+  { bg: "#1E3A3A", fg: "#FFE767", pub: "Cosac Naify" },
+  { bg: "#7A2F1F", fg: "#FFE767", pub: "Editora 34" },
+  { bg: "#0F2A4A", fg: "#FFF8D5", pub: "Penguin Brasil" },
+  { bg: "#FFE767", fg: "#343600", pub: "Trapiche Indie" },
+  { bg: "#F8E99D", fg: "#433E12", pub: "Iluminuras" },
+  { bg: "#2E2A1E", fg: "#FFE767", pub: "Nova Fronteira" },
+  { bg: "#4F4030", fg: "#FFF8D5", pub: "Objetiva" },
+  { bg: "#8A4B22", fg: "#FFF8D5", pub: "Alfaguara" },
+  { bg: "#1F4030", fg: "#F8E99D", pub: "Boitempo" },
+  { bg: "#3A1F40", fg: "#FFE767", pub: "Mundaréu" },
+  { bg: "#FFF8D5", fg: "#433E12", pub: "Editora 34" },
+  { bg: "#552020", fg: "#FFE767", pub: "Quadrante" },
+];
+
+function book(id: string, title: string, author: string, pages: number, glyph: string, pi: number): Book {
+  return { id, title, author, pages, glyph, palette: PALETTES[pi % PALETTES.length] };
+}
+
+const DEMO: Record<string, Book> = {
+  capitaes: book("capitaes", "Capitães da Areia", "Jorge Amado", 280, "♁", 0),
+  quarto:   book("quarto",   "Quarto de Despejo", "Carolina Maria de Jesus", 224, "◇", 11),
+  torto:    book("torto",    "Torto Arado", "Itamar Vieira Junior", 264, "✶", 1),
+  secas:    book("secas",    "Vidas Secas", "Graciliano Ramos", 176, "≈", 3),
+  cortico:  book("cortico",  "O Cortiço", "Aluísio Azevedo", 304, "◐", 13),
+  macunaima: book("macunaima", "Macunaíma", "Mário de Andrade", 192, "▲", 7),
+};
 
 export const BOOK_DETAIL = {
-  ...BOOK,
+  ...DEMO.capitaes,
   subtitle: "Romance",
   edition: "Edição 89 · Companhia das Letras",
   cover_credit: "Capa de Elaine Ramos",
@@ -33,9 +61,8 @@ export const BOOK_DETAIL = {
     distribution: { 5: 9847, 4: 3621, 3: 938, 2: 287, 1: 130 },
     avgDaysToRead: 9,
   },
-  // logged user's state — Felipe
   user: {
-    status: "lendo", // lendo | quero | lido | abandonei | relendo
+    status: "lendo",
     liked: true,
     favorite: true,
     started: "12 mai 2026",
@@ -51,12 +78,11 @@ export const BOOK_DETAIL = {
       { date: "20 mai · seg", pages: 26, minutes: 64, page_end: 144 },
       { date: "18 mai · sáb", pages: 31, minutes: 78, page_end: 118 },
     ],
-    review: null, // ainda não terminou — sem resenha
+    review: null,
     note: "Reli o capítulo do Sem-Pernas duas vezes. Dói mais do que eu lembrava.",
     times_read: 2,
     last_read: "out 2025",
   },
-  // outras leitoras
   reviews: [
     {
       user: "Júlia Mendonça",
@@ -103,7 +129,6 @@ export const BOOK_DETAIL = {
       comments: 51,
     },
   ],
-  // listas onde esse livro aparece
   in_my_lists: [
     { title: "Brasileiras que mudam o ano", kind: "Pública", count: 12 },
     { title: "Releituras essenciais", kind: "Pública", count: 8 },
@@ -132,15 +157,7 @@ export const BOOK_DETAIL = {
       subscribers: 612,
     },
   ],
-  // related
-  related: [
-    BOOKS.find((b) => b.id === "quarto")!,
-    BOOKS.find((b) => b.id === "torto")!,
-    BOOKS.find((b) => b.id === "secas")!,
-    BOOKS.find((b) => b.id === "cortico")!,
-    BOOKS.find((b) => b.id === "macunaima")!,
-  ],
-  // Jorge Amado bibliografia
+  related: [DEMO.quarto, DEMO.torto, DEMO.secas, DEMO.cortico, DEMO.macunaima],
   by_author: [
     { title: "Gabriela, Cravo e Canela", year: 1958 },
     { title: "Dona Flor e Seus Dois Maridos", year: 1966 },

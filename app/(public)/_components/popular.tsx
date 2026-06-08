@@ -1,9 +1,10 @@
 import BookCover from "@/components/shared/book-cover";
-import { getBooks } from "@/app/catalog";
+import { getFeaturedBooks } from "@/app/catalog";
+import type { Book } from "@/lib/types/book";
 
 const Popular = async () => {
   const density = 8;
-  const books = await getBooks();
+  const books = await getFeaturedBooks();
   const list = books.slice(0, density);
 
   return (
@@ -34,7 +35,7 @@ const Popular = async () => {
             gridTemplateColumns: `repeat(${density}, 1fr)`,
           }}
         >
-          {list.map((b, i) => {
+          {list.map((b: Book, i: number) => {
             const pct =
               [92, 87, 84, 81, 79, 76, 74, 71, 68, 66, 64, 62][i] || 60;
             const reads = 3200 - i * 280;

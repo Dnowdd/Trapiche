@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import AuthContent from "./_components/auth-content";
-import { getBooks } from "@/app/catalog";
+import { getFeaturedBooks } from "@/app/catalog";
 
 export default async function AuthPage() {
-  const books = await getBooks();
+  const books = await getFeaturedBooks();
   return (
     <Suspense>
       <AuthContent books={books} />

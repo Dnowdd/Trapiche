@@ -1,9 +1,9 @@
 import BookCover from "@/components/shared/book-cover";
-import { getBooks } from "@/app/catalog";
+import { getFeaturedBooks } from "@/app/catalog";
 import type { Book } from "@/lib/types/book";
 
 const IASection = async () => {
-  const allBooks = await getBooks();
+  const allBooks = await getFeaturedBooks();
   const filled = 3;
   const filledBooks = allBooks.slice(2, 2 + filled);
 

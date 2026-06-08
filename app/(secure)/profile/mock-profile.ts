@@ -1,6 +1,46 @@
-import { BOOKS } from "@/app/mock";
+import type { Book } from "@/lib/types/book";
 
-const byId = (id: string) => BOOKS.find((b) => b.id === id)!;
+const P = [
+  { bg: "#2A2920", fg: "#FFF8D5", pub: "Companhia das Letras" },
+  { bg: "#5B3A1E", fg: "#F8E99D", pub: "Record" },
+  { bg: "#1E3A3A", fg: "#FFE767", pub: "Cosac Naify" },
+  { bg: "#7A2F1F", fg: "#FFE767", pub: "Editora 34" },
+  { bg: "#0F2A4A", fg: "#FFF8D5", pub: "Penguin Brasil" },
+  { bg: "#FFE767", fg: "#343600", pub: "Trapiche Indie" },
+  { bg: "#F8E99D", fg: "#433E12", pub: "Iluminuras" },
+  { bg: "#2E2A1E", fg: "#FFE767", pub: "Nova Fronteira" },
+  { bg: "#4F4030", fg: "#FFF8D5", pub: "Objetiva" },
+  { bg: "#8A4B22", fg: "#FFF8D5", pub: "Alfaguara" },
+  { bg: "#1F4030", fg: "#F8E99D", pub: "Boitempo" },
+  { bg: "#3A1F40", fg: "#FFE767", pub: "Mundaréu" },
+  { bg: "#FFF8D5", fg: "#433E12", pub: "Editora 34" },
+  { bg: "#552020", fg: "#FFE767", pub: "Quadrante" },
+];
+
+function b(id: string, title: string, author: string, pages: number, glyph: string, pi: number): Book {
+  return { id, title, author, pages, glyph, palette: P[pi % P.length] };
+}
+
+const BOOKS: Book[] = [
+  b("capitaes",  "Capitães da Areia",              "Jorge Amado",               280, "♁", 0),
+  b("memorias",  "Memórias Póstumas de Brás Cubas", "Machado de Assis",          304, "✶", 1),
+  b("hora",      "A Hora da Estrela",               "Clarice Lispector",          96, "★", 2),
+  b("secas",     "Vidas Secas",                     "Graciliano Ramos",          176, "≈", 3),
+  b("sertao",    "Grande Sertão: Veredas",          "Guimarães Rosa",            624, "✦", 4),
+  b("casmurro",  "Dom Casmurro",                    "Machado de Assis",          256, "✶", 5),
+  b("quinze",    "O Quinze",                        "Rachel de Queiroz",         160, "○", 6),
+  b("macunaima", "Macunaíma",                       "Mário de Andrade",          192, "▲", 7),
+  b("paixao",    "A Paixão Segundo G.H.",            "Clarice Lispector",         184, "★", 8),
+  b("iracema",   "Iracema",                         "José de Alencar",           144, "❀", 9),
+  b("sagarana",  "Sagarana",                        "Guimarães Rosa",            432, "✦", 10),
+  b("quarto",    "Quarto de Despejo",               "Carolina Maria de Jesus",   224, "◇", 11),
+  b("sertoes",   "Os Sertões",                      "Euclides da Cunha",         720, "▼", 12),
+  b("cortico",   "O Cortiço",                       "Aluísio Azevedo",           304, "◐", 13),
+  b("poncia",    "Ponciá Vicêncio",                 "Conceição Evaristo",        144, "✿", 0),
+  b("torto",     "Torto Arado",                     "Itamar Vieira Junior",      264, "✶", 1),
+];
+
+const byId = (id: string) => BOOKS.find((bk) => bk.id === id)!;
 
 export const USER = {
   name: "Felipe Carvalho",

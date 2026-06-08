@@ -1,5 +1,5 @@
-import { getBookByIsbn, getBookByQuery, volumeToBook } from "@/lib/google-books"
-import type { Book, BookPalette } from "@/lib/types/book"
+import { searchBooks, volumeToBook } from "@/lib/google-books"
+import type { Book, BookPalette, GoogleBooksVolume } from "@/lib/types/book"
 
 const PALETTES: BookPalette[] = [
   { bg: "#2A2920", fg: "#FFF8D5", pub: "Companhia das Letras" },
@@ -18,73 +18,35 @@ const PALETTES: BookPalette[] = [
   { bg: "#552020", fg: "#FFE767", pub: "Quadrante" },
 ]
 
-interface CatalogEntry {
-  id: string
-  title: string
-  author: string
-  glyph: string
-  paletteIndex: number
-  isbn?: string
+const GLYPHS = ["♁", "✶", "★", "≈", "✦", "○", "▲", "◇", "✿", "▼", "◐", "❀"]
+
+function hashIndex(str: string, len: number): number {
+  let h = 0
+  for (const c of str) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0
+  return Math.abs(h) % len
 }
 
-const CATALOG: CatalogEntry[] = [
-  { id: "capitaes", title: "Capitães da Areia", author: "Jorge Amado", glyph: "♁", paletteIndex: 0, isbn: "9788535914145" },
-  { id: "memorias", title: "Memórias Póstumas de Brás Cubas", author: "Machado de Assis", glyph: "✶", paletteIndex: 1 },
-  { id: "hora", title: "A Hora da Estrela", author: "Clarice Lispector", glyph: "★", paletteIndex: 2 },
-  { id: "secas", title: "Vidas Secas", author: "Graciliano Ramos", glyph: "≈", paletteIndex: 3 },
-  { id: "sertao", title: "Grande Sertão: Veredas", author: "Guimarães Rosa", glyph: "✦", paletteIndex: 4 },
-  { id: "casmurro", title: "Dom Casmurro", author: "Machado de Assis", glyph: "✶", paletteIndex: 5 },
-  { id: "quinze", title: "O Quinze", author: "Rachel de Queiroz", glyph: "○", paletteIndex: 6 },
-  { id: "macunaima", title: "Macunaíma", author: "Mário de Andrade", glyph: "▲", paletteIndex: 7 },
-  { id: "paixao", title: "A Paixão Segundo G.H.", author: "Clarice Lispector", glyph: "★", paletteIndex: 8 },
-  { id: "iracema", title: "Iracema", author: "José de Alencar", glyph: "❀", paletteIndex: 9 },
-  { id: "sagarana", title: "Sagarana", author: "Guimarães Rosa", glyph: "✦", paletteIndex: 10 },
-  { id: "quarto", title: "Quarto de Despejo", author: "Carolina Maria de Jesus", glyph: "◇", paletteIndex: 11 },
-  { id: "sertoes", title: "Os Sertões", author: "Euclides da Cunha", glyph: "▼", paletteIndex: 12 },
-  { id: "cortico", title: "O Cortiço", author: "Aluísio Azevedo", glyph: "◐", paletteIndex: 13 },
-  { id: "poncia", title: "Ponciá Vicêncio", author: "Conceição Evaristo", glyph: "✿", paletteIndex: 0 },
-  { id: "torto", title: "Torto Arado", author: "Itamar Vieira Junior", glyph: "✶", paletteIndex: 1 },
-]
+function assignVisuals(vol: GoogleBooksVolume): Book {
+  return volumeToBook(vol, {
+    id: vol.id,
+    glyph: GLYPHS[hashIndex(vol.id, GLYPHS.length)],
+    palette: PALETTES[hashIndex(vol.id, PALETTES.length)],
+  })
+}
 
-async function enrichEntry(entry: CatalogEntry): Promise<Book> {
-  const palette = PALETTES[entry.paletteIndex]
-  const overrides = { id: entry.id, glyph: entry.glyph, palette, isbn: entry.isbn }
-
+export async function getFeaturedBooks(maxResults = 24): Promise<Book[]> {
   try {
-    const volume = entry.isbn
-      ? await getBookByIsbn(entry.isbn)
-      : await getBookByQuery(entry.title, entry.author)
-
-    if (volume) return volumeToBook(volume, overrides)
+    const volumes = await searchBooks(
+      "literatura brasileira ficção romance",
+      maxResults,
+    )
+    return volumes.map(assignVisuals)
   } catch {
-    // API unavailable — fall through to static fallback
-  }
-
-  return {
-    id: entry.id,
-    isbn: entry.isbn,
-    title: entry.title,
-    author: entry.author,
-    pages: 0,
-    glyph: entry.glyph,
-    palette,
+    return []
   }
 }
 
-export async function getBooks(ids?: string[]): Promise<Book[]> {
-  const entries = ids
-    ? CATALOG.filter((e) => ids.includes(e.id))
-    : CATALOG
-  return Promise.all(entries.map(enrichEntry))
-}
-
-export async function getBook(id: string): Promise<Book | null> {
-  const entry = CATALOG.find((e) => e.id === id)
-  if (!entry) return null
-  return enrichEntry(entry)
-}
-
-// ---------- Editorial content (listas e reviews da landing page) ----------
+// ---------- Editorial content (homepage sections) ----------
 
 interface ListDef {
   title: string
@@ -92,17 +54,7 @@ interface ListDef {
   kind: "Pública" | "Privada" | "Compartilhada"
   by: string
   byInitials: string
-  bookIds: string[]
-}
-
-interface ReviewDef {
-  bookId: string
-  user: string
-  handle: string
-  initials: string
-  stars: number
-  date: string
-  text: string
+  query: string
 }
 
 const LIST_DEFS: ListDef[] = [
@@ -112,7 +64,7 @@ const LIST_DEFS: ListDef[] = [
     kind: "Pública",
     by: "Você",
     byInitials: "FC",
-    bookIds: ["poncia", "hora", "torto"],
+    query: "ficção brasileira mulheres autoras",
   },
   {
     title: "Modernismo de cabeça",
@@ -120,7 +72,7 @@ const LIST_DEFS: ListDef[] = [
     kind: "Compartilhada",
     by: "Júlia M.",
     byInitials: "JM",
-    bookIds: ["macunaima", "sertao", "sagarana"],
+    query: "modernismo brasileiro romance",
   },
   {
     title: "Para ler no inverno",
@@ -128,65 +80,45 @@ const LIST_DEFS: ListDef[] = [
     kind: "Privada",
     by: "Você",
     byInitials: "FC",
-    bookIds: ["secas", "quinze", "cortico"],
+    query: "nordeste brasileiro literatura contos",
   },
 ]
 
-const REVIEW_DEFS: ReviewDef[] = [
-  {
-    bookId: "torto",
-    user: "Maria Eduarda",
-    handle: "@duda.le",
-    initials: "ME",
-    stars: 5,
-    date: "12 mai",
-    text: "Um livro que me atravessou. Itamar escreve com a paciência de quem entende que o tempo do sertão é outro. Bibiana e Belonísia ficaram comigo dias depois de fechar o livro.",
-  },
-  {
-    bookId: "hora",
-    user: "Pedro Antunes",
-    handle: "@pdrntns",
-    initials: "PA",
-    stars: 4,
-    date: "08 mai",
-    text: "Clarice no estado mais puro. Macabéa é uma personagem que dói. Tirei uma estrela só porque eu sou implicante com finais que parecem brincar com o leitor — mas esse é proposital, eu sei.",
-  },
-  {
-    bookId: "quarto",
-    user: "Luana Vidal",
-    handle: "@luvidal",
-    initials: "LV",
-    stars: 5,
-    date: "05 mai",
-    text: "Carolina escreveu o que o Brasil tenta esquecer. Cada página é um soco no estômago e ao mesmo tempo uma demonstração de poesia. Leitura obrigatória, do tipo que muda como você vê a rua de casa.",
-  },
+const REVIEW_LOREM = [
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt.",
+]
+
+const REVIEW_META = [
+  { user: "Maria Eduarda", handle: "@duda.le", initials: "ME", stars: 5, date: "12 mai" },
+  { user: "Pedro Antunes", handle: "@pdrntns", initials: "PA", stars: 4, date: "08 mai" },
+  { user: "Luana Vidal", handle: "@luvidal", initials: "LV", stars: 5, date: "05 mai" },
 ]
 
 export async function getLists() {
-  const allIds = LIST_DEFS.flatMap((l) => l.bookIds)
-  const uniqueIds = [...new Set(allIds)]
-  const books = await getBooks(uniqueIds)
-  const bookMap = Object.fromEntries(books.map((b) => [b.id, b]))
-
-  return LIST_DEFS.map((def) => ({
+  const results = await Promise.all(
+    LIST_DEFS.map((def) => searchBooks(def.query, 3).catch(() => [] as GoogleBooksVolume[])),
+  )
+  return LIST_DEFS.map((def, i) => ({
     title: def.title,
     count: def.count,
     kind: def.kind,
     by: def.by,
     byInitials: def.byInitials,
-    books: def.bookIds.map((id) => bookMap[id]).filter(Boolean) as Book[],
+    books: results[i].map(assignVisuals),
   }))
 }
 
 export async function getReviews() {
-  const ids = REVIEW_DEFS.map((r) => r.bookId)
-  const books = await getBooks(ids)
-  const bookMap = Object.fromEntries(books.map((b) => [b.id, b]))
-
-  return REVIEW_DEFS.map((def) => ({
-    ...def,
-    book: bookMap[def.bookId],
-  })).filter((r) => r.book != null)
+  try {
+    const volumes = await searchBooks("literatura brasileira", 3)
+    return volumes.slice(0, 3).map((vol, i) => ({
+      book: assignVisuals(vol),
+      ...REVIEW_META[i],
+      text: REVIEW_LOREM[i],
+    }))
+  } catch {
+    return []
+  }
 }
-
-export { CATALOG }

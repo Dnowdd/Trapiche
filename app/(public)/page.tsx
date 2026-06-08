@@ -5,10 +5,10 @@ import Lists from "./_components/lists";
 import Popular from "./_components/popular";
 import Quote from "./_components/quote";
 import Reviews from "./_components/reviews";
-import { getBooks } from "@/app/catalog";
+import { getFeaturedBooks } from "@/app/catalog";
 
 export default async function Home() {
-  const books = await getBooks();
+  const books = await getFeaturedBooks();
 
   return (
     <div className="w-360 mx-auto bg-(--yellow) relative">
