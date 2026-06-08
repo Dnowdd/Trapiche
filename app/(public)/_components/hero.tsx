@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { BOOKS } from "../../mock";
 import BookCover from "@/components/shared/book-cover";
+import type { Book } from "@/lib/types/book";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -15,7 +15,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-const BOOK_POSITIONS: React.CSSProperties[] = [
+const BOOK_POSITIONS: CSSProperties[] = [
   {
     position: "absolute",
     width: 200,
@@ -54,17 +54,21 @@ const BOOK_POSITIONS: React.CSSProperties[] = [
   },
 ];
 
-const Hero = () => {
+interface HeroProps {
+  books: Book[];
+}
+
+const Hero = ({ books }: HeroProps) => {
   const { data: session } = useSession();
   const router = useRouter();
   const user = session?.user;
 
   const [seed, setSeed] = useState(0);
-  const [picked, setPicked] = useState(() => BOOKS.slice(0, 3));
+  const [picked, setPicked] = useState(() => books.slice(0, 3));
 
   useEffect(() => {
-    setPicked(shuffle(BOOKS).slice(0, 3));
-  }, [seed]);
+    setPicked(shuffle(books).slice(0, 3));
+  }, [seed, books]);
 
   return (
     <section

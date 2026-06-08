@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { BOOKS } from "@/app/mock";
 import BookCover from "@/components/shared/book-cover";
+import type { Book } from "@/lib/types/book";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -64,48 +64,52 @@ const POSITIONS: React.CSSProperties[] = [
   },
 ];
 
-export default function Poster() {
-  const [picked, setPicked] = useState(() => BOOKS.slice(0, 3));
+interface PosterProps {
+  books: Book[];
+}
+
+export default function Poster({ books }: PosterProps) {
+  const [picked, setPicked] = useState(() => books.slice(0, 3));
 
   useEffect(() => {
-    setPicked(shuffle(BOOKS).slice(0, 3));
-  }, []);
+    setPicked(shuffle(books).slice(0, 3));
+  }, [books]);
 
-  const reshuffle = () => setPicked(shuffle(BOOKS).slice(0, 3));
+  const reshuffle = () => setPicked(shuffle(books).slice(0, 3));
 
   return (
-    <div className="relative bg-[#2b2710] text-(--cream) py-12 px-14 flex flex-col justify-between overflow-hidden min-h-screen before:content-[''] before:absolute before:inset-0 before:[background:radial-gradient(120%_80%_at_75%_15%,rgba(255,231,103,0.16),transparent_55%),radial-gradient(90%_70%_at_10%_100%,rgba(255,231,103,0.07),transparent_60%)] before:pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(rgba(255,248,213,0.05)_1px,transparent_1px)] after:[background-size:4px_4px] after:mix-blend-overlay after:pointer-events-none">
-      <div className="relative z-[1] flex items-center justify-between">
+    <div className="relative bg-[#2b2710] text-(--cream) py-12 px-14 flex flex-col justify-between overflow-hidden min-h-screen before:content-[''] before:absolute before:inset-0 before:[background:radial-gradient(120%_80%_at_75%_15%,rgba(255,231,103,0.16),transparent_55%),radial-gradient(90%_70%_at_10%_100%,rgba(255,231,103,0.07),transparent_60%)] before:pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(rgba(255,248,213,0.05)_1px,transparent_1px)] after:bg-size-[4px_4px] after:mix-blend-overlay after:pointer-events-none">
+      <div className="relative z-1 flex items-center justify-between">
         <div className="text-[26px] font-extrabold tracking-[-0.02em] text-(--cream) flex items-baseline gap-2">
           Trapiche
         </div>
       </div>
 
-      <div className="relative z-[1] flex-1 flex items-center justify-center my-5">
+      <div className="relative z-1 flex-1 flex items-center justify-center my-5">
         <div
-          className="relative w-[420px] h-[360px]"
+          className="relative w-105 h-90"
           onClick={reshuffle}
           style={{ cursor: "pointer" }}
         >
           {picked.map((b, i) => (
             <BookCover key={b.id} book={b} size="lg" style={POSITIONS[i]} />
           ))}
-          <div className="absolute bottom-[-18px] left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] text-[rgba(255,248,213,0.55)] tracking-[0.06em] border border-[rgba(255,248,213,0.18)] rounded-full py-[5px] px-3 inline-flex items-center gap-[7px] bg-[rgba(43,39,16,0.6)] [backdrop-filter:blur(4px)]">
-            <span className="w-[5px] h-[5px] rounded-full bg-(--yellow)"></span>
+          <div className="absolute -bottom-4.5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] text-[rgba(255,248,213,0.55)] tracking-[0.06em] border border-[rgba(255,248,213,0.18)] rounded-full py-1.25 px-3 inline-flex items-center gap-1.75 bg-[rgba(43,39,16,0.6)] [backdrop-filter:blur(4px)]">
+            <span className="w-1.25 h-1.25 rounded-full bg-(--yellow)"></span>
             toda visita, uma estante diferente
           </div>
         </div>
       </div>
 
-      <div className="relative z-[1] max-w-[460px]">
-        <span className="text-[56px] leading-[0.4] text-(--yellow) opacity-60 font-bold block mb-[18px]">
+      <div className="relative z-1 max-w-115">
+        <span className="text-[56px] leading-[0.4] text-(--yellow) opacity-60 font-bold block mb-4.5">
           &quot;
         </span>
-        <blockquote className="m-0 mb-[18px] text-[19px] leading-normal text-[rgba(255,248,213,0.92)] tracking-[-0.005em] [text-wrap:pretty]">
+        <blockquote className="m-0 mb-4.5 text-[19px] leading-normal text-[rgba(255,248,213,0.92)] tracking-[-0.005em] text-pretty">
           Lia-os todos numa ânsia que era quase febre. Os livros lhe traziam
           notícias daquele mundo que ele desejava percorrer.
         </blockquote>
-        <cite className="not-italic font-mono text-[10px] tracking-[0.1em] uppercase text-(--yellow) inline-flex items-center gap-2.5">
+        <cite className="not-italic font-mono text-[10px] tracking-widest uppercase text-(--yellow) inline-flex items-center gap-2.5">
           <span className="w-6 h-px bg-(--yellow) opacity-60"></span>
           Jorge Amado · Capitães da Areia
         </cite>

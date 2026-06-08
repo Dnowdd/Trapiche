@@ -1,9 +1,11 @@
 import BookCover from "@/components/shared/book-cover";
-import { BOOKS } from "../../mock";
+import { getBooks } from "@/app/catalog";
+import type { Book } from "@/lib/types/book";
 
-const IASection = () => {
+const IASection = async () => {
+  const allBooks = await getBooks();
   const filled = 3;
-  const filledBooks = BOOKS.slice(2, 2 + filled);
+  const filledBooks = allBooks.slice(2, 2 + filled);
 
   return (
     <section className="px-12.5" data-screen-label="05 IA">
@@ -27,11 +29,11 @@ const IASection = () => {
             recomendação por afinidade
           </div>
 
-          <h2 className="m-0 text-[44px] font-extrabold tracking-[-0.025em] leading-[1.05] text-(--ink-2) max-w-135 text-balance">
+          <h2 className="m-0 text-[44px] font-extrabold tracking-tight leading-[1.05] text-(--ink-2) max-w-135 text-balance">
             Encontre seu próximo livro favorito.
           </h2>
 
-          <p className="m-0 text-[14px] text-(--ink-3) max-w-[460px] text-center leading-[1.55]">
+          <p className="m-0 text-[14px] text-(--ink-3) max-w-115 text-center leading-[1.55]">
             Escolha 5 livros que você ama. A nossa recomendação não usa rankings
             ou listas de mais vendidos — só o seu gosto.
           </p>
@@ -39,14 +41,14 @@ const IASection = () => {
 
         <div className="flex gap-3.5 relative">
           {[0, 1, 2, 3, 4].map((i) => {
-            const book = filledBooks[i];
+            const book: Book | undefined = filledBooks[i];
             return (
               <div
                 key={i}
                 className={
                   book
-                    ? "w-32.5 h-[195px] rounded-lg relative flex items-center justify-center"
-                    : "w-32.5 h-[195px] rounded-lg relative flex items-center justify-center flex-col gap-2 border-[1.5px] border-dashed border-[rgba(67,62,18,0.25)] bg-[rgba(67,62,18,0.025)] text-(--ink-4) cursor-pointer transition-[background,border-color] duration-150 hover:bg-(--yellow-soft) hover:border-(--ink-3) hover:text-(--ink-2)"
+                    ? "w-32.5 h-48.75 rounded-lg relative flex items-center justify-center"
+                    : "w-32.5 h-48.75 rounded-lg relative flex items-center justify-center flex-col gap-2 border-[1.5px] border-dashed border-[rgba(67,62,18,0.25)] bg-[rgba(67,62,18,0.025)] text-(--ink-4) cursor-pointer transition-[background,border-color] duration-150 hover:bg-(--yellow-soft) hover:border-(--ink-3) hover:text-(--ink-2)"
                 }
               >
                 <span className="absolute -top-2.5 -left-2.5 w-5.5 h-5.5 rounded-full bg-(--ink-2) text-(--yellow) font-mono text-[10px] font-semibold flex items-center justify-center border-2 border-(--cream-card)">
@@ -78,7 +80,7 @@ const IASection = () => {
           </span>
 
           <button
-            className="py-3 px-5.5 rounded-lg bg-(--ink-2) text-(--yellow) text-[14px] font-semibold tracking-[-0.005em] inline-flex items-center gap-2 border border-(--ink-2) transition-transform duration-[120ms] disabled:bg-[rgba(67,62,18,0.1)] disabled:text-(--ink-4) disabled:border-transparent disabled:cursor-not-allowed enabled:hover:-translate-y-px"
+            className="py-3 px-5.5 rounded-lg bg-(--ink-2) text-(--yellow) text-[14px] font-semibold tracking-[-0.005em] inline-flex items-center gap-2 border border-(--ink-2) transition-transform duration-120 disabled:bg-[rgba(67,62,18,0.1)] disabled:text-(--ink-4) disabled:border-transparent disabled:cursor-not-allowed enabled:hover:-translate-y-px"
             disabled={filled < 5}
           >
             Gerar recomendação

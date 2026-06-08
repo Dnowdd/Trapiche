@@ -1,5 +1,6 @@
+import { type CSSProperties } from "react";
 import BookCover from "@/components/shared/book-cover";
-import { REVIEWS } from "../../mock";
+import { getReviews } from "@/app/catalog";
 
 const Stars = ({ n }: { n: number }) => {
   return (
@@ -16,7 +17,7 @@ const Stars = ({ n }: { n: number }) => {
   );
 };
 
-const REVIEW_BOOK_STYLE: React.CSSProperties = {
+const REVIEW_BOOK_STYLE: CSSProperties = {
   width: 42,
   height: 60,
   borderRadius: 3,
@@ -24,7 +25,9 @@ const REVIEW_BOOK_STYLE: React.CSSProperties = {
   padding: "6px 5px",
 };
 
-const Reviews = () => {
+const Reviews = async () => {
+  const reviews = await getReviews();
+
   return (
     <section className="px-12.5" data-screen-label="07 Reviews">
       <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-7 px-7.5">
@@ -51,7 +54,7 @@ const Reviews = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-4.5 mt-4.5">
-          {REVIEWS.map((r, i) => (
+          {reviews.map((r, i) => (
             <div
               className="bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-[10px] py-4.5 px-5 flex flex-col gap-3"
               key={i}

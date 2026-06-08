@@ -1,29 +1,50 @@
+import { type CSSProperties } from "react"
+import Image from "next/image"
+
 interface BookCoverProps {
   book: {
-    id: string;
-    title: string;
-    author: string;
-    pages: number;
-    glyph: string;
+    id: string
+    title: string
+    author: string
+    pages: number
+    glyph: string
     palette: {
-      bg: string;
-      fg: string;
-      pub?: string;
-    };
-  };
-  size?: "sm" | "md" | "lg";
-  style?: React.CSSProperties;
+      bg: string
+      fg: string
+      pub?: string
+    }
+    coverUrl?: string
+  }
+  size?: "sm" | "md" | "lg"
+  style?: CSSProperties
 }
 
 const sizeMap = {
   sm: { wrap: "py-2.5 px-2.25", title: "text-[14px]", author: "text-[9px]" },
   md: { wrap: "py-3 px-2.75", title: "text-[16px]", author: "text-[10px]" },
   lg: { wrap: "py-4 px-3.5", title: "text-[18px]", author: "text-[10px]" },
-} as const;
+} as const
 
 const BookCover = ({ book, size = "lg", style }: BookCoverProps) => {
-  const p = book.palette ?? {};
-  const s = sizeMap[size];
+  const p = book.palette ?? {}
+  const s = sizeMap[size]
+
+  if (book.coverUrl) {
+    return (
+      <div
+        className="rounded relative overflow-hidden"
+        style={{ ...style, background: p.bg ?? "#2a2920" }}
+      >
+        <Image
+          src={book.coverUrl}
+          alt={`Capa de ${book.title}`}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 120px, 160px"
+        />
+      </div>
+    )
+  }
 
   return (
     <div
@@ -44,7 +65,7 @@ const BookCover = ({ book, size = "lg", style }: BookCoverProps) => {
           "--cover-bg": p.bg ?? "#2a2920",
           "--cover-fg": p.fg ?? "#fff",
           ...style,
-        } as React.CSSProperties
+        } as CSSProperties
       }
     >
       <div className="cover-top flex justify-between items-start gap-2">
@@ -71,7 +92,7 @@ const BookCover = ({ book, size = "lg", style }: BookCoverProps) => {
         {book.author}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BookCover;
+export default BookCover

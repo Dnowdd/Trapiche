@@ -1,9 +1,10 @@
 import BookCover from "@/components/shared/book-cover";
-import { BOOKS } from "../../mock";
+import { getBooks } from "@/app/catalog";
 
-const Popular = () => {
+const Popular = async () => {
   const density = 8;
-  const list = BOOKS.slice(0, density);
+  const books = await getBooks();
+  const list = books.slice(0, density);
 
   return (
     <section className="px-12.5" data-screen-label="06 Populares">

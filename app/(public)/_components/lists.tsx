@@ -1,7 +1,8 @@
+import { type CSSProperties } from "react";
 import BookCover from "@/components/shared/book-cover";
-import { LISTS } from "../../mock";
+import { getLists } from "@/app/catalog";
 
-const STACK_POSITIONS: React.CSSProperties[] = [
+const STACK_POSITIONS: CSSProperties[] = [
   {
     position: "absolute",
     width: 90,
@@ -37,7 +38,9 @@ const STACK_POSITIONS: React.CSSProperties[] = [
   },
 ];
 
-const Lists = () => {
+const Lists = async () => {
+  const lists = await getLists();
+
   return (
     <section className="px-12.5" data-screen-label="04 Listas">
       <div className="flex items-end justify-between px-7.5 pb-4">
@@ -60,9 +63,9 @@ const Lists = () => {
       </div>
 
       <div className="grid grid-cols-4 gap-4.5 px-7.5">
-        {LISTS.map((l, i) => (
+        {lists.map((l, i) => (
           <div
-            className="bg-(--cream-card) border border-[rgba(67,62,18,0.08)] rounded-[18px] p-4.5 pb-5 flex flex-col gap-3.5 transition-[transform,box-shadow] duration-[180ms] cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(67,62,18,0.04),0_24px_60px_-28px_rgba(67,62,18,0.3)]"
+            className="bg-(--cream-card) border border-[rgba(67,62,18,0.08)] rounded-[18px] p-4.5 pb-5 flex flex-col gap-3.5 transition-[transform,box-shadow] duration-180 cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(67,62,18,0.04),0_24px_60px_-28px_rgba(67,62,18,0.3)]"
             key={i}
           >
             <div className="h-40 relative bg-(--yellow-soft) rounded-[10px] overflow-hidden">
@@ -95,7 +98,7 @@ const Lists = () => {
           </div>
         ))}
 
-        <div className="rounded-[18px] flex flex-col gap-3.5 transition-[transform,box-shadow,background,border-color] duration-[180ms] cursor-pointer bg-transparent border-[1.5px] border-dashed border-[rgba(67,62,18,0.25)] items-center justify-center text-center min-h-62 hover:bg-(--yellow-soft) hover:border-(--ink-3)">
+        <div className="rounded-[18px] flex flex-col gap-3.5 transition-[transform,box-shadow,background,border-color] duration-180 cursor-pointer bg-transparent border-[1.5px] border-dashed border-[rgba(67,62,18,0.25)] items-center justify-center text-center min-h-62 hover:bg-(--yellow-soft) hover:border-(--ink-3)">
           <div>
             <div className="text-[32px] font-light text-(--ink-3) mb-2">+</div>
 
