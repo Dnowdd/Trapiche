@@ -89,7 +89,7 @@ const Header = () => {
               <div className="w-9 h-9 rounded-full bg-(--cream-deep) flex items-center justify-center text-[13px] font-bold text-(--ink-2) border-[1.5px] border-(--ink-2) select-none transition-opacity duration-150 group-data-[popup-open]/trigger:opacity-70">
                 {initials(user.name)}
               </div>
-              <div>
+              <div className="flex flex-col items-start">
                 <div className="text-[13px] font-semibold text-(--ink-2) leading-[1.2]">
                   {user.name}
                 </div>
