@@ -194,6 +194,7 @@ const Hero = ({ books }: HeroProps) => {
               book={b}
               size="lg"
               style={BOOK_POSITIONS[idx]}
+              loading="eager"
             />
           ))}
         </div>
