@@ -202,8 +202,7 @@ export default function HeaderSearch() {
           {/* Header */}
           <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-[rgba(67,62,18,0.06)]">
             <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase">
-              {results.length} resultado{results.length !== 1 ? "s" : ""} para
-              &ldquo;{query}&rdquo;
+              {`${results.length} resultado${results.length !== 1 ? "s" : ""} para “${query.trim()}”`}
             </span>
             <span className="font-mono text-[10px] text-(--ink-5) tracking-[0.04em]">
               ↑↓ navegar · Enter abrir
