@@ -9,6 +9,8 @@ interface LoginFormProps {
   setPw: (v: string) => void;
   showPw: boolean;
   setShowPw: (v: boolean) => void;
+  remember: boolean;
+  setRemember: (v: boolean) => void;
   loading: boolean;
   go: (mode: AuthMode) => void;
   submit: (e: { preventDefault(): void }) => void;
@@ -21,6 +23,8 @@ export default function LoginForm({
   setPw,
   showPw,
   setShowPw,
+  remember,
+  setRemember,
   loading,
   go,
   submit,
@@ -88,7 +92,12 @@ export default function LoginForm({
       />
 
       <label className="flex items-start gap-2.5 mt-1 mb-5 text-[12px] text-(--ink-3) leading-normal cursor-pointer">
-        <input type="checkbox" defaultChecked className="peer hidden" />
+        <input
+          type="checkbox"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+          className="peer hidden"
+        />
         <span className="w-4.5 h-4.5 rounded-[5px] border-[1.5px] border-[rgba(67,62,18,0.3)] shrink-0 mt-px flex items-center justify-center transition-[background,border-color] duration-120 text-(--ink) peer-checked:bg-(--yellow) peer-checked:border-(--yellow-deep) [&_svg]:w-2.75 [&_svg]:h-2.75 [&_svg]:opacity-0 peer-checked:[&_svg]:opacity-100">
           <Check />
         </span>
