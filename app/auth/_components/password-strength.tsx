@@ -54,7 +54,9 @@ export default function PasswordStrength({
       </div>
       <div className="mt-1.5 font-mono text-[10px] tracking-[0.04em] text-(--ink-4) flex justify-between">
         <span>força da senha</span>
-        <strong className="text-(--ink-2) font-semibold">{STRENGTH_LABELS[score]}</strong>
+        <strong className="text-(--ink-2) font-semibold">
+          {STRENGTH_LABELS[score]}
+        </strong>
       </div>
       {showReqs && (
         <div className="grid grid-cols-2 gap-x-3.5 gap-y-1.5 mt-2.5">

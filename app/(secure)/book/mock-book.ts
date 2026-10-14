@@ -17,16 +17,37 @@ const PALETTES = [
   { bg: "#552020", fg: "#FFE767", pub: "Quadrante" },
 ];
 
-function book(id: string, title: string, author: string, pages: number, glyph: string, pi: number): Book {
-  return { id, title, author, pages, glyph, palette: PALETTES[pi % PALETTES.length] };
+function book(
+  id: string,
+  title: string,
+  author: string,
+  pages: number,
+  glyph: string,
+  pi: number,
+): Book {
+  return {
+    id,
+    title,
+    author,
+    pages,
+    glyph,
+    palette: PALETTES[pi % PALETTES.length],
+  };
 }
 
 const DEMO: Record<string, Book> = {
   capitaes: book("capitaes", "Capitães da Areia", "Jorge Amado", 280, "♁", 0),
-  quarto:   book("quarto",   "Quarto de Despejo", "Carolina Maria de Jesus", 224, "◇", 11),
-  torto:    book("torto",    "Torto Arado", "Itamar Vieira Junior", 264, "✶", 1),
-  secas:    book("secas",    "Vidas Secas", "Graciliano Ramos", 176, "≈", 3),
-  cortico:  book("cortico",  "O Cortiço", "Aluísio Azevedo", 304, "◐", 13),
+  quarto: book(
+    "quarto",
+    "Quarto de Despejo",
+    "Carolina Maria de Jesus",
+    224,
+    "◇",
+    11,
+  ),
+  torto: book("torto", "Torto Arado", "Itamar Vieira Junior", 264, "✶", 1),
+  secas: book("secas", "Vidas Secas", "Graciliano Ramos", 176, "≈", 3),
+  cortico: book("cortico", "O Cortiço", "Aluísio Azevedo", 304, "◐", 13),
   macunaima: book("macunaima", "Macunaíma", "Mário de Andrade", 192, "▲", 7),
 };
 

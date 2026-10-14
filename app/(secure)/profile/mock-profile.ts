@@ -17,27 +17,41 @@ const P = [
   { bg: "#552020", fg: "#FFE767", pub: "Quadrante" },
 ];
 
-function b(id: string, title: string, author: string, pages: number, glyph: string, pi: number): Book {
+function b(
+  id: string,
+  title: string,
+  author: string,
+  pages: number,
+  glyph: string,
+  pi: number,
+): Book {
   return { id, title, author, pages, glyph, palette: P[pi % P.length] };
 }
 
 const BOOKS: Book[] = [
-  b("capitaes",  "Capitães da Areia",              "Jorge Amado",               280, "♁", 0),
-  b("memorias",  "Memórias Póstumas de Brás Cubas", "Machado de Assis",          304, "✶", 1),
-  b("hora",      "A Hora da Estrela",               "Clarice Lispector",          96, "★", 2),
-  b("secas",     "Vidas Secas",                     "Graciliano Ramos",          176, "≈", 3),
-  b("sertao",    "Grande Sertão: Veredas",          "Guimarães Rosa",            624, "✦", 4),
-  b("casmurro",  "Dom Casmurro",                    "Machado de Assis",          256, "✶", 5),
-  b("quinze",    "O Quinze",                        "Rachel de Queiroz",         160, "○", 6),
-  b("macunaima", "Macunaíma",                       "Mário de Andrade",          192, "▲", 7),
-  b("paixao",    "A Paixão Segundo G.H.",            "Clarice Lispector",         184, "★", 8),
-  b("iracema",   "Iracema",                         "José de Alencar",           144, "❀", 9),
-  b("sagarana",  "Sagarana",                        "Guimarães Rosa",            432, "✦", 10),
-  b("quarto",    "Quarto de Despejo",               "Carolina Maria de Jesus",   224, "◇", 11),
-  b("sertoes",   "Os Sertões",                      "Euclides da Cunha",         720, "▼", 12),
-  b("cortico",   "O Cortiço",                       "Aluísio Azevedo",           304, "◐", 13),
-  b("poncia",    "Ponciá Vicêncio",                 "Conceição Evaristo",        144, "✿", 0),
-  b("torto",     "Torto Arado",                     "Itamar Vieira Junior",      264, "✶", 1),
+  b("capitaes", "Capitães da Areia", "Jorge Amado", 280, "♁", 0),
+  b(
+    "memorias",
+    "Memórias Póstumas de Brás Cubas",
+    "Machado de Assis",
+    304,
+    "✶",
+    1,
+  ),
+  b("hora", "A Hora da Estrela", "Clarice Lispector", 96, "★", 2),
+  b("secas", "Vidas Secas", "Graciliano Ramos", 176, "≈", 3),
+  b("sertao", "Grande Sertão: Veredas", "Guimarães Rosa", 624, "✦", 4),
+  b("casmurro", "Dom Casmurro", "Machado de Assis", 256, "✶", 5),
+  b("quinze", "O Quinze", "Rachel de Queiroz", 160, "○", 6),
+  b("macunaima", "Macunaíma", "Mário de Andrade", 192, "▲", 7),
+  b("paixao", "A Paixão Segundo G.H.", "Clarice Lispector", 184, "★", 8),
+  b("iracema", "Iracema", "José de Alencar", 144, "❀", 9),
+  b("sagarana", "Sagarana", "Guimarães Rosa", 432, "✦", 10),
+  b("quarto", "Quarto de Despejo", "Carolina Maria de Jesus", 224, "◇", 11),
+  b("sertoes", "Os Sertões", "Euclides da Cunha", 720, "▼", 12),
+  b("cortico", "O Cortiço", "Aluísio Azevedo", 304, "◐", 13),
+  b("poncia", "Ponciá Vicêncio", "Conceição Evaristo", 144, "✿", 0),
+  b("torto", "Torto Arado", "Itamar Vieira Junior", 264, "✶", 1),
 ];
 
 const byId = (id: string) => BOOKS.find((bk) => bk.id === id)!;

@@ -11,7 +11,9 @@ const MyReading = () => {
           <div className="font-mono text-[11px] text-(--cream-deep) tracking-[0.06em] uppercase">
             {u.status === "relendo" ? "Sua releitura" : "Sua leitura"}
           </div>
-          <h3 className="mt-1.5 mb-4 text-[24px] font-bold text-(--yellow) tracking-[-0.015em]">Você está aqui agora</h3>
+          <h3 className="mt-1.5 mb-4 text-[24px] font-bold text-(--yellow) tracking-[-0.015em]">
+            Você está aqui agora
+          </h3>
 
           <div className="text-[64px] font-extrabold text-(--yellow) leading-[1] tracking-[-0.03em]">
             {u.progress}
@@ -21,26 +23,45 @@ const MyReading = () => {
             página {u.page} de {u.total}
           </div>
           <div className="mt-4 h-2 bg-[rgba(255,231,103,0.15)] rounded-[4px] overflow-hidden">
-            <div className="h-full bg-(--yellow) rounded-[4px]" style={{ width: u.progress + "%" }} />
+            <div
+              className="h-full bg-(--yellow) rounded-[4px]"
+              style={{ width: u.progress + "%" }}
+            />
           </div>
 
           <div className="mt-4 flex gap-9">
             <div className="flex flex-col gap-0.5">
-              <span className="text-[18px] font-bold text-(--cream) tracking-[-0.01em]">{u.started}</span>
-              <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.06em] uppercase">Começou em</span>
+              <span className="text-[18px] font-bold text-(--cream) tracking-[-0.01em]">
+                {u.started}
+              </span>
+              <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.06em] uppercase">
+                Começou em
+              </span>
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-[18px] font-bold text-(--cream) tracking-[-0.01em]">{u.expectedDone}</span>
-              <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.06em] uppercase">Previsão</span>
+              <span className="text-[18px] font-bold text-(--cream) tracking-[-0.01em]">
+                {u.expectedDone}
+              </span>
+              <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.06em] uppercase">
+                Previsão
+              </span>
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-[18px] font-bold text-(--cream) tracking-[-0.01em]">{u.streakDays} dias</span>
-              <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.06em] uppercase">Sequência</span>
+              <span className="text-[18px] font-bold text-(--cream) tracking-[-0.01em]">
+                {u.streakDays} dias
+              </span>
+              <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.06em] uppercase">
+                Sequência
+              </span>
             </div>
             {u.times_read > 1 && (
               <div className="flex flex-col gap-0.5">
-                <span className="text-[18px] font-bold text-(--cream) tracking-[-0.01em]">{u.times_read}ª vez</span>
-                <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.06em] uppercase">Releitura</span>
+                <span className="text-[18px] font-bold text-(--cream) tracking-[-0.01em]">
+                  {u.times_read}ª vez
+                </span>
+                <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.06em] uppercase">
+                  Releitura
+                </span>
               </div>
             )}
           </div>
@@ -52,9 +73,15 @@ const MyReading = () => {
           )}
 
           <div className="mt-5.5 flex gap-2">
-            <button className="text-[12px] font-medium py-[9px] px-3.5 rounded-[7px] bg-(--yellow) text-(--ink) hover:-translate-y-px">+ Registrar leitura de hoje</button>
-            <button className="text-[12px] font-medium py-[9px] px-3.5 rounded-[7px] bg-transparent border border-[rgba(255,248,213,0.3)] text-(--cream) hover:bg-[rgba(255,248,213,0.05)] hover:-translate-y-px">Marcar como concluído</button>
-            <button className="text-[12px] font-medium py-[9px] px-3.5 rounded-[7px] bg-transparent border border-[rgba(255,248,213,0.3)] text-(--cream) hover:bg-[rgba(255,248,213,0.05)] hover:-translate-y-px">Editar progresso</button>
+            <button className="text-[12px] font-medium py-[9px] px-3.5 rounded-[7px] bg-(--yellow) text-(--ink) hover:-translate-y-px">
+              + Registrar leitura de hoje
+            </button>
+            <button className="text-[12px] font-medium py-[9px] px-3.5 rounded-[7px] bg-transparent border border-[rgba(255,248,213,0.3)] text-(--cream) hover:bg-[rgba(255,248,213,0.05)] hover:-translate-y-px">
+              Marcar como concluído
+            </button>
+            <button className="text-[12px] font-medium py-[9px] px-3.5 rounded-[7px] bg-transparent border border-[rgba(255,248,213,0.3)] text-(--cream) hover:bg-[rgba(255,248,213,0.05)] hover:-translate-y-px">
+              Editar progresso
+            </button>
           </div>
         </div>
 
@@ -64,12 +91,19 @@ const MyReading = () => {
             <span>{u.sessions.length}</span>
           </div>
           {u.sessions.map((s, i) => (
-            <div className="grid grid-cols-[90px_1fr_auto] gap-3 text-[12px] items-center py-1.5 border-b border-[rgba(255,248,213,0.08)] last:border-b-0" key={i}>
-              <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.04em] uppercase">{s.date}</span>
+            <div
+              className="grid grid-cols-[90px_1fr_auto] gap-3 text-[12px] items-center py-1.5 border-b border-[rgba(255,248,213,0.08)] last:border-b-0"
+              key={i}
+            >
+              <span className="font-mono text-[10px] text-(--cream-deep) tracking-[0.04em] uppercase">
+                {s.date}
+              </span>
               <span className="text-(--cream) font-medium [&_strong]:text-(--yellow) [&_strong]:font-bold">
                 <strong>{s.pages} pgs</strong> · até pág. {s.page_end}
               </span>
-              <span className="text-(--cream-deep) font-mono text-[11px]">{s.minutes}min</span>
+              <span className="text-(--cream-deep) font-mono text-[11px]">
+                {s.minutes}min
+              </span>
             </div>
           ))}
         </div>

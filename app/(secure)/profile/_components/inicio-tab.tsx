@@ -104,13 +104,25 @@ const ActivityRow = ({ a }: { a: ActivityItem }) => {
       </div>
       {a.book && (
         <div className="shrink-0 [&_.cover-title]:text-[7px] [&_.cover-title]:leading-[1.05] [&_.cover-pub]:hidden [&_.cover-author]:hidden [&_.cover-top]:hidden">
-          <BookCover book={a.book} size="sm" style={{ width: 30, height: 44, padding: "4px", borderRadius: 2 }} />
+          <BookCover
+            book={a.book}
+            size="sm"
+            style={{ width: 30, height: 44, padding: "4px", borderRadius: 2 }}
+          />
         </div>
       )}
-      {!a.book && <div className="shrink-0" style={{ width: 30, height: 44 }} />}
+      {!a.book && (
+        <div className="shrink-0" style={{ width: 30, height: 44 }} />
+      )}
       <div className="flex-1 min-w-0 pt-1">
-        <div className="text-[13px] text-(--ink-3) [&_strong]:text-(--ink) [&_strong]:font-semibold">{verb}</div>
-        {a.text && <div className="mt-1.5 text-[12px] text-(--ink-4) leading-[1.45] border-l-2 border-(--rule) pl-2.5 italic">&quot;{a.text}&quot;</div>}
+        <div className="text-[13px] text-(--ink-3) [&_strong]:text-(--ink) [&_strong]:font-semibold">
+          {verb}
+        </div>
+        {a.text && (
+          <div className="mt-1.5 text-[12px] text-(--ink-4) leading-[1.45] border-l-2 border-(--rule) pl-2.5 italic">
+            &quot;{a.text}&quot;
+          </div>
+        )}
       </div>
     </div>
   );
@@ -122,21 +134,34 @@ const InicioTab = () => {
       <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 px-7">
         <div className="flex items-center justify-between mb-4.5">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">Curadoria do leitor</div>
-            <h3 className="m-0 text-[16px] font-bold tracking-[-0.005em] text-(--ink)">Meus 5 livros favoritos</h3>
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">
+              Curadoria do leitor
+            </div>
+            <h3 className="m-0 text-[16px] font-bold tracking-[-0.005em] text-(--ink)">
+              Meus 5 livros favoritos
+            </h3>
           </div>
-          <a className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)" href="#">
+          <a
+            className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
+            href="#"
+          >
             Editar →
           </a>
         </div>
         <div className="grid grid-cols-5 gap-5">
           {FAVORITES.map((b, i) => (
             <div className="flex flex-col gap-2" key={i}>
-              <BookCover book={b} size="md" style={{ width: "100%", aspectRatio: "2/3" }} />
+              <BookCover
+                book={b}
+                size="md"
+                style={{ width: "100%", aspectRatio: "2/3" }}
+              />
               <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
                 № <strong className="text-(--ink-2)">0{i + 1}</strong>
               </div>
-              <div className="text-[13px] font-semibold text-(--ink-2) tracking-[-0.005em] leading-tight">{b.title}</div>
+              <div className="text-[13px] font-semibold text-(--ink-2) tracking-[-0.005em] leading-tight">
+                {b.title}
+              </div>
               <div className="text-[11px] text-(--ink-4)">{b.author}</div>
             </div>
           ))}
@@ -146,10 +171,17 @@ const InicioTab = () => {
       <div className="mt-5.5 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 px-7">
         <div className="flex items-center justify-between mb-4.5">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">Em andamento</div>
-            <h3 className="m-0 text-[16px] font-bold tracking-[-0.005em] text-(--ink)">Lendo agora</h3>
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">
+              Em andamento
+            </div>
+            <h3 className="m-0 text-[16px] font-bold tracking-[-0.005em] text-(--ink)">
+              Lendo agora
+            </h3>
           </div>
-          <a className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)" href="#">
+          <a
+            className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
+            href="#"
+          >
             Ver pilha →
           </a>
         </div>
@@ -159,12 +191,28 @@ const InicioTab = () => {
               className="bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-[10px] p-4 flex gap-3.5 [&_.cover-title]:text-[11px] [&_.cover-title]:leading-[1.05] [&_.cover-pub]:hidden [&_.cover-author]:hidden [&_.cover-top]:hidden"
               key={i}
             >
-              <BookCover book={r.book} size="sm" style={{ width: 70, height: 100, flexShrink: 0, padding: "8px 7px" }} />
+              <BookCover
+                book={r.book}
+                size="sm"
+                style={{
+                  width: 70,
+                  height: 100,
+                  flexShrink: 0,
+                  padding: "8px 7px",
+                }}
+              />
               <div className="flex-1 min-w-0">
-                <div className="text-[14px] font-bold text-(--ink-2) tracking-[-0.005em] leading-[1.2]">{r.book.title}</div>
-                <div className="text-[11px] text-(--ink-4) mt-0.5">{r.book.author}</div>
+                <div className="text-[14px] font-bold text-(--ink-2) tracking-[-0.005em] leading-[1.2]">
+                  {r.book.title}
+                </div>
+                <div className="text-[11px] text-(--ink-4) mt-0.5">
+                  {r.book.author}
+                </div>
                 <div className="mt-2.5 h-1 bg-[rgba(67,62,18,0.1)] rounded-sm overflow-hidden">
-                  <div className="h-full bg-(--ink-2) rounded-sm" style={{ width: r.progress + "%" }}></div>
+                  <div
+                    className="h-full bg-(--ink-2) rounded-sm"
+                    style={{ width: r.progress + "%" }}
+                  ></div>
                 </div>
                 <div className="mt-1.5 flex justify-between font-mono text-[9px] text-(--ink-4) tracking-[0.04em] uppercase [&_strong]:text-(--ink-2)">
                   <span>
@@ -181,10 +229,17 @@ const InicioTab = () => {
       <div className="mt-5.5 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 px-7">
         <div className="flex items-center justify-between mb-4.5">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">Últimas semanas</div>
-            <h3 className="m-0 text-[16px] font-bold tracking-[-0.005em] text-(--ink)">Atividade recente</h3>
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">
+              Últimas semanas
+            </div>
+            <h3 className="m-0 text-[16px] font-bold tracking-[-0.005em] text-(--ink)">
+              Atividade recente
+            </h3>
           </div>
-          <a className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)" href="#">
+          <a
+            className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
+            href="#"
+          >
             Histórico completo →
           </a>
         </div>

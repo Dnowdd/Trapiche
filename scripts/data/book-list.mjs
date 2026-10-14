@@ -112,7 +112,6 @@ export default [
   "LTrYCwAAQBAJ", // O Navio Negreiro - Castro Alves
   "dQIHEAAAQBAJ", // Espumas Flutuantes - Castro Alves
 
-
   "SgIVEQAAQBAJ", // Missal - Cruz e Sousa
 
   "V8cgEQAAQBAJ", // Via Láctea - Olavo Bilac
@@ -192,7 +191,6 @@ export default [
 
   "84jSgiit7IMC", // Balão Cativo - Pedro Nava
 
-
   "MXD2DwAAQBAJ", // Ponciá Vicêncio - Conceição Evaristo
   "g0kyDAAAQBAJ", // Olhos d'Água - Conceição Evaristo
   "OJNlDwAAQBAJ", // Becos da Memória - Conceição Evaristo
@@ -233,7 +231,6 @@ export default [
 
   "8SAgAQAAQBAJ", // 1968: O Ano que Não Terminou - Zuenir Ventura
 
-
   "rwJDDwAAQBAJ", // A Elite do Atraso - Jessé Souza
 
   "6V-IDwAAQBAJ", // Casa-Grande & Senzala - Gilberto Freyre
@@ -253,8 +250,6 @@ export default [
   "NmaPEQAAQBAJ", // Pântano de Sangue - Pedro Bandeira
   "O Fantasma da Escola - Pedro Bandeira", // ⚠ não encontrado no Google Books - confira título/autor
   "UmaPEQAAQBAJ", // A Marca de uma Lágrima - Pedro Bandeira
-
-
 
   "ziTpEAAAQBAJ", // O Menino Maluquinho - Ziraldo
   "hAGqDwAAQBAJ", // Flicts - Ziraldo

@@ -40,10 +40,12 @@ export default async function BookDetailPage({ params }: Props) {
   return (
     <div className="bg-(--cream) rounded-[30px] border-15 border-(--yellow) mx-3.75 overflow-hidden">
       <div className="pt-12.5 px-18.75 pb-15">
-
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
-          <Link href="/" className="text-(--ink-4) transition-colors duration-120 hover:text-(--ink-2)">
+          <Link
+            href="/"
+            className="text-(--ink-4) transition-colors duration-120 hover:text-(--ink-2)"
+          >
             Trapiche
           </Link>
           <span className="text-(--ink-5)">/</span>
@@ -60,7 +62,6 @@ export default async function BookDetailPage({ params }: Props) {
 
         {/* Hero */}
         <section className="grid grid-cols-[320px_1fr] gap-15 items-start mb-15">
-
           {/* Cover */}
           <div className="relative">
             {coverUrl ? (
@@ -194,7 +195,7 @@ export default async function BookDetailPage({ params }: Props) {
                     ? "Português"
                     : info.language === "en"
                       ? "Inglês"
-                      : info.language ?? "—"}
+                      : (info.language ?? "—")}
                 </div>
               </div>
               {info.publisher && (
@@ -266,7 +267,15 @@ export default async function BookDetailPage({ params }: Props) {
                 { label: "Editora", value: info.publisher },
                 { label: "Publicação", value: info.publishedDate },
                 { label: "Páginas", value: info.pageCount?.toString() },
-                { label: "Idioma", value: info.language === "pt" ? "Português" : info.language === "en" ? "Inglês" : info.language },
+                {
+                  label: "Idioma",
+                  value:
+                    info.language === "pt"
+                      ? "Português"
+                      : info.language === "en"
+                        ? "Inglês"
+                        : info.language,
+                },
                 { label: "ISBN-13", value: isbn13 },
                 { label: "ISBN-10", value: isbn10 },
               ]

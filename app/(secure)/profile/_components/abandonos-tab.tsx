@@ -32,11 +32,22 @@ const AbandonosTab = () => {
 
       <div className="flex flex-col gap-4">
         {items.map((a, i) => (
-          <article className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-[22px] px-[26px] grid grid-cols-[100px_1fr_auto] gap-6 items-center" key={i}>
-            <BookCover book={a.book} size="md" style={{ width: 100, height: 150 }} />
+          <article
+            className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-[22px] px-[26px] grid grid-cols-[100px_1fr_auto] gap-6 items-center"
+            key={i}
+          >
+            <BookCover
+              book={a.book}
+              size="md"
+              style={{ width: 100, height: 150 }}
+            />
             <div className="min-w-0">
-              <div className="text-[17px] font-bold text-(--ink) tracking-[-0.01em]">{a.book.title}</div>
-              <div className="text-[12px] text-(--ink-4) mt-[3px]">{a.book.author}</div>
+              <div className="text-[17px] font-bold text-(--ink) tracking-[-0.01em]">
+                {a.book.title}
+              </div>
+              <div className="text-[12px] text-(--ink-4) mt-[3px]">
+                {a.book.author}
+              </div>
               <div className="mt-3.5 flex items-center gap-2.5 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] [&_strong]:text-(--ink-2) [&_strong]:font-['Inter',sans-serif] [&_strong]:font-bold [&_strong]:text-[12px]">
                 <div className="flex-1 max-w-[280px] h-[5px] rounded-[3px] bg-[rgba(67,62,18,0.1)] overflow-hidden relative">
                   <div
@@ -56,7 +67,9 @@ const AbandonosTab = () => {
               )}
             </div>
             <div className="text-right flex flex-col items-end gap-2.5">
-              <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase">{a.abandonedAt}</span>
+              <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase">
+                {a.abandonedAt}
+              </span>
               <span className="text-[12px] text-(--ink-3) [&_strong]:text-(--ink) [&_strong]:font-semibold">
                 depois de <strong>{a.spentDays} dias</strong>
               </span>
