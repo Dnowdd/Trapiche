@@ -69,6 +69,11 @@ export interface GoogleBooksVolume {
       extraLarge?: string;
     };
     language?: string;
+    dimensions?: {
+      height?: string;
+      width?: string;
+      thickness?: string;
+    };
   };
 }
 

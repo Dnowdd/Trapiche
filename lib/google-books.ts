@@ -13,23 +13,33 @@ function getKey() {
   return key;
 }
 
-function coverUrl(volume: GoogleBooksVolume): string | undefined {
+export function coverUrl(volume: GoogleBooksVolume): string | undefined {
   const links = volume.volumeInfo.imageLinks;
   if (!links) return undefined;
-  // Google Books returns HTTP — upgrade to HTTPS and request higher res
   const url =
     links.medium ?? links.small ?? links.thumbnail ?? links.smallThumbnail;
   return url?.replace("http:", "https:").replace("&zoom=1", "&zoom=3");
+}
+
+async function fetchWithRetry(url: string) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, { next: { revalidate: 86400 } });
+    if (res.ok || attempt >= 2 || (res.status < 500 && res.status !== 429))
+      return res;
+    await new Promise((r) => setTimeout(r, 400 * 3 ** attempt));
+  }
 }
 
 async function fetchVolumes(
   query: string,
   maxResults = 10,
   orderBy: "relevance" | "newest" = "relevance",
+  lang?: string,
 ): Promise<GoogleBooksVolume[]> {
   const key = getKey();
-  const url = `${API_BASE}/volumes?q=${encodeURIComponent(query)}&maxResults=${maxResults}&orderBy=${orderBy}&printType=books&key=${key}`;
-  const res = await fetch(url, { next: { revalidate: 86400 } });
+  const langParam = lang ? `&langRestrict=${encodeURIComponent(lang)}` : "";
+  const url = `${API_BASE}/volumes?q=${encodeURIComponent(query)}&maxResults=${maxResults}&orderBy=${orderBy}&printType=books${langParam}&key=${key}`;
+  const res = await fetchWithRetry(url);
   if (!res.ok)
     throw new Error(`Google Books API ${res.status}: ${res.statusText}`);
   const data: GoogleBooksResponse = await res.json();
@@ -39,8 +49,9 @@ async function fetchVolumes(
 export async function searchBooks(
   query: string,
   maxResults = 10,
+  lang?: string,
 ): Promise<GoogleBooksVolume[]> {
-  return fetchVolumes(query, maxResults);
+  return fetchVolumes(query, maxResults, "relevance", lang);
 }
 
 export async function smartSearch(
@@ -82,9 +93,9 @@ export async function getBookByQuery(
 
 export async function getVolume(volumeId: string): Promise<GoogleBooksVolume> {
   const key = getKey();
-  const res = await fetch(`${API_BASE}/volumes/${volumeId}?key=${key}`, {
-    next: { revalidate: 86400 },
-  });
+  const res = await fetchWithRetry(
+    `${API_BASE}/volumes/${encodeURIComponent(volumeId)}?key=${key}`,
+  );
   if (!res.ok)
     throw new Error(`Google Books API ${res.status}: ${res.statusText}`);
   return res.json();

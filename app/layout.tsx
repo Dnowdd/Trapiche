@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/shared/toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-(--yellow) text-(--ink-2) min-w-360 font-features-['ss01','cv11'] [text-rendering:optimizeLegibility]">
         <main>{children}</main>
+        <Toaster />
       </body>
     </html>
   );

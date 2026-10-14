@@ -12,3 +12,7 @@ export async function requireSession() {
   if (!session) redirect("/auth");
   return session;
 }
+
+export async function getViewerId() {
+  return (await getSession())?.user.id ?? null;
+}
