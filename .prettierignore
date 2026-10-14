@@ -1,0 +1,4 @@
+package-lock.json
+lib/data/
+app/emails/
+prisma/migrations/
