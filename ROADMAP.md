@@ -1,14 +1,14 @@
 # Trapiche — estado atual e o que falta
 
-_Revisão de 13/10/2026. Base: leitura do código + testes no navegador (Chromium headless, dev server local) + `tsc`, `eslint` e `prettier`._
+_Revisão de 13/10/2026, atualizada em 14/10/2026 (livro, listas e perfil). Base: leitura do código + testes no navegador (Chromium headless, dev server local) + `tsc`, `eslint`, `prettier` e `next build`._
 
 ## Como foi verificado
 
 - `tsc --noEmit`: **ok**, sem erros.
 - `prettier --check`: **ok**.
 - `eslint`: **3 erros + 1 warning** depois das correções de bugs (ver "Qualidade de código").
-- Navegador: home, header, busca, `/auth` (todos os modos), `/book/[id]`, `/book`, `/profile`, redirecionamentos do `proxy.ts`.
-- **Login de ponta a ponta não foi testado**: ele lê e grava no banco Neon (remoto), e isso precisa da sua autorização. O fluxo foi revisado no código e a UI foi testada até o envio.
+- `next build`: **ok**.
+- Navegador (14/10, com sua autorização, contra o Neon): cadastro real, todos os fluxos do livro (status, sessão, progresso, concluir, releitura, resenha, comentário, curtir, favoritar, listas), perfil (todas as abas, editar perfil, favoritos, nova entrada no diário, abandonar e voltar à pilha), página da lista (fixar, editar, compartilhada, convite com @ inexistente) e visitante deslogado.
 
 ## O que está pronto
 
@@ -33,13 +33,28 @@ _Revisão de 13/10/2026. Base: leitura do código + testes no navegador (Chromiu
 - Catálogo vem de snapshot local (`lib/data/books.json`, 198 livros com capa), gerado por `npm run books`.
 - `GET /api/books` (filtros `q`, `author`, `limit`, `withCover`).
 
-### Livro
+### Livro (feito em 14/10/2026)
 
-- `/book/[id]` com dados reais do Google Books: capa, título, autor, categorias, nota do Google, páginas, idioma, editora, ISBN, "Sobre o livro", ficha técnica. ID inválido → 404.
+- `/book/[id]` (público) com o design completo ligado ao banco: status (Lendo, Quero ler, Lido, Abandonei, Relendo; clicar no status ativo tira da estante), curtir, favoritar (até 5), adicionar a listas (com criação de lista no próprio modal) e compartilhar (Web Share ou copia o link).
+- "Sua leitura": progresso, página, início, previsão (pelo ritmo), sequência de dias, nª releitura, nota, últimas sessões. Botões "Registrar leitura de hoje", "Marcar como concluído" e "Editar progresso" abrem modais.
+- Concluir abre o convite para a resenha. Resenha: nota de 1 a 5 + texto opcional, editar e apagar.
+- Comunidade: nota média e distribuição do Trapiche (sem avaliações, cai para a nota do Google no topo), leitura média em dias, nº de listas públicas, resenhas em destaque (ordenadas por curtidas) com curtir e comentários, página `/book/[id]/resenhas` com todas (paginada).
+- "Em N listas": suas listas e listas públicas da comunidade (com seguidores). "Quem leu esse, leu também": coocorrência entre leitores, completando com o Google (categoria e depois autor). "Mais de {autor}" com links. Ficha técnica só com os campos que existem.
+- Livros ficam em cache na tabela `Book` (renovados a cada 7 dias).
 
-### Perfil
+### Listas (feito em 14/10/2026)
 
-- `/profile` com layout completo e 7 abas (Início, Diário, Avaliações, Listas, Curtidas, Abandonos, Releituras). **100% mock** (Felipe Carvalho).
+- `/lists/[id]`: pública, privada ou compartilhada. Dono edita, apaga e convida pessoas por @ (lista compartilhada). Membros adicionam e tiram livros, fixam a lista no perfil e podem sair. Visitantes seguem listas públicas.
+
+### Perfil (feito em 14/10/2026)
+
+- `/u/[handle]` é o perfil público. `/profile` redireciona para o seu. Abas por `?tab=`.
+- Card com nome, @, cidade, "desde", bio, 6 números clicáveis, "Editar perfil" (nome, usuário, cidade, bio) e "Compartilhar".
+- Início: 5 favoritos (com modal para reordenar e tirar), Lendo agora, atividade recente e histórico completo.
+- **Estante** (aba nova, combinada com você): todos os livros por status. "Ver pilha →" leva para "Quero ler".
+- Diário: estatísticas do ano (livros, páginas, horas, comparação com o ano anterior, média diária, sequência, recorde, dia mais cheio, mais rápido e mais lento), heatmap por ano, linha do tempo e "+ Nova entrada".
+- Avaliações (com editar), Listas (filtros, fixadas, criar), Curtidas (por ano), Abandonos (motivo, onde parou, "Voltar à pilha") e Releituras.
+- Visitantes não veem listas privadas nem os botões de edição.
 
 ## Bugs encontrados (fazer primeiro)
 
@@ -63,48 +78,59 @@ _Corrigidos em 13/10/2026, exceto o do e-mail. Testados no navegador (Chromium h
 
 - [ ] Botões "Continuar/Cadastrar com Google" ficam sempre desabilitados → configurar `socialProviders.google` ou remover.
 - [ ] Sino de notificações no header sem ação.
-- [ ] `/book/[id]`: Quero ler / Lendo / Lido / Relendo / Abandonei, Curtir, Favoritos, Adicionar à lista e Compartilhar só mudam estado local, sem salvar nada.
+- [x] `/book/[id]`: status, curtir, favoritos, lista e compartilhar salvam de verdade.
 - [ ] Footer inteiro, Termos, Privacidade, Ajuda e redes sociais com `href="#"`.
 - [ ] Home: links "ver todos" de Listas, Populares e Resenhas com `href="#"`. Resenhas usam lorem ipsum. Números do hero (14.8k leitores, 312k livros) são fictícios.
-- [ ] `/book` (sem id): página mock inteira (Jorge Amado), com `href="index.html"` no breadcrumb. Remover ou redirecionar.
-- [ ] `/profile`: tudo mock. Editar perfil, Compartilhar e os links "Editar →", "Ver pilha →" e "Histórico completo →" não fazem nada.
-- [ ] Breadcrumb "Livros" e link do autor em `/book/[id]` não levam a lugar nenhum.
+- [x] `/book` (sem id): a página mock foi removida; o design dela virou o `/book/[id]`.
+- [x] `/profile`: tudo funcional.
+- [x] Link do autor em `/book/[id]` leva para "Mais de {autor}". O breadcrumb "Livros" ficou como texto (não há página de catálogo ainda).
 
 ## O que falta construir (o produto em si)
 
-Hoje o banco só tem as tabelas do Better Auth (`User`, `Session`, `Account`, `Verification`). Nenhuma ação do leitor é salva. Sugestão de ordem:
+Feito em 14/10/2026: schema do acervo (`Book`, `UserBook`, `Reading`, `ReadingSession`, `Review`, `ReviewLike`, `ReviewComment`, `List`, `ListMember`, `ListItem`, `ListFollow`, `Activity`; migration `20261013120000_reading_library` aplicada no Neon), livro, resenhas, listas e perfil.
 
-1. **Modelo de dados do acervo** (schema + migration, aplicar só com sua aprovação):
-   - `Book`: cache local do volume do Google (googleId, título, autores, capa, páginas, ISBN), para não depender da API a cada página.
-   - `Shelf`/`UserBook`: status por usuário (quero ler, lendo, lido, relendo, abandonei), datas de início e fim, curtido, favorito.
-   - `ReadingSession`: diário (páginas, minutos, data), base para progresso, sequência e releituras.
-   - `Review`: nota de 1 a 5 + texto.
-   - `List` + `ListItem`: listas pública, privada e compartilhada.
-2. **Ligar `/book/[id]` ao banco:** salvar status, curtida, favorito e progresso. Mostrar "Sua leitura" de verdade (os componentes de `book/_components` já existem, só que em cima de mock).
-3. **Perfil real:** `/profile` com os dados do usuário logado e rota pública por handle (`/u/[handle]` ou `/@handle`). Editar perfil (nome, bio, avatar, cidade).
-4. **Resenhas:** escrever, editar, listar no livro e no perfil.
-5. **Listas:** criar, adicionar livro, ordenar, visibilidade.
-6. **Home logada:** trocar o mock por "lendo agora", atividade recente e listas reais. Números do hero reais ou removidos.
-7. **Busca completa:** página `/search?q=` com mais resultados (o header só mostra 8). Busca e livro já são públicos.
-8. **Google OAuth** (botões já desenhados).
-9. **Seção IA** (recomendação com 5 livros): definir o que é e implementar, ou tirar da home.
-10. **Páginas institucionais:** Termos, Privacidade, Sobre (o cadastro pede aceite dos Termos, então eles precisam existir).
+1. **Home logada:** trocar o mock por "lendo agora", atividade recente e listas reais. Números do hero reais ou removidos.
+2. **Busca completa:** página `/search?q=` com mais resultados (o header só mostra 8). Daria destino ao breadcrumb "Livros".
+3. **Google OAuth** (botões já desenhados).
+4. **Seção IA** (recomendação com 5 livros): definir o que é e implementar, ou tirar da home.
+5. **Páginas institucionais:** Termos, Privacidade, Sobre (o cadastro pede aceite dos Termos, então eles precisam existir).
+6. **Notificações** (o sino do header). Hoje não há nada para notificar; candidatos: comentário na sua resenha, convite para lista compartilhada, curtidas.
+
+### Decidido com você nesta etapa
+
+- Desenvolvimento e testes direto no Neon, com aprovação. O teste E2E criou e depois apagou o usuário `e2e-trapiche@example.com`; ficaram 3 livros no cache `Book`.
+- Telas que não estavam no design foram criadas no mesmo visual: página da lista, página de resenhas, comentários e todos os modais.
+- Ficha técnica mostra só o que o Google fornece. Saíram: peso, formato, título e idioma originais, tradutor, nº da edição e crédito da capa.
+- Aba nova "Estante".
+
+### Adicionado sem estar no design (para você validar)
+
+- Chip **"Seguindo"** na aba Listas do seu perfil: sem ele, seguir uma lista não levava a lugar nenhum.
+- Botão **"Sair da lista"** para quem colabora numa lista compartilhada.
+- Clicar no status ativo do livro tira o livro da estante (com aviso).
+
+### Ideias para discutir (não feitas)
+
+- Editar e apagar entradas do diário (hoje só dá para criar; erros só se corrigem pelo "Editar progresso").
+- Reordenar livros dentro de uma lista (hoje é por data de adição).
+- Avatar com foto (hoje são as iniciais).
 
 ## Qualidade de código e infra
 
 - [ ] Corrigir os 3 erros de `eslint` (`react-hooks/set-state-in-effect`) em `hero.tsx:70`, `poster.tsx:75` e `header-search.tsx:47`, e o `setSeed` sem uso em `hero.tsx:66`. Para o shuffle, sortear no servidor ou com `useState(() => ...)`. (O de `auth-content.tsx` saiu junto com o bug do `mode`.)
 - [ ] Warning no console de `/auth`: `animation` misturado com `animationDelay` no pôster.
 - [ ] Remover os comentários que fogem da regra (`// Logged-in user...` no proxy, `{/* Header */}`, `{/* Identity header */}`, docblocks em `catalog.ts`/`api/books`).
-- [ ] Nenhum teste automatizado. Começar por um E2E do fluxo de auth (Playwright) contra um banco local/descartável.
-- [ ] **Banco local para dev/testes:** hoje o `.env` aponta direto para o Neon, e `PrismaNeonHttp` só fala com Neon. Ter um Postgres local (docker) + adapter `pg` em dev permitiria testar auth e migrations sem tocar no banco real.
+- [ ] Nenhum teste automatizado no repo. Os E2E desta etapa rodaram por scripts locais (Playwright); vale versionar os fluxos de livro, perfil e lista, de preferência contra um banco descartável.
+- [ ] Google Books oscila (503 e respostas vazias). Há retentativa, mas "Quem leu também" e "Mais do autor" podem sumir quando a API falha. Categorias vêm em inglês ("Fiction / Classics").
+- [ ] **Banco local para dev/testes:** hoje o `.env` aponta direto para o Neon, e o adapter `PrismaNeon` (WebSocket, trocado do HTTP para ter transações) só fala com Neon. Ter um Postgres local (docker) + adapter `pg` em dev permitiria testar auth e migrations sem tocar no banco real.
 - [ ] Layout fixo em `min-w-360` (1440px): não há versão mobile.
 - [x] Atualizar o README (setup, variáveis de ambiente, `npm run books`).
 - [ ] Deploy: definir `BETTER_AUTH_URL`/`NEXT_PUBLIC_APP_URL` de produção, `trustedOrigins` e o domínio do Resend (o cookie `__Secure-` no proxy já está resolvido).
 
 ## Sugestão para os próximos dias
 
-1. ~~Corrigir os bugs da seção "Bugs encontrados"~~ feito, falta o remetente do e-mail.
-2. ~~Decidir se livro e busca são públicos~~ decidido: são públicos.
-3. Modelar o schema do acervo (`Book`, `UserBook`, `ReadingSession`, `Review`, `List`).
-4. Ligar os botões de status do `/book/[id]` ao banco: é a primeira feature de verdade do produto.
-5. Perfil real em cima desses dados.
+1. Revisar no navegador as telas novas (livro, lista, perfil) e me dizer o que ajustar.
+2. Remetente do e-mail (domínio no Resend), antes de chamar outras pessoas.
+3. Home logada com dados reais.
+4. Página de busca `/search`.
+5. Termos e Privacidade (o cadastro já exige o aceite).
