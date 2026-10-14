@@ -14,10 +14,24 @@ model User {
   emailVerified Boolean
   image         String?
   handle        String    @unique
+  bio           String?
+  city          String?
   createdAt     DateTime
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+
+  shelf           UserBook[]
+  readings        Reading[]
+  readingSessions ReadingSession[]
+  reviews         Review[]
+  reviewLikes     ReviewLike[]
+  reviewComments  ReviewComment[]
+  ownedLists      List[]
+  listMemberships ListMember[]
+  listItemsAdded  ListItem[]
+  listFollows     ListFollow[]
+  activities      Activity[]
 }
 
 model Session {
@@ -56,4 +70,253 @@ model Verification {
   expiresAt  DateTime
   createdAt  DateTime?
   updatedAt  DateTime?
+}
+
+enum ShelfStatus {
+  WANT
+  READING
+  READ
+  ABANDONED
+  REREADING
+}
+
+enum ReadingStatus {
+  ACTIVE
+  FINISHED
+  ABANDONED
+}
+
+enum ListVisibility {
+  PUBLIC
+  PRIVATE
+  SHARED
+}
+
+enum ListRole {
+  OWNER
+  EDITOR
+}
+
+enum ActivityKind {
+  REVIEW
+  STARTED
+  FINISHED
+  ABANDONED
+  ADDED_TO_SHELF
+  ADDED_TO_LIST
+  LIST_CREATED
+}
+
+model Book {
+  id                 String   @id
+  title              String
+  subtitle           String?
+  authors            String[]
+  publisher          String?
+  publishedDate      String?
+  pageCount          Int?
+  language           String?
+  categories         String[]
+  description        String?
+  coverUrl           String?
+  isbn10             String?
+  isbn13             String?
+  dimensions         String?
+  googleRating       Float?
+  googleRatingsCount Int?
+  syncedAt           DateTime @default(now())
+  createdAt          DateTime @default(now())
+
+  shelf      UserBook[]
+  readings   Reading[]
+  sessions   ReadingSession[]
+  reviews    Review[]
+  listItems  ListItem[]
+  activities Activity[]
+}
+
+model UserBook {
+  id               String       @id @default(cuid())
+  userId           String
+  bookId           String
+  status           ShelfStatus?
+  statusChangedAt  DateTime?
+  liked            Boolean      @default(false)
+  likedAt          DateTime?
+  favoritePosition Int?
+  currentPage      Int          @default(0)
+  note             String?
+  abandonReason    String?
+  wantsToReturn    Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@unique([userId, bookId])
+  @@index([userId, status])
+  @@index([bookId, status])
+}
+
+model Reading {
+  id        String        @id @default(cuid())
+  userId    String
+  bookId    String
+  number    Int
+  status    ReadingStatus @default(ACTIVE)
+  startedAt DateTime
+  endedAt   DateTime?
+  endPage   Int?
+  createdAt DateTime      @default(now())
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book     Book             @relation(fields: [bookId], references: [id])
+  sessions ReadingSession[]
+
+  @@index([userId, bookId])
+  @@index([bookId, status])
+}
+
+model ReadingSession {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  readingId String
+  date      DateTime @db.Date
+  pages     Int
+  minutes   Int
+  pageEnd   Int
+  note      String?
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book    Book    @relation(fields: [bookId], references: [id])
+  reading Reading @relation(fields: [readingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@index([readingId, date])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  rating    Int
+  text      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book       Book            @relation(fields: [bookId], references: [id])
+  likes      ReviewLike[]
+  comments   ReviewComment[]
+  activities Activity[]
+
+  @@unique([userId, bookId])
+  @@index([bookId, createdAt])
+}
+
+model ReviewLike {
+  userId    String
+  reviewId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@id([userId, reviewId])
+  @@index([reviewId])
+}
+
+model ReviewComment {
+  id        String   @id @default(cuid())
+  reviewId  String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId, createdAt])
+}
+
+model List {
+  id         String         @id @default(cuid())
+  ownerId    String
+  title      String
+  note       String?
+  visibility ListVisibility @default(PUBLIC)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  owner      User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members    ListMember[]
+  items      ListItem[]
+  followers  ListFollow[]
+  activities Activity[]
+
+  @@index([ownerId])
+}
+
+model ListMember {
+  listId    String
+  userId    String
+  role      ListRole @default(EDITOR)
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([listId, userId])
+  @@index([userId])
+}
+
+model ListItem {
+  id        String   @id @default(cuid())
+  listId    String
+  bookId    String
+  addedById String
+  createdAt DateTime @default(now())
+
+  list    List @relation(fields: [listId], references: [id], onDelete: Cascade)
+  book    Book @relation(fields: [bookId], references: [id])
+  addedBy User @relation(fields: [addedById], references: [id], onDelete: Cascade)
+
+  @@unique([listId, bookId])
+  @@index([bookId])
+}
+
+model ListFollow {
+  listId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([listId, userId])
+  @@index([userId])
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  userId    String
+  kind      ActivityKind
+  bookId    String?
+  listId    String?
+  reviewId  String?
+  rating    Int?
+  text      String?
+  days      Int?
+  createdAt DateTime     @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book   Book?   @relation(fields: [bookId], references: [id])
+  list   List?   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  review Review? @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
