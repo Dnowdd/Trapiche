@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { searchBooks } from "@/lib/google-books"
+import { smartSearch } from "@/lib/google-books"
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")
@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const volumes = await searchBooks(q, Math.min(maxResults, 40))
+    const volumes = await smartSearch(q, Math.min(maxResults, 40))
     return NextResponse.json({ items: volumes })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erro desconhecido"

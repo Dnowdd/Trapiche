@@ -3,6 +3,7 @@
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import HeaderSearch from "./header-search";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,27 +43,7 @@ const Header = () => {
         Trapiche
       </Link>
 
-      <label className="w-110 h-10 rounded-[10px] bg-(--cream) flex items-center gap-2.5 px-4 border border-[rgba(67,62,18,0.07)]">
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-(--ink-3) shrink-0"
-        >
-          <circle cx="11" cy="11" r="7"></circle>
-          <path d="m21 21-4.3-4.3"></path>
-        </svg>
-        <input
-          className="border-0 bg-transparent w-full text-[13px] text-(--ink-2) outline-none placeholder:text-(--ink-4)"
-          id="header-search"
-          placeholder="Busque por título, autor, editora, ISBN…"
-        />
-      </label>
+      <HeaderSearch />
 
       <div className="flex items-center gap-4.5">
         {user ? (
