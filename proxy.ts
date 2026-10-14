@@ -3,7 +3,11 @@ import { getSessionCookie } from "better-auth/cookies";
 
 const PUBLIC_PATHS = ["/auth", "/api/auth"];
 const PUBLIC_EXACT = ["/", "/api/books", "/api/books/search"];
-const PUBLIC_PATTERNS = [/^\/book\/[^/]+$/];
+const PUBLIC_PATTERNS = [
+  /^\/book\/[^/]+(\/resenhas)?$/,
+  /^\/lists\/[^/]+$/,
+  /^\/u\/[^/]+$/,
+];
 
 function isPublic(pathname: string) {
   return (
