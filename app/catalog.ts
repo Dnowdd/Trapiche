@@ -1,88 +1,167 @@
-import { searchBooks, volumeToBook } from "@/lib/google-books"
-import type { Book, BookPalette, GoogleBooksVolume } from "@/lib/types/book"
+import catalogData from "@/lib/data/books.json"
+import type { Book, CatalogBook } from "@/lib/types/book"
 
-const PALETTES: BookPalette[] = [
-  { bg: "#2A2920", fg: "#FFF8D5", pub: "Companhia das Letras" },
-  { bg: "#5B3A1E", fg: "#F8E99D", pub: "Record" },
-  { bg: "#1E3A3A", fg: "#FFE767", pub: "Cosac Naify" },
-  { bg: "#7A2F1F", fg: "#FFE767", pub: "Editora 34" },
-  { bg: "#0F2A4A", fg: "#FFF8D5", pub: "Penguin Brasil" },
-  { bg: "#FFE767", fg: "#343600", pub: "Trapiche Indie" },
-  { bg: "#F8E99D", fg: "#433E12", pub: "Iluminuras" },
-  { bg: "#2E2A1E", fg: "#FFE767", pub: "Nova Fronteira" },
-  { bg: "#4F4030", fg: "#FFF8D5", pub: "Objetiva" },
-  { bg: "#8A4B22", fg: "#FFF8D5", pub: "Alfaguara" },
-  { bg: "#1F4030", fg: "#F8E99D", pub: "Boitempo" },
-  { bg: "#3A1F40", fg: "#FFE767", pub: "Mundaréu" },
-  { bg: "#FFF8D5", fg: "#433E12", pub: "Editora 34" },
-  { bg: "#552020", fg: "#FFE767", pub: "Quadrante" },
-]
+/**
+ * Catálogo local — mock da home page.
+ *
+ * Os dados vêm de lib/data/books.json, gerado por `npm run books`
+ * (scripts/build-books.mjs) a partir da lista em scripts/data/book-list.mjs.
+ * Para adicionar livros: edite a lista e rode o script de novo — ele só busca
+ * na API do Google o que ainda não estiver em cache.
+ */
+const CATALOG = (catalogData.books ?? []) as unknown as CatalogBook[]
 
-const GLYPHS = ["♁", "✶", "★", "≈", "✦", "○", "▲", "◇", "✿", "▼", "◐", "❀"]
-
-function hashIndex(str: string, len: number): number {
-  let h = 0
-  for (const c of str) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0
-  return Math.abs(h) % len
+export const catalogMeta = {
+  generatedAt: catalogData.generatedAt,
+  total: catalogData.total,
 }
 
-function assignVisuals(vol: GoogleBooksVolume): Book {
-  return volumeToBook(vol, {
-    id: vol.id,
-    glyph: GLYPHS[hashIndex(vol.id, GLYPHS.length)],
-    palette: PALETTES[hashIndex(vol.id, PALETTES.length)],
-  })
+function norm(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
 }
 
-export async function getFeaturedBooks(maxResults = 24): Promise<Book[]> {
-  try {
-    const volumes = await searchBooks(
-      "literatura brasileira ficção romance",
-      maxResults,
-    )
-    return volumes.map(assignVisuals)
-  } catch {
-    return []
+/** Um livro por autor, em rodízio — evita 14 Machados seguidos na home. */
+function spreadByAuthor(books: CatalogBook[]): CatalogBook[] {
+  const groups = new Map<string, CatalogBook[]>()
+  for (const book of books) {
+    const key = norm(book.author)
+    const group = groups.get(key)
+    if (group) group.push(book)
+    else groups.set(key, [book])
   }
+
+  const buckets = [...groups.values()]
+  const out: CatalogBook[] = []
+  for (let round = 0; out.length < books.length; round++) {
+    let added = false
+    for (const bucket of buckets) {
+      const book = bucket[round]
+      if (book) {
+        out.push(book)
+        added = true
+      }
+    }
+    if (!added) break
+  }
+  return out
 }
 
-// ---------- Editorial content (homepage sections) ----------
+const WITH_COVER = CATALOG.filter((b) => Boolean(b.coverUrl))
+const FEATURED = spreadByAuthor(WITH_COVER)
+
+// ---------- acesso ao catálogo ----------
+
+export function getCatalog(): CatalogBook[] {
+  return CATALOG
+}
+
+export function getBookById(id: string): CatalogBook | undefined {
+  return CATALOG.find((b) => b.id === id || b.slug === id)
+}
+
+export function getBooksByAuthor(author: string, limit = 12): CatalogBook[] {
+  const needle = norm(author)
+  return CATALOG.filter((b) => norm(b.author).includes(needle)).slice(0, limit)
+}
+
+export function getAuthors(): string[] {
+  return [...new Set(CATALOG.map((b) => b.author))].sort((a, b) =>
+    a.localeCompare(b, "pt-BR"),
+  )
+}
+
+export function searchCatalog(query: string, limit = 10): CatalogBook[] {
+  const needle = norm(query)
+  if (needle.length < 2) return []
+  return CATALOG.filter(
+    (b) => norm(b.title).includes(needle) || norm(b.author).includes(needle),
+  ).slice(0, limit)
+}
+
+/** Destaques da home — variados por autor, sempre com capa. */
+export async function getFeaturedBooks(maxResults = 24): Promise<Book[]> {
+  return FEATURED.slice(0, maxResults)
+}
+
+// ---------- conteúdo editorial (seções da home) ----------
 
 interface ListDef {
   title: string
-  count: number
   kind: "Pública" | "Privada" | "Compartilhada"
   by: string
   byInitials: string
-  query: string
+  authors: string[]
 }
 
 const LIST_DEFS: ListDef[] = [
   {
     title: "Brasileiras que mudam o ano",
-    count: 12,
     kind: "Pública",
     by: "Você",
     byInitials: "FC",
-    query: "ficção brasileira mulheres autoras",
+    authors: [
+      "Clarice Lispector",
+      "Conceição Evaristo",
+      "Lygia Fagundes Telles",
+      "Carolina Maria de Jesus",
+      "Rachel de Queiroz",
+      "Cecília Meireles",
+      "Nélida Piñon",
+      "Ana Maria Gonçalves",
+      "Cora Coralina",
+    ],
   },
   {
     title: "Modernismo de cabeça",
-    count: 8,
     kind: "Compartilhada",
     by: "Júlia M.",
     byInitials: "JM",
-    query: "modernismo brasileiro romance",
+    authors: [
+      "Mário de Andrade",
+      "Oswald de Andrade",
+      "Manuel Bandeira",
+      "Carlos Drummond de Andrade",
+      "Cecília Meireles",
+    ],
   },
   {
     title: "Para ler no inverno",
-    count: 6,
     kind: "Privada",
     by: "Você",
     byInitials: "FC",
-    query: "nordeste brasileiro literatura contos",
+    authors: [
+      "Graciliano Ramos",
+      "José Lins do Rego",
+      "Ariano Suassuna",
+      "João Cabral de Melo Neto",
+      "Euclides da Cunha",
+      "Raduan Nassar",
+    ],
   },
 ]
+
+function booksForAuthors(authors: string[]): CatalogBook[] {
+  const wanted = authors.map(norm)
+  return WITH_COVER.filter((b) => wanted.some((a) => norm(b.author).includes(a)))
+}
+
+export async function getLists() {
+  return LIST_DEFS.map((def) => {
+    const books = spreadByAuthor(booksForAuthors(def.authors))
+    return {
+      title: def.title,
+      count: books.length,
+      kind: def.kind,
+      by: def.by,
+      byInitials: def.byInitials,
+      books: books.slice(0, 3),
+    }
+  })
+}
 
 const REVIEW_LOREM = [
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
@@ -96,29 +175,21 @@ const REVIEW_META = [
   { user: "Luana Vidal", handle: "@luvidal", initials: "LV", stars: 5, date: "05 mai" },
 ]
 
-export async function getLists() {
-  const results = await Promise.all(
-    LIST_DEFS.map((def) => searchBooks(def.query, 3).catch(() => [] as GoogleBooksVolume[])),
-  )
-  return LIST_DEFS.map((def, i) => ({
-    title: def.title,
-    count: def.count,
-    kind: def.kind,
-    by: def.by,
-    byInitials: def.byInitials,
-    books: results[i].map(assignVisuals),
-  }))
-}
+const REVIEW_PICKS = ["Torto Arado", "A Hora da Estrela", "Grande Sertão"]
 
 export async function getReviews() {
-  try {
-    const volumes = await searchBooks("literatura brasileira", 3)
-    return volumes.slice(0, 3).map((vol, i) => ({
-      book: assignVisuals(vol),
+  const picked = REVIEW_PICKS.map((title) => {
+    const needle = norm(title)
+    return WITH_COVER.find((b) => norm(b.title).includes(needle))
+  })
+
+  const books = picked.map((book, i) => book ?? FEATURED[i])
+
+  return books
+    .filter((b): b is CatalogBook => Boolean(b))
+    .map((book, i) => ({
+      book,
       ...REVIEW_META[i],
       text: REVIEW_LOREM[i],
     }))
-  } catch {
-    return []
-  }
 }

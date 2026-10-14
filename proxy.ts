@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const SESSION_COOKIE = "better-auth.session_token";
 
 const PUBLIC_PATHS = ["/auth", "/api/auth"];
-const PUBLIC_EXACT = ["/"];
+const PUBLIC_EXACT = ["/", "/api/books"];
 
 function isPublic(pathname: string) {
   return (

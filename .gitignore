@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# cache do gerador de livros (scripts/build-books.mjs)
+/scripts/data/.cache/
+/scripts/data/build-report.json
