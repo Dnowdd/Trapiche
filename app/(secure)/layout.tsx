@@ -1,10 +1,13 @@
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
+import { requireSession } from "@/lib/session";
 import React from "react";
 
 export const dynamic = "force-dynamic";
 
-const SecureLayout = ({ children }: { children: React.ReactNode }) => {
+const SecureLayout = async ({ children }: { children: React.ReactNode }) => {
+  await requireSession();
+
   return (
     <>
       <Header />
