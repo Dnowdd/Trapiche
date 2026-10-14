@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trapiche
 
-## Getting Started
+Diário de leituras: catalogue o que você lê, acompanhe o progresso, escreva resenhas e monte listas.
 
-First, run the development server:
+Next.js 16 (App Router), React 19, Tailwind v4, Better Auth, Prisma 7 + Postgres (Neon), Resend e Google Books.
+
+## Rodando localmente
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Antes, crie um `.env` na raiz com as variáveis abaixo.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Abra [http://localhost:3000](http://localhost:3000).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Variáveis de ambiente
 
-## Learn More
+| Variável                  | Para quê                                                                |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `DATABASE_URL`            | Conexão da app com o Postgres (pooled).                                 |
+| `DIRECT_URL`              | Conexão direta, usada pelo Prisma nas migrations (`prisma.config.ts`).  |
+| `BETTER_AUTH_SECRET`      | Segredo do Better Auth (assina os cookies de sessão).                   |
+| `BETTER_AUTH_URL`         | URL base do servidor de auth (ex.: `http://localhost:3000`).            |
+| `NEXT_PUBLIC_APP_URL`     | URL pública da app, usada pelo client de auth.                          |
+| `GOOGLE_BOOKS_API_KEY`    | Busca e página de livro, e o script `npm run books`.                    |
+| `RESEND_API_KEY`          | Envio dos e-mails de verificação e de recuperação de senha.             |
+| `RESEND_FROM_EMAIL`       | Remetente. Sem domínio verificado no Resend, só o dono da conta recebe. |
+| `SKIP_EMAIL_VERIFICATION` | `true` pula a confirmação de e-mail no cadastro (útil em dev).          |
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Comando          | O que faz                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| `npm run dev`    | Servidor de desenvolvimento.                                                         |
+| `npm run build`  | Build de produção.                                                                   |
+| `npm run lint`   | ESLint.                                                                              |
+| `npm run format` | Prettier em todo o projeto (`format:check` só confere).                              |
+| `npm run books`  | Regera `lib/data/books.json`, o catálogo da home. Ver [scripts/](scripts/README.md). |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Banco
 
-## Deploy on Vercel
+O schema fica em `prisma/schema.prisma` e as migrations em `prisma/migrations/`. Hoje o `.env` aponta para o Neon: aplicar migrations ali afeta dados reais.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Rotas
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Públicas: `/`, `/auth`, `/book/[id]`, `/api/books`, `/api/books/search`, `/api/auth/*`.
+- Logadas: o resto. O `proxy.ts` faz a checagem rápida pelo cookie e o layout `(secure)` valida a sessão no servidor.
+
+O estado do projeto e o que falta estão em [ROADMAP.md](ROADMAP.md).
