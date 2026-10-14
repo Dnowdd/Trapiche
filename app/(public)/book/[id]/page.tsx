@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +7,20 @@ import BookActions from "./_components/book-actions";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const { volumeInfo: info } = await getVolume(id);
+    const by = info.authors?.length ? `, de ${info.authors.join(", ")}` : "";
+    return {
+      title: info.title,
+      description: `${info.title}${by}. Veja detalhes e acompanhe sua leitura no Trapiche.`,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function BookDetailPage({ params }: Props) {

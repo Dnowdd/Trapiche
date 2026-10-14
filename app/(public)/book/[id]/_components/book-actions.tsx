@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
 
 const STATUSES = [
   { id: "quero", label: "Quero ler" },
@@ -14,6 +16,16 @@ export default function BookActions() {
   const [status, setStatus] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
   const [fav, setFav] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const guard = (action: () => void) => () => {
+    if (!session) {
+      router.push("/auth");
+      return;
+    }
+    action();
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -24,7 +36,7 @@ export default function BookActions() {
             key={s.id}
             className="text-[12px] font-medium py-2.5 px-4 rounded-lg border border-[rgba(67,62,18,0.15)] bg-transparent text-(--ink-3) inline-flex items-center gap-2 cursor-pointer transition-[background,color,border-color] duration-120 hover:bg-(--yellow-soft) hover:text-(--ink-2) aria-pressed:bg-(--ink-2) aria-pressed:text-(--yellow) aria-pressed:border-(--ink-2)"
             aria-pressed={status === s.id}
-            onClick={() => setStatus(status === s.id ? null : s.id)}
+            onClick={guard(() => setStatus(status === s.id ? null : s.id))}
           >
             {status === s.id && (
               <svg
@@ -52,7 +64,7 @@ export default function BookActions() {
               ? "text-(--ink) bg-(--yellow) border-(--yellow-deep)"
               : "border-[rgba(67,62,18,0.15)] bg-(--cream-card) text-(--ink-3)"
           }`}
-          onClick={() => setLiked(!liked)}
+          onClick={guard(() => setLiked(!liked))}
         >
           <svg
             className="w-[13px] h-[13px]"
@@ -74,7 +86,7 @@ export default function BookActions() {
               ? "text-(--ink) bg-(--yellow) border-(--yellow-deep)"
               : "border-[rgba(67,62,18,0.15)] bg-(--cream-card) text-(--ink-3)"
           }`}
-          onClick={() => setFav(!fav)}
+          onClick={guard(() => setFav(!fav))}
         >
           <svg
             className="w-[13px] h-[13px]"

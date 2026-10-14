@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 const PUBLIC_PATHS = ["/auth", "/api/auth"];
-const PUBLIC_EXACT = ["/", "/api/books"];
+const PUBLIC_EXACT = ["/", "/api/books", "/api/books/search"];
+const PUBLIC_PATTERNS = [/^\/book\/[^/]+$/];
 
 function isPublic(pathname: string) {
   return (
     PUBLIC_EXACT.includes(pathname) ||
-    PUBLIC_PATHS.some((p) => pathname.startsWith(p))
+    PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
+    PUBLIC_PATTERNS.some((re) => re.test(pathname))
   );
 }
 
