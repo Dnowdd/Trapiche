@@ -157,3 +157,56 @@ export function longestStreak(days: Date[]) {
   }
   return { length: best, year: bestYear };
 }
+
+export type Precision = "YEAR" | "MONTH" | "DAY";
+
+export interface PartialDate {
+  date: Date;
+  precision: Precision;
+}
+
+export function parsePartialISO(v: string): PartialDate | null {
+  const m = /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(v);
+  if (!m) return null;
+  const [, y, mo, d] = m;
+  const date = dayFromISO(`${y}-${mo ?? "01"}-${d ?? "01"}`);
+  if (Number.isNaN(date.getTime())) return null;
+  if (d && toISODay(date) !== `${y}-${mo}-${d}`) return null;
+  return { date, precision: d ? "DAY" : mo ? "MONTH" : "YEAR" };
+}
+
+export function partialToISO(date: Date | null, precision: Precision) {
+  if (!date) return "";
+  const iso = toISODay(date);
+  return precision === "YEAR"
+    ? iso.slice(0, 4)
+    : precision === "MONTH"
+      ? iso.slice(0, 7)
+      : iso;
+}
+
+export function periodEnd({ date, precision }: PartialDate) {
+  if (precision === "DAY") return date;
+  const y = date.getUTCFullYear();
+  return precision === "YEAR"
+    ? new Date(Date.UTC(y, 11, 31))
+    : new Date(Date.UTC(y, date.getUTCMonth() + 1, 0));
+}
+
+export function fmtPartial(date: Date | null, precision: Precision) {
+  if (!date) return null;
+  if (precision === "YEAR") return String(date.getUTCFullYear());
+  if (precision === "MONTH") return fmtMonthYear(date);
+  return fmtDay(date);
+}
+
+export function spanDays(r: {
+  startedAt: Date | null;
+  startPrecision: Precision;
+  endedAt: Date | null;
+  endPrecision: Precision;
+}) {
+  if (!r.startedAt || !r.endedAt) return null;
+  if (r.startPrecision !== "DAY" || r.endPrecision !== "DAY") return null;
+  return readingDays(r.startedAt, r.endedAt);
+}

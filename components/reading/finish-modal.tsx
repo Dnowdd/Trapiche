@@ -8,9 +8,9 @@ import {
   FormError,
   FormField,
   TextArea,
-  TextInput,
 } from "@/components/shared/form";
 import { finishBook } from "@/lib/actions/shelf";
+import PartialDateInput from "./partial-date-input";
 import { useAction } from "./use-action";
 
 interface FinishModalProps {
@@ -20,7 +20,7 @@ interface FinishModalProps {
   title: string;
   today: string;
   startedAt?: string | null;
-  onFinished?: (days: number) => void;
+  onFinished?: () => void;
 }
 
 export default function FinishModal({
@@ -32,23 +32,29 @@ export default function FinishModal({
   startedAt,
   onFinished,
 }: FinishModalProps) {
-  const [start, setStart] = useState(startedAt ?? "");
-  const [end, setEnd] = useState(today);
+  const [start, setStart] = useState<string | null>(startedAt ?? "");
+  const [end, setEnd] = useState<string | null>("");
+  const invalid =
+    start === null ||
+    end === null ||
+    start > today.slice(0, start.length) ||
+    end > today.slice(0, end.length);
   const [note, setNote] = useState("");
   const { pending, error, run } = useAction();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (invalid) return;
     run(
       () =>
         finishBook(bookId, {
-          startedAt: start || undefined,
-          finishedAt: end,
+          startedAt: start ?? "",
+          finishedAt: end ?? "",
           note,
         }),
-      (data) => {
+      () => {
         onOpenChange(false);
-        onFinished?.(data?.days ?? 1);
+        onFinished?.();
       },
     );
   };
@@ -59,31 +65,23 @@ export default function FinishModal({
       onOpenChange={onOpenChange}
       eyebrow="Leitura concluída"
       title={`Terminou ${title}?`}
-      description="Registre quando você começou e terminou. Isso entra no seu diário e nas suas estatísticas."
+      description="As datas são opcionais. Preencha só o que lembrar: o ano, o mês ou o dia certinho."
     >
       <form onSubmit={submit}>
         <FormError message={error} />
-        <div className="grid grid-cols-2 gap-3.5">
-          <FormField
+        <div className="grid sm:grid-cols-2 gap-x-4">
+          <PartialDateInput
             label="Começou em"
-            hint={startedAt ? undefined : "Opcional"}
-          >
-            <TextInput
-              type="date"
-              value={start}
-              max={end || today}
-              onChange={(e) => setStart(e.target.value)}
-            />
-          </FormField>
-          <FormField label="Terminou em">
-            <TextInput
-              type="date"
-              value={end}
-              max={today}
-              required
-              onChange={(e) => setEnd(e.target.value)}
-            />
-          </FormField>
+            value={start}
+            onChange={setStart}
+            today={today}
+          />
+          <PartialDateInput
+            label="Terminou em"
+            value={end}
+            onChange={setEnd}
+            today={today}
+          />
         </div>
         <FormField label="Uma nota sobre a leitura" hint="Opcional">
           <TextArea
@@ -101,7 +99,7 @@ export default function FinishModal({
           >
             Cancelar
           </Button>
-          <Button type="submit" loading={pending}>
+          <Button type="submit" loading={pending} disabled={invalid}>
             Marcar como lido
           </Button>
         </FormActions>

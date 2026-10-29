@@ -13,6 +13,7 @@ import {
   fmtMonthYear,
   longestStreak,
   readingDays,
+  spanDays,
   streakFrom,
   today,
   toISODay,
@@ -273,7 +274,9 @@ export async function getDiario(userId: string, entriesLimit: number) {
       where: { userId, status: "FINISHED", endedAt: { not: null } },
       select: {
         startedAt: true,
+        startPrecision: true,
         endedAt: true,
+        endPrecision: true,
         book: { select: bookSummarySelect },
       },
     }),
@@ -297,6 +300,7 @@ export async function getDiario(userId: string, entriesLimit: number) {
   const summarize = (start: Date) => {
     const ss = sessions.filter((s) => inYear(s.date, start));
     const fs = finished.filter((f) => inYear(f.endedAt!, start));
+    const spans = fs.map(spanDays).filter((d): d is number => d != null);
     const minutes = ss.reduce((a, s) => a + s.minutes, 0);
     const isCurrent = start.getUTCFullYear() === year;
     const first = ss.reduce<Date | null>(
@@ -313,11 +317,8 @@ export async function getDiario(userId: string, entriesLimit: number) {
       pages: ss.reduce((a, s) => a + s.pages, 0),
       hours: Math.round(minutes / 60),
       avgPerDay: Math.round(minutes / daysInPeriod),
-      avgPerBook: fs.length
-        ? Math.round(
-            fs.reduce((a, f) => a + readingDays(f.startedAt, f.endedAt!), 0) /
-              fs.length,
-          )
+      avgPerBook: spans.length
+        ? Math.round(spans.reduce((a, d) => a + d, 0) / spans.length)
         : null,
     };
   };
@@ -336,10 +337,10 @@ export async function getDiario(userId: string, entriesLimit: number) {
     { i: -1, avg: 0 } as { i: number; avg: number },
   );
 
-  const withDays = finished.map((f) => ({
-    title: f.book.title,
-    days: readingDays(f.startedAt, f.endedAt!),
-  }));
+  const withDays = finished.flatMap((f) => {
+    const days = spanDays(f);
+    return days == null ? [] : [{ title: f.book.title, days }];
+  });
   const sortedByDays = [...withDays].sort((a, b) => a.days - b.days);
 
   const sessionDays = Object.keys(minutesByDay).map(
@@ -404,10 +405,7 @@ export async function getAvaliacoes(userId: string) {
       stars: r.rating,
       text: r.text ?? "",
       date: fmtDay(dayOf(r.createdAt)),
-      days:
-        reading?.endedAt != null
-          ? readingDays(reading.startedAt, reading.endedAt)
-          : null,
+      days: reading ? spanDays(reading) : null,
       likes: r._count.likes,
       comments: r._count.comments,
     };
@@ -510,7 +508,7 @@ export async function getAbandonos(userId: string) {
       total,
       abandonedAt: fmtDay(ended),
       abandonedTs: ended.getTime(),
-      spentDays: reading ? readingDays(reading.startedAt, ended) : 1,
+      spentDays: reading?.startedAt ? readingDays(reading.startedAt, ended) : 1,
       reason: r.abandonReason,
       again: r.wantsToReturn,
     };
@@ -527,7 +525,7 @@ export async function getReleituras(userId: string) {
         bookId: { in: ids },
         status: { in: ["FINISHED", "ACTIVE"] },
       },
-      orderBy: { startedAt: "asc" },
+      orderBy: { number: "asc" },
     }),
     db.userBook.findMany({
       where: { userId, bookId: { in: ids } },
@@ -538,13 +536,15 @@ export async function getReleituras(userId: string) {
     .map((e) => {
       const rs = readings.filter((r) => r.bookId === e.bookId);
       const last = rs[rs.length - 1];
-      const lastDate = last.endedAt ?? last.startedAt;
+      const dateOf = (r: (typeof rs)[number]) =>
+        r.endedAt ?? r.startedAt ?? dayOf(r.createdAt);
+      const lastDate = dateOf(last);
       return {
         book: toCover(e.book),
         times: rs.length,
         dates: rs.map(
           (r, i) =>
-            `${(r.endedAt ?? r.startedAt).getUTCFullYear()} · ${i + 1}ª${r.status === "ACTIVE" ? " (lendo)" : ""}`,
+            `${dateOf(r).getUTCFullYear()} · ${i + 1}ª${r.status === "ACTIVE" ? " (lendo)" : ""}`,
         ),
         last: fmtMonthYear(lastDate),
         lastTs: lastDate.getTime(),

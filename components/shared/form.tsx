@@ -6,7 +6,7 @@ import type {
 } from "react";
 import { cn } from "@/lib/utils";
 
-const control =
+export const control =
   "w-full rounded-[10px] border-[1.5px] border-[rgba(67,62,18,0.14)] bg-(--cream-card) px-3.5 text-[14px] text-(--ink-2) outline-none focus:border-(--ink-3) focus:bg-white focus:shadow-[0_0_0_4px_rgba(255,231,103,0.35)] placeholder:text-(--ink-4) transition-[border-color,box-shadow,background] duration-150 disabled:opacity-60";
 
 export function FormField({

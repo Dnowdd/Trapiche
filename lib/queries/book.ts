@@ -14,14 +14,17 @@ import { findOpenLibraryEditions, toIsbn13 } from "../open-library";
 import { findEditions, searchBooks } from "../google-books";
 import {
   addDays,
+  dayOf,
   daysBetween,
   fmtAgo,
-  fmtDay,
   fmtDayWeek,
   fmtExpected,
-  readingDays,
+  fmtPartial,
+  partialToISO,
+  spanDays,
   streakFrom,
   today,
+  toISODay,
 } from "../dates";
 import type { ShelfStatus } from "../generated/prisma/client";
 
@@ -41,12 +44,12 @@ async function latestReadingDays(bookId: string, userIds: string[]) {
   const readings = await db.reading.findMany({
     where: { bookId, userId: { in: userIds }, status: "FINISHED" },
     orderBy: { endedAt: "desc" },
-    select: { userId: true, startedAt: true, endedAt: true },
   });
   const map = new Map<string, number>();
   for (const r of readings) {
-    if (!map.has(r.userId) && r.endedAt)
-      map.set(r.userId, readingDays(r.startedAt, r.endedAt));
+    if (map.has(r.userId)) continue;
+    const days = spanDays(r);
+    if (days != null) map.set(r.userId, days);
   }
   return map;
 }
@@ -288,7 +291,8 @@ async function viewerState(
   if (active && entry) {
     const page = entry.currentPage;
     const total = pageCount ?? 0;
-    const elapsed = Math.max(1, daysBetween(active.startedAt, today()) + 1);
+    const startedAt = active.startedAt ?? dayOf(active.createdAt);
+    const elapsed = Math.max(1, daysBetween(startedAt, today()) + 1);
     const pagesRead = Math.max(0, page);
     const pace = pagesRead / elapsed;
     const remaining = Math.max(0, total - page);
@@ -297,8 +301,9 @@ async function viewerState(
       progress: total ? Math.min(100, Math.round((page / total) * 100)) : 0,
       page,
       total,
-      started: fmtDay(active.startedAt),
-      startedISO: active.startedAt.toISOString().slice(0, 10),
+      started: fmtPartial(startedAt, active.startPrecision)!,
+      startedISO: toISODay(startedAt),
+      startedPartial: partialToISO(active.startedAt, active.startPrecision),
       expectedDone:
         total && pace > 0
           ? fmtExpected(addDays(today(), Math.ceil(remaining / pace)))
@@ -363,8 +368,14 @@ export async function getBookPage(id: string, viewerId: string | null) {
       _count: { rating: true },
     }),
     db.reading.findMany({
-      where: { bookId: id, status: "FINISHED", endedAt: { not: null } },
-      select: { startedAt: true, endedAt: true },
+      where: {
+        bookId: id,
+        status: "FINISHED",
+        startedAt: { not: null },
+        endedAt: { not: null },
+        startPrecision: "DAY",
+        endPrecision: "DAY",
+      },
     }),
     db.list.count({
       where: { visibility: "PUBLIC", items: { some: { bookId: id } } },
@@ -398,19 +409,18 @@ export async function getBookPage(id: string, viewerId: string | null) {
     4: 0,
     5: 0,
   };
-  for (const g of ratingGroups)
-    distribution[g.rating as 1 | 2 | 3 | 4 | 5] = g._count.rating;
+  let ratingSum = 0;
+  for (const g of ratingGroups) {
+    const bucket = Math.max(1, Math.floor(g.rating)) as 1 | 2 | 3 | 4 | 5;
+    distribution[bucket] += g._count.rating;
+    ratingSum += g.rating * g._count.rating;
+  }
   const count = Object.values(distribution).reduce((a, b) => a + b, 0);
-  const average = count
-    ? Object.entries(distribution).reduce((s, [k, v]) => s + Number(k) * v, 0) /
-      count
-    : 0;
+  const average = count ? ratingSum / count : 0;
   const avgDaysToRead = finishedReadings.length
     ? Math.round(
-        finishedReadings.reduce(
-          (s, r) => s + readingDays(r.startedAt, r.endedAt!),
-          0,
-        ) / finishedReadings.length,
+        finishedReadings.reduce((s, r) => s + (spanDays(r) ?? 0), 0) /
+          finishedReadings.length,
       )
     : null;
 

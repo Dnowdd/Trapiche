@@ -33,7 +33,7 @@ import {
 } from "@/lib/actions/shelf";
 import type { BookPageData } from "@/lib/queries/book";
 import { categoryLabels } from "@/lib/categories";
-import Stars from "./stars";
+import Stars from "@/components/shared/stars";
 import Synopsis from "./synopsis";
 
 type Status = "READING" | "WANT" | "READ" | "ABANDONED" | "REREADING";
@@ -305,7 +305,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
           bookId={book.id}
           title={book.title}
           today={today}
-          startedAt={viewer.reading?.startedISO}
+          startedAt={viewer.reading?.startedPartial}
           onFinished={() => {
             if (!viewer.review) setModal("review");
           }}

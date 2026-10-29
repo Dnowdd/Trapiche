@@ -155,7 +155,7 @@ export default function MyReading({
           bookId={book.id}
           title={book.title}
           today={today}
-          startedAt={r?.startedISO}
+          startedAt={r?.startedPartial}
           onFinished={() => {
             if (!v.review) setModal("review");
           }}

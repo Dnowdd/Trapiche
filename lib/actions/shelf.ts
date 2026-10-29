@@ -3,7 +3,16 @@
 import { refresh } from "next/cache";
 import { db } from "../db";
 import { ensureBook } from "../books";
-import { dayFromISO, isISODay, readingDays, today, toISODay } from "../dates";
+import {
+  dayFromISO,
+  isISODay,
+  parsePartialISO,
+  periodEnd,
+  spanDays,
+  today,
+  toISODay,
+  type PartialDate,
+} from "../dates";
 import { fail, withUser } from "./result";
 import type { Prisma } from "../generated/prisma/client";
 
@@ -24,7 +33,7 @@ async function shelfEntry(tx: Tx, userId: string, bookId: string) {
 async function activeReading(tx: Tx, userId: string, bookId: string) {
   return tx.reading.findFirst({
     where: { userId, bookId, status: "ACTIVE" },
-    orderBy: { startedAt: "desc" },
+    orderBy: { createdAt: "desc" },
   });
 }
 
@@ -60,6 +69,15 @@ function parseDay(value: unknown, label: string) {
   if (d > today())
     fail(`${label[0].toUpperCase()}${label.slice(1)} não pode ser no futuro.`);
   return d;
+}
+
+function parsePartial(value: unknown, label: string): PartialDate | null {
+  if (value == null || value === "") return null;
+  const parsed = typeof value === "string" ? parsePartialISO(value) : null;
+  if (!parsed) fail(`Confira ${label}.`);
+  if (parsed.date > today())
+    fail(`${label[0].toUpperCase()}${label.slice(1)} não pode ser no futuro.`);
+  return parsed;
 }
 
 function parseOptionalText(value: unknown, max: number) {
@@ -132,27 +150,30 @@ export async function setShelfStatus(
 
 export async function finishBook(
   bookId: string,
-  input: { startedAt?: string; finishedAt: string; note?: string },
+  input: { startedAt?: string; finishedAt?: string; note?: string },
 ) {
   return withUser(async (userId) => {
     const book = await ensureBook(bookId);
-    const finishedAt = parseDay(input.finishedAt, "a data de término");
+    const start = parsePartial(input.startedAt, "a data de início");
+    const end = parsePartial(input.finishedAt, "a data de término");
     const note = parseOptionalText(input.note, 500);
-    let days = 1;
+    if (start && end && start.date > periodEnd(end))
+      fail("O início não pode ser depois do término.");
+    const dates = {
+      startedAt: start?.date ?? null,
+      startPrecision: start?.precision ?? "DAY",
+      endedAt: end?.date ?? null,
+      endPrecision: end?.precision ?? "DAY",
+    } as const;
+    const days = spanDays(dates);
     await db.$transaction(async (tx) => {
       const entry = await shelfEntry(tx, userId, bookId);
       const active = await activeReading(tx, userId, bookId);
-      const startedAt = input.startedAt
-        ? parseDay(input.startedAt, "a data de início")
-        : (active?.startedAt ?? finishedAt);
-      if (startedAt > finishedAt)
-        fail("O início não pode ser depois do término.");
-      days = readingDays(startedAt, finishedAt);
 
       if (active) {
         await tx.reading.update({
           where: { id: active.id },
-          data: { status: "FINISHED", startedAt, endedAt: finishedAt },
+          data: { status: "FINISHED", ...dates },
         });
       } else {
         const done = await finishedCount(tx, userId, bookId);
@@ -162,8 +183,7 @@ export async function finishBook(
             bookId,
             number: done + 1,
             status: "FINISHED",
-            startedAt,
-            endedAt: finishedAt,
+            ...dates,
           },
         });
       }
@@ -284,10 +304,10 @@ export async function logReadingSession(
           note,
         },
       });
-      if (date < active.startedAt) {
+      if (!active.startedAt || date < active.startedAt) {
         await tx.reading.update({
           where: { id: active.id },
-          data: { startedAt: date },
+          data: { startedAt: date, startPrecision: "DAY" },
         });
       }
       if (!later) {
@@ -326,7 +346,7 @@ export async function updateProgress(
         );
       await tx.reading.update({
         where: { id: active.id },
-        data: { startedAt },
+        data: { startedAt, startPrecision: "DAY" },
       });
       await tx.userBook.update({
         where: { id: entry.id },

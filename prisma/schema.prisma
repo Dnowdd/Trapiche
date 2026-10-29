@@ -159,16 +159,24 @@ model UserBook {
   @@index([bookId, status])
 }
 
+enum DatePrecision {
+  YEAR
+  MONTH
+  DAY
+}
+
 model Reading {
-  id        String        @id @default(cuid())
-  userId    String
-  bookId    String
-  number    Int
-  status    ReadingStatus @default(ACTIVE)
-  startedAt DateTime
-  endedAt   DateTime?
-  endPage   Int?
-  createdAt DateTime      @default(now())
+  id             String        @id @default(cuid())
+  userId         String
+  bookId         String
+  number         Int
+  status         ReadingStatus @default(ACTIVE)
+  startedAt      DateTime?
+  startPrecision DatePrecision @default(DAY)
+  endedAt        DateTime?
+  endPrecision   DatePrecision @default(DAY)
+  endPage        Int?
+  createdAt      DateTime      @default(now())
 
   user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   book     Book             @relation(fields: [bookId], references: [id])
@@ -202,7 +210,7 @@ model Review {
   id        String   @id @default(cuid())
   userId    String
   bookId    String
-  rating    Int
+  rating    Float
   text      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -308,7 +316,7 @@ model Activity {
   bookId    String?
   listId    String?
   reviewId  String?
-  rating    Int?
+  rating    Float?
   text      String?
   days      Int?
   createdAt DateTime     @default(now())
