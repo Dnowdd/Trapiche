@@ -17,7 +17,8 @@ const BOOK_SHADOW =
   "0 40px 60px -30px rgba(0,0,0,0.7),0 10px 24px -12px rgba(0,0,0,0.5)";
 const BOOK_TRANSITION =
   "transform 0.7s cubic-bezier(0.2,0.8,0.2,1),opacity 0.5s";
-const BOOK_ANIM = "bookFloat 6s ease-in-out infinite";
+const bookAnim = (delay: string) =>
+  `bookFloat 6s ease-in-out ${delay} infinite`;
 
 const POSITIONS: React.CSSProperties[] = [
   {
@@ -26,13 +27,12 @@ const POSITIONS: React.CSSProperties[] = [
     top: 40,
     transform: "rotate(-12deg)",
     zIndex: 1,
-    animationDelay: "0s",
     width: 190,
     height: 286,
     borderRadius: 5,
     boxShadow: BOOK_SHADOW,
     transition: BOOK_TRANSITION,
-    animation: BOOK_ANIM,
+    animation: bookAnim("0s"),
   },
   {
     position: "absolute",
@@ -40,13 +40,12 @@ const POSITIONS: React.CSSProperties[] = [
     top: 14,
     transform: "rotate(-1deg)",
     zIndex: 3,
-    animationDelay: "0.6s",
     width: 190,
     height: 286,
     borderRadius: 5,
     boxShadow: BOOK_SHADOW,
     transition: BOOK_TRANSITION,
-    animation: BOOK_ANIM,
+    animation: bookAnim("0.6s"),
   },
   {
     position: "absolute",
@@ -54,13 +53,12 @@ const POSITIONS: React.CSSProperties[] = [
     top: 44,
     transform: "rotate(11deg)",
     zIndex: 2,
-    animationDelay: "1.2s",
     width: 190,
     height: 286,
     borderRadius: 5,
     boxShadow: BOOK_SHADOW,
     transition: BOOK_TRANSITION,
-    animation: BOOK_ANIM,
+    animation: bookAnim("1.2s"),
   },
 ];
 
