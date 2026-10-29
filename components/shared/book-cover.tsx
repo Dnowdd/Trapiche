@@ -1,4 +1,6 @@
-import { type CSSProperties } from "react";
+"use client";
+
+import { useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { sharpCover } from "@/lib/cover-url";
 
@@ -37,8 +39,9 @@ const BookCover = ({
 }: BookCoverProps) => {
   const p = book.palette ?? {};
   const s = sizeMap[size];
+  const [failed, setFailed] = useState<string | null>(null);
 
-  if (book.coverUrl) {
+  if (book.coverUrl && failed !== book.coverUrl) {
     return (
       <div
         className="rounded relative overflow-hidden"
@@ -56,6 +59,7 @@ const BookCover = ({
               : "(max-width: 768px) 45vw, 240px")
           }
           loading={loading}
+          onError={() => setFailed(book.coverUrl ?? null)}
         />
       </div>
     );

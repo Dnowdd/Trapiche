@@ -1,3 +1,4 @@
+import { cachedValue } from "./api-cache";
 import { sharpCover } from "./cover-url";
 
 function imageSize(bytes: Uint8Array) {
@@ -32,7 +33,7 @@ function withZoom(url: string, zoom: number) {
 }
 
 async function sizeOf(url: string) {
-  const res = await fetch(url, { next: { revalidate: 604800 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return null;
   return imageSize(new Uint8Array(await res.arrayBuffer()));
 }
@@ -40,19 +41,30 @@ async function sizeOf(url: string) {
 // Google serves an "image not available" placeholder (JPEG or PNG) for missing high-res covers; only the aspect ratio gives it away.
 export async function bestCover(url: string | null | undefined) {
   if (!url) return null;
+  if (!withZoom(url, 1)) return url;
+  return (
+    (await cachedValue(`cover:${url}`, () => probeCover(url))) ??
+    sharpCover(url)
+  );
+}
+
+async function probeCover(url: string): Promise<string | null> {
   const small = withZoom(url, 1);
-  if (!small) return url;
+  if (!small) return null;
   try {
-    const candidates = [4, 3, 2].map((z) => withZoom(url, z)!);
-    const [s, ...sizes] = await Promise.all(
-      [small, ...candidates].map((u) => sizeOf(u).catch(() => null)),
+    const [s, first] = await Promise.all(
+      [small, withZoom(url, 4)!].map((u) => sizeOf(u).catch(() => null)),
     );
-    if (!s) return sharpCover(url);
-    const match = sizes.findIndex(
-      (b) => b && b.w > s.w && Math.abs(b.h / b.w - s.h / s.w) < 0.04,
-    );
-    return match >= 0 ? candidates[match] : sharpCover(url);
-  } catch {
+    if (!s) return null;
+    const fits = (b: { w: number; h: number } | null) =>
+      b != null && b.w > s.w && Math.abs(b.h / b.w - s.h / s.w) < 0.04;
+    if (fits(first)) return withZoom(url, 4)!;
+    for (const zoom of [3, 2]) {
+      const candidate = withZoom(url, zoom)!;
+      if (fits(await sizeOf(candidate).catch(() => null))) return candidate;
+    }
     return sharpCover(url);
+  } catch {
+    return null;
   }
 }
