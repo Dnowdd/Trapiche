@@ -1,4 +1,6 @@
+import { cachedJson, HttpError, markUnavailable } from "./api-cache";
 import { authorSurname, normalize, workKey } from "./editions";
+import type { GoogleBooksVolume } from "./types/book";
 
 const API_BASE = "https://openlibrary.org";
 const COVERS_BASE = "https://covers.openlibrary.org";
@@ -45,13 +47,18 @@ export function isOpenLibraryId(id: string) {
 
 async function olFetch<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
-      next: { revalidate: 86400 },
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
+    return await cachedJson<T>(
+      `${API_BASE}${path}`,
+      { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } },
+      (data) => {
+        const docs = (data as { docs?: unknown[] }).docs;
+        const entries = (data as { entries?: unknown[] }).entries;
+        return (docs ?? entries ?? [1]).length > 0;
+      },
+    );
+  } catch (err) {
+    if (err instanceof HttpError && err.status >= 500)
+      markUnavailable(`${API_BASE}${path}`);
     return null;
   }
 }
@@ -185,4 +192,188 @@ export async function findOpenLibraryEditions({
   return (res?.entries ?? [])
     .filter((e) => e.publishers?.length && (e.isbn_13 || e.isbn_10))
     .map((e) => editionToRow(e, authors));
+}
+
+interface OLAuthor {
+  name?: string;
+  bio?: TextValue;
+  birth_date?: string;
+  death_date?: string;
+  photos?: number[];
+}
+
+const PT_HINTS =
+  /\b(foi|nasceu|escritora?|brasileir[oa]|romances?|obras?|autora?)\b/gi;
+
+function pickBio(raw: string | null) {
+  if (!raw) return null;
+  const parts = raw
+    .split(/\n\s*-{4,}\s*\n/)
+    .map((p) =>
+      p
+        .split("\n")
+        .filter((l) => !/^\s*\[\d+\]:/.test(l))
+        .join("\n")
+        .replace(/\(\[[^\]]*\]\[\d+\]\)/g, "")
+        .replace(/\[([^\]]+)\]\[\d+\]/g, "$1")
+        .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+        .replace(/(\*\*|\*|__|_)([^*_\n]+)\1/g, "$2")
+        .trim(),
+    )
+    .filter(Boolean);
+  if (!parts.length) return null;
+  const score = (p: string) => p.match(PT_HINTS)?.length ?? 0;
+  return parts.reduce((best, p) => (score(p) > score(best) ? p : best));
+}
+
+export async function getAuthorProfile(name: string) {
+  const params = new URLSearchParams({ q: name, limit: "10" });
+  const res = await olFetch<{
+    docs: { key: string; name: string; work_count?: number }[];
+  }>(`/search/authors.json?${params}`);
+  const match = res?.docs
+    .filter((d) => normalize(d.name) === normalize(name))
+    .sort((a, b) => (b.work_count ?? 0) - (a.work_count ?? 0))[0];
+  if (!match) return null;
+  const author = await olFetch<OLAuthor>(`/authors/${match.key}.json`);
+  if (!author) return null;
+  const photo = author.photos?.find((p) => p > 0);
+  return {
+    born: year(author.birth_date),
+    died: year(author.death_date),
+    bio: pickBio(text(author.bio)),
+    photoUrl: photo ? `${COVERS_BASE}/a/id/${photo}-L.jpg` : null,
+  };
+}
+
+const PUBLISHER_NOISE =
+  /\b(editora|editorial|edicoes|edições|publicacoes|publicações|livros|ltda|s\.?a\.?|grupo)\b/gi;
+
+export function publisherCore(name: string) {
+  return name.replace(PUBLISHER_NOISE, " ").replace(/\s+/g, " ").trim() || name;
+}
+
+export async function findPublisherWorks(publisher: string, limit = 100) {
+  const core = publisherCore(publisher);
+  const params = new URLSearchParams({
+    q: `publisher:"${core}"`,
+    lang: "por",
+    limit: String(limit),
+    fields:
+      "key,title,author_name,edition_count,first_publish_year,editions,editions.key,editions.title,editions.publisher,editions.cover_i,editions.publish_date",
+  });
+  const res = await olFetch<{ docs: OLSearchDoc[] }>(`/search.json?${params}`);
+  const wanted = normalize(core);
+  return (res?.docs ?? [])
+    .flatMap((d) => {
+      const e = d.editions?.docs[0];
+      const own = e?.publisher?.some((p) => {
+        const n = normalize(p);
+        return n.includes(wanted) || wanted.includes(n);
+      });
+      if (!e || !own) return [];
+      return [
+        {
+          id: idOf(e.key),
+          title: e.title ?? d.title,
+          author: d.author_name?.[0] ?? null,
+          year:
+            year(e.publish_date?.[0]) ??
+            (d.first_publish_year ? String(d.first_publish_year) : null),
+          coverUrl: e.cover_i ? `${COVERS_BASE}/b/id/${e.cover_i}-L.jpg` : null,
+          popularity: d.edition_count ?? 0,
+        },
+      ];
+    })
+    .sort((a, b) => b.popularity - a.popularity);
+}
+
+interface OLSearchDoc {
+  key?: string;
+  title: string;
+  author_name?: string[];
+  first_publish_year?: number;
+  edition_count?: number;
+  editions?: {
+    docs: {
+      key: string;
+      title?: string;
+      language?: string[];
+      publisher?: string[];
+      cover_i?: number;
+      isbn?: string[];
+      publish_date?: string[];
+    }[];
+  };
+}
+
+export async function searchOpenLibrary(
+  query: string,
+  limit = 20,
+): Promise<GoogleBooksVolume[]> {
+  const params = new URLSearchParams({
+    q: query,
+    lang: "por",
+    limit: String(limit),
+    fields:
+      "key,title,author_name,first_publish_year,edition_count,editions,editions.key,editions.title,editions.language,editions.publisher,editions.cover_i,editions.isbn,editions.publish_date",
+  });
+  const res = await olFetch<{ docs: OLSearchDoc[] }>(`/search.json?${params}`);
+  return (res?.docs ?? []).flatMap((d) => {
+    const e = d.editions?.docs[0];
+    if (!e || !d.author_name?.length) return [];
+    if (!e.cover_i && !e.isbn?.length) return [];
+    const isbn13 = e.isbn?.map(toIsbn13).find(Boolean);
+    return [
+      {
+        id: idOf(e.key),
+        volumeInfo: {
+          title: e.title ?? d.title,
+          authors: d.author_name,
+          publisher: e.publisher?.[0],
+          publishedDate:
+            year(e.publish_date?.[0]) ??
+            (d.first_publish_year ? String(d.first_publish_year) : undefined),
+          language: e.language?.includes("por") ? "pt" : e.language?.[0],
+          imageLinks: e.cover_i
+            ? { thumbnail: `${COVERS_BASE}/b/id/${e.cover_i}-L.jpg` }
+            : undefined,
+          industryIdentifiers: isbn13
+            ? [{ type: "ISBN_13", identifier: isbn13 }]
+            : undefined,
+          workEditions: d.edition_count,
+          olWork: d.key,
+          olWorkTitle: d.title,
+        },
+      } as GoogleBooksVolume,
+    ];
+  });
+}
+
+export async function searchOpenLibraryPt(query: string, limit = 40) {
+  const [pt, any] = await Promise.all([
+    searchOpenLibrary(`${query} language:por`, limit).catch(() => []),
+    searchOpenLibrary(query, limit).catch(() => []),
+  ]);
+  const seen = new Set(pt.map((v) => v.volumeInfo.olWork));
+  return [...pt, ...any.filter((v) => !seen.has(v.volumeInfo.olWork))];
+}
+
+export function withoutOpenLibraryDuplicates(
+  openLibrary: GoogleBooksVolume[],
+  others: GoogleBooksVolume[],
+  author?: string,
+) {
+  const tokensOf = (title: string) =>
+    workKey(title, author).split("|")[0].split(" ").filter(Boolean);
+  const known = openLibrary.flatMap((v) =>
+    [v.volumeInfo.title, v.volumeInfo.olWorkTitle]
+      .filter((t): t is string => Boolean(t))
+      .map(tokensOf)
+      .filter((t) => t.length > 0),
+  );
+  return others.filter((v) => {
+    const own = new Set(tokensOf(v.volumeInfo.title));
+    return !known.some((k) => k.every((t) => own.has(t)));
+  });
 }

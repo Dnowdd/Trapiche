@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { publisherHref } from "@/lib/links";
 import { fmtAgo } from "@/lib/dates";
 import { fmtPublished } from "@/lib/books";
 import { isOpenLibraryId } from "@/lib/open-library";
@@ -12,7 +14,11 @@ export default function TechDetails({
   language: string | null;
 }) {
   const rows = [
-    { label: "Editora", value: book.publisher },
+    {
+      label: "Editora",
+      value: book.publisher,
+      href: book.publisher ? publisherHref(book.publisher) : undefined,
+    },
     { label: "Publicação", value: fmtPublished(book.publishedDate) },
     { label: "Páginas", value: book.pageCount?.toString() },
     { label: "Idioma", value: language },
@@ -39,7 +45,16 @@ export default function TechDetails({
                 r.mono ? "font-mono text-[12px]" : "text-[13px]",
               ].join(" ")}
             >
-              {r.value}
+              {"href" in r && r.href ? (
+                <Link
+                  href={r.href}
+                  className="hover:underline underline-offset-2"
+                >
+                  {r.value}
+                </Link>
+              ) : (
+                r.value
+              )}
             </dd>
           </div>
         ))}

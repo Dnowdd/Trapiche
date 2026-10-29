@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Check,
@@ -34,6 +35,7 @@ import {
 } from "@/lib/actions/shelf";
 import type { BookPageData } from "@/lib/queries/book";
 import { categoryLabels } from "@/lib/categories";
+import { authorHref, publisherHref } from "@/lib/links";
 import Stars from "@/components/shared/stars";
 import Synopsis from "./synopsis";
 
@@ -100,10 +102,17 @@ export default function BookHero({ data, today }: BookHeroProps) {
   };
 
   const categories = categoryLabels(book.categories);
-  const facts = [
+  const facts: ReactNode[] = [
     book.pageCount ? `${book.pageCount} páginas` : null,
     data.languageLabel,
-    book.publisher,
+    book.publisher ? (
+      <Link
+        href={publisherHref(book.publisher)}
+        className="hover:text-(--ink) hover:underline underline-offset-2"
+      >
+        {book.publisher}
+      </Link>
+    ) : null,
     book.publishedDate?.slice(0, 4),
   ].filter(Boolean);
 
@@ -147,16 +156,21 @@ export default function BookHero({ data, today }: BookHeroProps) {
         )}
         <div className="mt-3 text-[17px] text-(--ink-3)">
           por{" "}
-          {data.byAuthor ? (
-            <a
-              href="#mais-do-autor"
-              className="text-(--ink-2) font-medium border-b border-(--ink-5) pb-px hover:border-(--ink-2)"
-            >
-              {book.authors.join(", ")}
-            </a>
+          {book.authors.length ? (
+            book.authors.map((a, i) => (
+              <span key={a}>
+                {i > 0 && ", "}
+                <Link
+                  href={authorHref(a)}
+                  className="text-(--ink-2) font-medium border-b border-(--ink-5) pb-px hover:border-(--ink-2)"
+                >
+                  {a}
+                </Link>
+              </span>
+            ))
           ) : (
             <span className="text-(--ink-2) font-medium">
-              {book.authors.join(", ") || "Autor desconhecido"}
+              Autor desconhecido
             </span>
           )}
         </div>

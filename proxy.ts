@@ -13,6 +13,8 @@ const PUBLIC_PATTERNS = [
   /^\/book\/[^/]+(\/resenhas)?$/,
   /^\/lists\/[^/]+$/,
   /^\/u\/[^/]+$/,
+  /^\/author\/[^/]+$/,
+  /^\/publisher\/[^/]+$/,
 ];
 
 function isPublic(pathname: string) {

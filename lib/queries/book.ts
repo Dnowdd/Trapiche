@@ -9,8 +9,13 @@ import {
   type BookSummary,
 } from "../books";
 import { bestCover } from "../cover-probe";
-import { normalize, workKey } from "../editions";
-import { findOpenLibraryEditions, toIsbn13 } from "../open-library";
+import { cleanAuthor, groupWorks, normalize, workKey } from "../editions";
+import {
+  findOpenLibraryEditions,
+  searchOpenLibraryPt,
+  toIsbn13,
+  withoutOpenLibraryDuplicates,
+} from "../open-library";
 import { findEditions, searchBooks } from "../google-books";
 import {
   addDays,
@@ -173,35 +178,45 @@ async function relatedBooks(
 
 async function byAuthor(id: string, title: string, author: string | null) {
   if (!author) return null;
-  let vols = await searchBooks(`inauthor:"${author}"`, 40).catch(() => []);
-  if (!vols.length) vols = await searchBooks(author, 40).catch(() => []);
-  const seen = new Set([workKey(title, author)]);
-  const picked = [];
-  for (const v of vols) {
-    const key = workKey(v.volumeInfo.title, author);
-    if (v.id === id || seen.has(key)) continue;
-    if (!v.volumeInfo.authors?.includes(author)) continue;
-    if (normalize(v.volumeInfo.title) === normalize(author)) continue;
-    seen.add(key);
-    picked.push(v);
-    if (picked.length >= 10) break;
-  }
-  picked.sort(
-    (a, b) =>
-      Number(Boolean(b.volumeInfo.imageLinks)) -
-      Number(Boolean(a.volumeInfo.imageLinks)),
-  );
+  const key = normalize(cleanAuthor(author));
+  const [google, openLibrary] = await Promise.all([
+    searchBooks(`inauthor:"${author}"`, 40)
+      .catch(() => [])
+      .then(async (vols) =>
+        vols.length ? vols : searchBooks(author, 40).catch(() => []),
+      ),
+    searchOpenLibraryPt(`author:"${author}"`, 40),
+  ]);
+  const current = workKey(title, author);
+  const picked = groupWorks(
+    [
+      ...openLibrary,
+      ...withoutOpenLibraryDuplicates(openLibrary, google, author),
+    ].filter(
+      (v) =>
+        v.id !== id &&
+        v.volumeInfo.authors?.some((a) => normalize(cleanAuthor(a)) === key) &&
+        normalize(v.volumeInfo.title) !== key,
+    ),
+    "",
+  )
+    .filter(
+      ({ main }) =>
+        workKey(main.volumeInfo.title, author) !== current &&
+        main.volumeInfo.imageLinks,
+    )
+    .slice(0, 10);
   if (!picked.length) return null;
   const items = await Promise.all(
-    picked.map(async (v) => {
-      const row = volumeToRow(v);
+    picked.map(async ({ main }) => {
+      const row = volumeToRow(main);
       return {
         cover: toCover({ ...row, coverUrl: await bestCover(row.coverUrl) }),
         year: row.publishedDate?.slice(0, 4) ?? null,
       };
     }),
   );
-  return { author, items };
+  return { author: cleanAuthor(author), items };
 }
 
 async function editionsOf(book: BookData) {

@@ -5,6 +5,7 @@ import { loadBook } from "@/lib/books";
 import { todayISO } from "@/lib/dates";
 import { getBookPage } from "@/lib/queries/book";
 import { getViewerId } from "@/lib/session";
+import { authorHref } from "@/lib/links";
 import BookHero from "./_components/book-hero";
 import Editions from "./_components/editions";
 import ByAuthor from "./_components/by-author";
@@ -55,16 +56,12 @@ export default async function BookDetailPage({ params }: Props) {
           {data.book.authors[0] && (
             <>
               <span className="text-(--ink-5)">/</span>
-              {data.byAuthor ? (
-                <a
-                  href="#mais-do-autor"
-                  className="text-(--ink-4) transition-colors duration-120 hover:text-(--ink-2)"
-                >
-                  {data.book.authors[0]}
-                </a>
-              ) : (
-                <span>{data.book.authors[0]}</span>
-              )}
+              <Link
+                href={authorHref(data.book.authors[0])}
+                className="text-(--ink-4) transition-colors duration-120 hover:text-(--ink-2)"
+              >
+                {data.book.authors[0]}
+              </Link>
             </>
           )}
           <span className="text-(--ink-5)">/</span>
