@@ -7,6 +7,9 @@ import { Toaster } from "@/components/shared/toast";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  ),
   title: {
     default: "Trapiche — seu diário de leituras",
     template: "%s · Trapiche",
