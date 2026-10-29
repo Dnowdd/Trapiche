@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
 import type { BookPageData, EditionItem } from "@/lib/queries/book";
+import { SectionHeader } from "./section-header";
 
 const PREVIEW = 6;
 
@@ -70,26 +71,23 @@ export default function Editions({ data }: { data: BookPageData }) {
       className="min-w-0 scroll-mt-6"
       data-screen-label="Edições"
     >
-      <div className="flex items-end justify-between mb-4">
-        <div>
-          <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1">
-            Edições
-          </div>
-          <h2 className="m-0 text-[20px] font-bold tracking-[-0.015em] text-(--ink)">
-            {all.length} edições
-          </h2>
-        </div>
-        {all.length > PREVIEW && (
-          <button
-            type="button"
-            className="hidden lg:inline text-[12px] text-(--ink-3) border-b border-(--ink-4) cursor-pointer hover:text-(--ink)"
-            onClick={() => setExpanded(!expanded)}
-          >
-            {expanded ? "Ver menos" : `Ver todas (${all.length})`}
-          </button>
-        )}
-      </div>
-      <div className="flex gap-3.5 overflow-x-auto snap-x snap-mandatory overscroll-x-contain -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:gap-y-5 lg:overflow-visible lg:mx-0 lg:px-0">
+      <SectionHeader
+        eyebrow="Edições"
+        title={`${all.length} edições`}
+        small
+        action={
+          all.length > PREVIEW ? (
+            <button
+              type="button"
+              className="hidden lg:inline text-[12px] text-(--ink-3) border-b border-(--ink-4) cursor-pointer hover:text-(--ink)"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? "Ver menos" : `Ver todas (${all.length})`}
+            </button>
+          ) : null
+        }
+      />
+      <div className="flex gap-3.5 overflow-x-auto snap-x snap-mandatory overscroll-x-contain -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:gap-x-3 lg:gap-y-4 lg:overflow-visible lg:mx-0 lg:px-0">
         {all.map((e, i) => (
           <div
             key={e.cover.id}

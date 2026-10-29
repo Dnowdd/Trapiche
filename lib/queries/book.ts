@@ -170,26 +170,24 @@ async function relatedBooks(
 
 async function byAuthor(id: string, title: string, author: string | null) {
   if (!author) return null;
-  const [vols, catalogued] = await Promise.all([
-    searchBooks(`inauthor:"${author}"`, 20).catch(() => []),
-    db.book.count({ where: { authors: { has: author } } }),
-  ]);
-  const seen = new Set([title.toLowerCase()]);
+  const vols = await searchBooks(`inauthor:"${author}"`, 20).catch(() => []);
+  const seen = new Set([workKey(title, author)]);
   const items: { id: string; title: string; year: string | null }[] = [];
   for (const v of vols) {
     const t = v.volumeInfo.title;
-    if (v.id === id || seen.has(t.toLowerCase())) continue;
+    const key = workKey(t, author);
+    if (v.id === id || seen.has(key)) continue;
     if (!v.volumeInfo.authors?.includes(author)) continue;
-    seen.add(t.toLowerCase());
+    seen.add(key);
     items.push({
       id: v.id,
       title: t,
       year: v.volumeInfo.publishedDate?.slice(0, 4) ?? null,
     });
-    if (items.length >= 4) break;
+    if (items.length >= 5) break;
   }
   if (!items.length) return null;
-  return { author, catalogued, items };
+  return { author, items };
 }
 
 async function editionsOf(book: BookData) {

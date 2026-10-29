@@ -2,6 +2,7 @@ import { fmtAgo } from "@/lib/dates";
 import { fmtPublished } from "@/lib/books";
 import { isOpenLibraryId } from "@/lib/open-library";
 import type { BookPageData } from "@/lib/queries/book";
+import { SectionHeader } from "./section-header";
 
 export default function TechDetails({
   book,
@@ -11,48 +12,41 @@ export default function TechDetails({
   language: string | null;
 }) {
   const rows = [
-    { label: "Título", value: book.title },
-    { label: "Autor(es)", value: book.authors.join(", ") },
     { label: "Editora", value: book.publisher },
     { label: "Publicação", value: fmtPublished(book.publishedDate) },
-    { label: "Idioma desta edição", value: language },
     { label: "Páginas", value: book.pageCount?.toString() },
+    { label: "Idioma", value: language },
     { label: "Dimensões", value: book.dimensions },
-    { label: "ISBN-10", value: book.isbn10, mono: true },
     { label: "ISBN-13", value: book.isbn13, mono: true },
+    { label: "ISBN-10", value: book.isbn10, mono: true },
   ].filter((r) => r.value);
 
+  if (rows.length === 0) return null;
+
   return (
-    <section className="mt-14" data-screen-label="10 Detalhes">
-      <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
-        Ficha técnica
-      </div>
-      <h2 className="m-0 mb-1.5 text-[24px] font-bold tracking-[-0.015em] text-(--ink)">
-        Detalhes desta edição
-      </h2>
-      <div className="h-5.5" />
-      <div className="bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-7 px-8 grid grid-cols-3 gap-y-5.5 gap-x-9">
+    <section data-screen-label="Ficha técnica">
+      <SectionHeader eyebrow="Ficha técnica" title="Esta edição" small />
+      <dl className="m-0 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[14px] px-5 py-1 grid sm:grid-cols-2 sm:gap-x-10">
         {rows.map((r) => (
-          <div key={r.label}>
-            <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase mb-1">
-              {r.label}
-            </div>
-            <div
-              className={
-                r.mono
-                  ? "font-mono text-[13px] text-(--ink-2) font-medium"
-                  : "text-[14px] text-(--ink-2) font-medium"
-              }
+          <div
+            key={r.label}
+            className="flex justify-between gap-4 py-2.5 border-b border-(--rule) last:border-b-0 sm:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
+          >
+            <dt className="text-[12px] text-(--ink-4) shrink-0">{r.label}</dt>
+            <dd
+              className={[
+                "m-0 text-right text-(--ink-2) font-medium min-w-0 break-words",
+                r.mono ? "font-mono text-[12px]" : "text-[13px]",
+              ].join(" ")}
             >
               {r.value}
-            </div>
+            </dd>
           </div>
         ))}
-      </div>
-      <div className="mt-3.5 font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
-        Dados sincronizados via{" "}
-        {isOpenLibraryId(book.id) ? "Open Library" : "Google Books"} · última
-        atualização {fmtAgo(book.syncedAt)}
+      </dl>
+      <div className="mt-2 text-[11px] text-(--ink-5)">
+        Via {isOpenLibraryId(book.id) ? "Open Library" : "Google Books"} ·
+        atualizado {fmtAgo(book.syncedAt)}
       </div>
     </section>
   );

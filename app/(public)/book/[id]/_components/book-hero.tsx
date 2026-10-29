@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Check,
+  ChevronDown,
+  Heart,
+  ListPlus,
+  Share2,
+  Star,
+  X,
+} from "lucide-react";
 import BookCover from "@/components/shared/book-cover";
 import { toast } from "@/components/shared/toast";
 import FinishModal from "@/components/reading/finish-modal";
@@ -11,6 +20,13 @@ import AddToListModal from "@/components/lists/add-to-list-modal";
 import { useAction } from "@/components/reading/use-action";
 import { shareLink } from "@/components/reading/share";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   setShelfStatus,
   toggleBookLike,
   toggleFavorite,
@@ -18,19 +34,29 @@ import {
 import type { BookPageData } from "@/lib/queries/book";
 import { categoryLabels } from "@/lib/categories";
 import Stars from "./stars";
+import Synopsis from "./synopsis";
 
 type Status = "READING" | "WANT" | "READ" | "ABANDONED" | "REREADING";
 
 const STATUSES: { id: Status; label: string }[] = [
-  { id: "READING", label: "Lendo" },
   { id: "WANT", label: "Quero ler" },
+  { id: "READING", label: "Lendo" },
   { id: "READ", label: "Lido" },
-  { id: "ABANDONED", label: "Abandonei" },
   { id: "REREADING", label: "Relendo" },
+  { id: "ABANDONED", label: "Abandonei" },
 ];
 
-const pill =
-  "inline-flex items-center gap-1.5 text-[12px] font-medium py-2 px-3.5 rounded-lg border cursor-pointer transition-[color,background] duration-120 hover:text-(--ink-2) hover:bg-(--yellow-soft) disabled:cursor-wait";
+const menuItem =
+  "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)";
+
+const iconButton =
+  "w-10 h-10 rounded-[10px] border flex items-center justify-center cursor-pointer transition-[background,color,border-color] duration-120 disabled:cursor-wait";
+
+function iconButtonState(active: boolean) {
+  return active
+    ? "bg-(--yellow) border-(--yellow-deep) text-(--ink)"
+    : "bg-(--cream-card) border-[rgba(67,62,18,0.14)] text-(--ink-3) hover:text-(--ink) hover:bg-(--yellow-soft)";
+}
 
 interface BookHeroProps {
   data: BookPageData;
@@ -44,7 +70,6 @@ export default function BookHero({ data, today }: BookHeroProps) {
   const [modal, setModal] = useState<
     null | "finish" | "abandon" | "review" | "lists"
   >(null);
-  const [pendingStatus, setPendingStatus] = useState<Status | null>(null);
   const { pending, run } = useAction();
 
   const guard = (fn: () => void) => () => {
@@ -55,279 +80,220 @@ export default function BookHero({ data, today }: BookHeroProps) {
     fn();
   };
 
-  const onError = (message: string) => {
-    setPendingStatus(null);
-    toast(message);
-  };
-
-  const chooseStatus = (s: Status) => {
-    if (!viewer) return;
-    if (viewer.status === s) {
-      setPendingStatus(s);
-      run(
-        () => setShelfStatus(book.id, null),
-        () => {
-          setPendingStatus(null);
-          toast("Livro removido da sua estante.");
-        },
-        onError,
-      );
-      return;
-    }
+  const chooseStatus = (s: Status | null) => {
+    if (!viewer) return router.push("/auth");
     if (s === "READ") return setModal("finish");
     if (s === "ABANDONED") return setModal("abandon");
-    setPendingStatus(s);
     run(
       () => setShelfStatus(book.id, s),
-      () => setPendingStatus(null),
-      onError,
+      s === null ? () => toast("Livro removido da sua estante.") : undefined,
+      toast,
     );
   };
 
   const categories = categoryLabels(book.categories);
-  const meta = [
-    categories[0],
+  const facts = [
+    book.pageCount ? `${book.pageCount} páginas` : null,
+    data.languageLabel,
     book.publisher,
     book.publishedDate?.slice(0, 4),
   ].filter(Boolean);
 
   const showGoogle = rating.count === 0 && book.googleRating != null;
   const average = showGoogle ? book.googleRating! : rating.average;
+  const current = STATUSES.find((s) => s.id === viewer?.status);
 
   return (
     <section
-      className="grid grid-cols-[320px_1fr] gap-15 items-start"
+      className="grid gap-8 md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] md:gap-10 lg:gap-14 items-start"
       data-screen-label="01 Book hero"
     >
-      <div className="relative [&_.cover-pub]:text-[11px] [&_.cover-title]:text-[28px] [&_.cover-author]:text-[12px] [&_.cover-author]:tracking-[0.06em]">
+      <div className="w-50 mx-auto md:w-full [&_.cover-pub]:text-[11px] [&_.cover-title]:text-[26px] [&_.cover-author]:text-[12px]">
         <BookCover
           book={book.cover}
           size="lg"
           loading="eager"
+          sizes="(max-width: 768px) 200px, 280px"
           style={{
-            width: 320,
-            height: 480,
+            width: "100%",
+            aspectRatio: "2/3",
             borderRadius: 6,
             boxShadow:
               "0 30px 50px -28px rgba(67,62,18,0.55), 0 8px 16px -8px rgba(67,62,18,0.25)",
-            padding: "26px 22px",
+            padding: "24px 20px",
           }}
         />
       </div>
 
-      <div className="flex flex-col">
-        {meta.length > 0 && (
-          <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase flex gap-2.5 items-center flex-wrap">
-            {meta.map((m, i) => (
-              <span key={i} className="flex gap-2.5 items-center">
-                {i > 0 && <span className="text-(--ink-5)">·</span>}
-                <span>{m}</span>
-              </span>
-            ))}
-          </div>
-        )}
-
-        <h1 className="mt-3 mb-2 text-[52px] font-extrabold tracking-[-0.025em] leading-none text-(--ink) text-balance max-w-175">
+      <div className="flex flex-col min-w-0">
+        <h1 className="m-0 text-[34px] md:text-[42px] lg:text-[50px] font-extrabold tracking-[-0.025em] leading-[1.02] text-(--ink) text-balance">
           {book.title}
         </h1>
         {book.subtitle && (
-          <p className="m-0 mb-2 text-[18px] text-(--ink-3) leading-snug">
+          <p className="m-0 mt-2 text-[17px] text-(--ink-3) leading-snug">
             {book.subtitle}
           </p>
         )}
-        <div className="text-[18px] text-(--ink-3) mb-3.5">
+        <div className="mt-3 text-[17px] text-(--ink-3)">
           por{" "}
           {data.byAuthor ? (
             <a
               href="#mais-do-autor"
-              className="text-(--ink-2) border-b border-(--ink-4) pb-px hover:border-(--ink-2)"
+              className="text-(--ink-2) font-medium border-b border-(--ink-5) pb-px hover:border-(--ink-2)"
             >
               {book.authors.join(", ")}
             </a>
           ) : (
-            <span className="text-(--ink-2)">
+            <span className="text-(--ink-2) font-medium">
               {book.authors.join(", ") || "Autor desconhecido"}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-5.5 mt-2 mb-5.5">
-          {average > 0 ? (
-            <>
-              <div className="text-[44px] font-extrabold text-(--ink) tracking-[-0.025em] leading-none flex items-baseline gap-1">
-                {average.toFixed(1).replace(".", ",")}
-                <span className="text-[14px] font-medium text-(--ink-4) tracking-normal font-mono">
-                  / 5
-                </span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <Stars value={average} className="text-[18px]" />
-                <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.04em]">
-                  {showGoogle
-                    ? `${(book.googleRatingsCount ?? 0).toLocaleString("pt-BR")} avaliações no Google Books`
-                    : `${rating.count.toLocaleString("pt-BR")} ${rating.count === 1 ? "avaliação" : "avaliações"} no Trapiche`}
-                </div>
-              </div>
-            </>
+        {average > 0 && (
+          <a
+            href="#avaliacoes"
+            className="mt-4 self-start flex items-center gap-2.5 group"
+          >
+            <span className="text-[22px] font-extrabold text-(--ink) tracking-[-0.02em] leading-none">
+              {average.toFixed(1).replace(".", ",")}
+            </span>
+            <Stars value={average} className="text-[16px]" />
+            <span className="text-[12px] text-(--ink-4) group-hover:text-(--ink-2)">
+              {showGoogle
+                ? `${(book.googleRatingsCount ?? 0).toLocaleString("pt-BR")} no Google Books`
+                : `${rating.count.toLocaleString("pt-BR")} ${rating.count === 1 ? "avaliação" : "avaliações"}`}
+            </span>
+          </a>
+        )}
+
+        <div className="mt-6 flex flex-wrap items-center gap-2">
+          {current ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                disabled={pending}
+                className="h-10 pl-3.5 pr-3 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[13px] font-semibold inline-flex items-center gap-2 cursor-pointer outline-none disabled:cursor-wait"
+              >
+                {pending ? (
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                ) : (
+                  <Check className="w-3.5 h-3.5" strokeWidth={2.6} />
+                )}
+                {current.label}
+                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+              </DropdownMenuTrigger>
+              <StatusMenu
+                current={current.id}
+                onChoose={chooseStatus}
+                allowRemove
+              />
+            </DropdownMenu>
           ) : (
-            <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.04em]">
-              Ainda sem avaliações no Trapiche
+            <div className="inline-flex h-10 rounded-[10px] bg-(--yellow) border border-(--yellow-deep) text-(--ink) overflow-hidden">
+              <button
+                type="button"
+                disabled={pending}
+                className="pl-4 pr-3.5 text-[13px] font-semibold cursor-pointer hover:bg-(--yellow-deep) disabled:cursor-wait inline-flex items-center gap-2"
+                onClick={() => chooseStatus("WANT")}
+              >
+                {pending && (
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                )}
+                Quero ler
+              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  disabled={pending}
+                  aria-label="Outros status de leitura"
+                  className="px-2.5 border-l border-(--yellow-deep) cursor-pointer outline-none hover:bg-(--yellow-deep) disabled:cursor-wait"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </DropdownMenuTrigger>
+                <StatusMenu current="WANT" onChoose={chooseStatus} />
+              </DropdownMenu>
             </div>
           )}
-        </div>
 
-        <div className="flex gap-2 mb-4 flex-wrap">
-          {STATUSES.map((s) => {
-            const active = viewer?.status === s.id;
-            const busy = pending && pendingStatus === s.id;
-            return (
-              <button
-                key={s.id}
-                className="text-[12px] font-medium py-2.5 px-4 rounded-lg border border-[rgba(67,62,18,0.15)] bg-transparent text-(--ink-3) inline-flex items-center gap-2 cursor-pointer transition-[background,color,border-color] duration-120 hover:bg-(--yellow-soft) hover:text-(--ink-2) aria-pressed:bg-(--ink-2) aria-pressed:text-(--yellow) aria-pressed:border-(--ink-2) disabled:cursor-wait"
-                aria-pressed={active}
-                disabled={pending}
-                title={active ? "Clique para tirar da estante" : undefined}
-                onClick={guard(() => chooseStatus(s.id))}
-              >
-                {busy ? (
-                  <span className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                ) : (
-                  active && (
-                    <svg
-                      className="w-3.25 h-3.25"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M4 12l5 5L20 6" />
-                    </svg>
-                  )
-                )}
-                {s.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex gap-2.5 mb-6 flex-wrap">
           <button
-            className={`${pill} ${viewer?.liked ? "text-(--ink) bg-(--yellow) border-(--yellow-deep)" : "border-[rgba(67,62,18,0.15)] bg-(--cream-card) text-(--ink-3)"}`}
+            type="button"
+            className={`${iconButton} ${iconButtonState(viewer?.liked ?? false)}`}
             disabled={pending}
             aria-pressed={viewer?.liked ?? false}
+            aria-label={viewer?.liked ? "Descurtir" : "Curtir"}
+            title={viewer?.liked ? "Curtido" : "Curtir"}
             onClick={guard(() =>
               run(() => toggleBookLike(book.id), undefined, toast),
             )}
           >
-            <svg
-              className="w-3.25 h-3.25"
-              viewBox="0 0 24 24"
+            <Heart
+              className="w-4 h-4"
               fill={viewer?.liked ? "currentColor" : "none"}
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 21s-7-4.35-9.5-9C.6 7.5 3 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.5 0 5.9 3.5 4 8-2.5 4.65-9.5 9-9.5 9z" />
-            </svg>
-            {viewer?.liked ? "Curtido" : "Curtir"}
+            />
           </button>
           <button
-            className={`${pill} ${viewer?.favorite ? "text-(--ink) bg-(--yellow) border-(--yellow-deep)" : "border-[rgba(67,62,18,0.15)] bg-(--cream-card) text-(--ink-3)"}`}
+            type="button"
+            className={`${iconButton} ${iconButtonState(viewer?.favorite ?? false)}`}
             disabled={pending}
             aria-pressed={viewer?.favorite ?? false}
+            aria-label={
+              viewer?.favorite
+                ? "Remover dos favoritos"
+                : "Adicionar aos favoritos"
+            }
+            title={
+              viewer?.favorite ? "Nos favoritos" : "Adicionar aos favoritos"
+            }
             onClick={guard(() =>
               run(() => toggleFavorite(book.id), undefined, toast),
             )}
           >
-            <svg
-              className="w-3.25 h-3.25"
-              viewBox="0 0 24 24"
+            <Star
+              className="w-4 h-4"
               fill={viewer?.favorite ? "currentColor" : "none"}
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M11.5 2.5l2.5 6 6.5.5-5 4.5 1.5 6.5-5.5-3.5L6 20l1.5-6.5L2.5 9l6.5-.5z" />
-            </svg>
-            {viewer?.favorite ? "Nos favoritos" : "Adicionar aos favoritos"}
+            />
           </button>
           <button
-            className={`${pill} border-[rgba(67,62,18,0.15)] bg-(--cream-card) text-(--ink-3)`}
+            type="button"
+            className={`${iconButton} ${iconButtonState(false)}`}
+            aria-label="Adicionar a uma lista"
+            title="Adicionar a uma lista"
             onClick={guard(() => setModal("lists"))}
           >
-            <svg
-              className="w-3.25 h-3.25"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 5v14" />
-              <path d="M5 12h14" />
-            </svg>
-            Adicionar a uma lista
+            <ListPlus className="w-4 h-4" />
           </button>
           <button
-            className={`${pill} border-[rgba(67,62,18,0.15)] bg-(--cream-card) text-(--ink-3)`}
+            type="button"
+            className={`${iconButton} ${iconButtonState(false)}`}
+            aria-label="Compartilhar"
+            title="Compartilhar"
             onClick={() => shareLink(`/book/${book.id}`, book.title)}
           >
-            <svg
-              className="w-3.25 h-3.25"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-              <polyline points="16 6 12 2 8 6" />
-              <line x1="12" x2="12" y1="2" y2="15" />
-            </svg>
-            Compartilhar
+            <Share2 className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-6 py-5.5 border-y border-(--rule)">
-          {[
-            { label: "Páginas", value: book.pageCount },
-            { label: "Idioma", value: data.languageLabel },
-            { label: "Editora", value: book.publisher },
-            { label: "ISBN-13", value: book.isbn13, mono: true },
-          ].map((m) => (
-            <div key={m.label}>
-              <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase mb-1">
-                {m.label}
-              </div>
-              <div
-                className={
-                  m.mono
-                    ? "font-mono text-[13px] text-(--ink-2) font-medium"
-                    : "text-[14px] text-(--ink-2) font-medium"
-                }
-              >
-                {m.value ?? "—"}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {categories.length > 0 && (
-          <div className="flex gap-1.5 flex-wrap mt-4">
+        {(facts.length > 0 || categories.length > 0) && (
+          <div className="mt-6 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-[13px] text-(--ink-3)">
+            {facts.map((f, i) => (
+              <span key={i} className="flex items-center gap-2.5">
+                {i > 0 && <span className="text-(--ink-5)">·</span>}
+                {f}
+              </span>
+            ))}
             {categories.map((c) => (
               <span
                 key={c}
-                className="font-mono text-[10px] bg-(--yellow-soft) text-(--ink-2) border border-(--yellow-deep) py-1 px-2.25 rounded tracking-[0.04em] uppercase"
+                className="text-[11px] font-medium bg-(--yellow-soft) text-(--ink-2) border border-(--yellow-deep) py-0.5 px-2 rounded-md"
               >
                 {c}
               </span>
             ))}
+          </div>
+        )}
+
+        {book.description && (
+          <div className="mt-6 pt-6 border-t border-(--rule)">
+            <Synopsis description={book.description} />
           </div>
         )}
       </div>
@@ -374,5 +340,41 @@ export default function BookHero({ data, today }: BookHeroProps) {
         />
       )}
     </section>
+  );
+}
+
+function StatusMenu({
+  current,
+  onChoose,
+  allowRemove,
+}: {
+  current?: Status;
+  onChoose: (s: Status | null) => void;
+  allowRemove?: boolean;
+}) {
+  return (
+    <DropdownMenuContent
+      align="start"
+      className="w-auto min-w-48 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(67,62,18,0.10)] shadow-[0_16px_40px_-8px_rgba(67,62,18,0.22),0_2px_8px_-2px_rgba(67,62,18,0.10)]"
+    >
+      {STATUSES.filter((s) => s.id !== current).map((s) => (
+        <DropdownMenuItem
+          key={s.id}
+          className={menuItem}
+          onClick={() => onChoose(s.id)}
+        >
+          {s.label}
+        </DropdownMenuItem>
+      ))}
+      {allowRemove && (
+        <>
+          <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
+          <DropdownMenuItem className={menuItem} onClick={() => onChoose(null)}>
+            <X className="w-3.5 h-3.5" />
+            Remover da estante
+          </DropdownMenuItem>
+        </>
+      )}
+    </DropdownMenuContent>
   );
 }

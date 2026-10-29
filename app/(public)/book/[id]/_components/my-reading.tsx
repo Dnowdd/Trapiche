@@ -29,8 +29,8 @@ export default function MyReading({
   return (
     <>
       {showCard && (
-        <section className="mt-14" data-screen-label="02 Sua leitura">
-          <div className="bg-(--ink-2) text-(--cream) rounded-[18px] py-7 px-8 grid grid-cols-[1fr_320px] gap-10">
+        <section data-screen-label="02 Sua leitura">
+          <div className="bg-(--ink-2) text-(--cream) rounded-[18px] p-6 md:py-7 md:px-8 grid gap-8 xl:grid-cols-[1fr_280px]">
             <div>
               <div className="font-mono text-[11px] text-(--cream-deep) tracking-[0.06em] uppercase">
                 {v.status === "REREADING" ? "Sua releitura" : "Sua leitura"}
@@ -39,7 +39,7 @@ export default function MyReading({
                 Você está aqui agora
               </h3>
 
-              <div className="text-[64px] font-extrabold text-(--yellow) leading-none tracking-[-0.03em]">
+              <div className="text-[56px] font-extrabold text-(--yellow) leading-none tracking-[-0.03em]">
                 {r.progress}
                 <span className="text-[28px] ml-1 text-(--cream-deep)">%</span>
               </div>

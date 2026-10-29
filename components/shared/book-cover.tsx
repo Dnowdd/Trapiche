@@ -19,6 +19,7 @@ interface BookCoverProps {
   size?: "sm" | "md" | "lg";
   style?: CSSProperties;
   loading?: "lazy" | "eager";
+  sizes?: string;
 }
 
 const sizeMap = {
@@ -27,7 +28,13 @@ const sizeMap = {
   lg: { wrap: "py-4 px-3.5", title: "text-[18px]", author: "text-[10px]" },
 } as const;
 
-const BookCover = ({ book, size = "lg", style, loading }: BookCoverProps) => {
+const BookCover = ({
+  book,
+  size = "lg",
+  style,
+  loading,
+  sizes,
+}: BookCoverProps) => {
   const p = book.palette ?? {};
   const s = sizeMap[size];
 
@@ -43,9 +50,10 @@ const BookCover = ({ book, size = "lg", style, loading }: BookCoverProps) => {
           fill
           className="object-cover"
           sizes={
-            typeof style?.width === "number"
+            sizes ??
+            (typeof style?.width === "number"
               ? `${style.width}px`
-              : "(max-width: 768px) 45vw, 240px"
+              : "(max-width: 768px) 45vw, 240px")
           }
           loading={loading}
         />
