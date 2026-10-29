@@ -1,18 +1,14 @@
-import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client";
 
-function isLocal(url: string) {
-  return ["localhost", "127.0.0.1", "::1"].includes(new URL(url).hostname);
-}
-
-const createClient = () => {
-  const connectionString = process.env.DATABASE_URL!;
-  const adapter = isLocal(connectionString)
-    ? new PrismaPg({ connectionString })
-    : new PrismaNeon({ connectionString });
-  return new PrismaClient({ adapter });
-};
+const createClient = () =>
+  new PrismaClient({
+    adapter: new PrismaPg({
+      connectionString: process.env.DATABASE_URL!,
+      max: 10,
+      idleTimeoutMillis: 30_000,
+    }),
+  });
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
