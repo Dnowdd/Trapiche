@@ -5,10 +5,12 @@ import {
   loadBook,
   toCover,
   volumeToRow,
+  type BookData,
   type BookSummary,
 } from "../books";
 import { bestCover } from "../cover-probe";
 import { workKey } from "../editions";
+import { findOpenLibraryEditions, toIsbn13 } from "../open-library";
 import { findEditions, searchBooks } from "../google-books";
 import {
   addDays,
@@ -190,9 +192,11 @@ async function byAuthor(id: string, title: string, author: string | null) {
   return { author, catalogued, items };
 }
 
-async function editionsOf(id: string, title: string, author: string | null) {
+async function editionsOf(book: BookData) {
+  const { id, title } = book;
+  const author = book.authors[0];
   const [vols, stored] = await Promise.all([
-    findEditions(id, title, author ?? undefined).catch(() => []),
+    findEditions(id, title, author).catch(() => []),
     author
       ? db.book.findMany({
           where: {
@@ -204,16 +208,35 @@ async function editionsOf(id: string, title: string, author: string | null) {
         })
       : [],
   ]);
-  const key = workKey(title, author ?? undefined);
-  const rows = vols.map(volumeToRow);
-  const seen = new Set(rows.map((r) => r.id));
-  for (const r of stored) {
-    if (seen.has(r.id) || workKey(r.title, r.authors[0]) !== key) continue;
-    seen.add(r.id);
-    rows.push(r);
+  const key = workKey(title, author);
+  const rows: EditionRow[] = vols.map(volumeToRow);
+  for (const r of stored)
+    if (workKey(r.title, r.authors[0]) === key) rows.push(r);
+
+  const isbnsOf = (r: EditionRow) =>
+    [toIsbn13(r.isbn13), toIsbn13(r.isbn10)].filter((x): x is string =>
+      Boolean(x),
+    );
+  const known = [book, ...rows].flatMap(isbnsOf);
+  const fromOpenLibrary = await findOpenLibraryEditions({
+    title,
+    author,
+    isbns: [...new Set(known)],
+  }).catch(() => []);
+
+  const seenIds = new Set([id]);
+  const seenIsbns = new Set(isbnsOf(book));
+  const merged: EditionRow[] = [];
+  for (const r of [...rows, ...fromOpenLibrary]) {
+    const isbns = isbnsOf(r);
+    if (seenIds.has(r.id) || isbns.some((i) => seenIsbns.has(i))) continue;
+    seenIds.add(r.id);
+    isbns.forEach((i) => seenIsbns.add(i));
+    merged.push(r);
   }
+
   return Promise.all(
-    rows.slice(0, 12).map(async (row) => ({
+    merged.slice(0, 12).map(async (row) => ({
       cover: toCover({ ...row, coverUrl: await bestCover(row.coverUrl) }),
       publisher: row.publisher,
       year: row.publishedDate?.slice(0, 4) ?? null,
@@ -222,6 +245,8 @@ async function editionsOf(id: string, title: string, author: string | null) {
     })),
   );
 }
+
+type EditionRow = Omit<BookData, "syncedAt">;
 
 export type EditionItem = Awaited<ReturnType<typeof editionsOf>>[number];
 
@@ -364,7 +389,7 @@ export async function getBookPage(id: string, viewerId: string | null) {
     getReviews(id, viewerId, { take: 4, excludeViewer: true }),
     relatedBooks(id, book.categories, author, book.language),
     byAuthor(id, book.title, author),
-    editionsOf(id, book.title, author),
+    editionsOf(book),
     viewerId ? viewerState(id, viewerId, book.pageCount) : null,
   ]);
 

@@ -1,5 +1,6 @@
 import { fmtAgo } from "@/lib/dates";
 import { fmtPublished } from "@/lib/books";
+import { isOpenLibraryId } from "@/lib/open-library";
 import type { BookPageData } from "@/lib/queries/book";
 
 export default function TechDetails({
@@ -49,8 +50,9 @@ export default function TechDetails({
         ))}
       </div>
       <div className="mt-3.5 font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
-        Dados sincronizados via Google Books · última atualização{" "}
-        {fmtAgo(book.syncedAt)}
+        Dados sincronizados via{" "}
+        {isOpenLibraryId(book.id) ? "Open Library" : "Google Books"} · última
+        atualização {fmtAgo(book.syncedAt)}
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { coverUrl, getVolume } from "./google-books";
+import { getOpenLibraryBook, isOpenLibraryId } from "./open-library";
 import type { Book as BookRow } from "./generated/prisma/client";
 import type { Book as CoverBook, GoogleBooksVolume } from "./types/book";
 
@@ -118,13 +119,20 @@ export type BookData = ReturnType<typeof volumeToRow> & { syncedAt: Date };
 
 const STALE_MS = 7 * 86_400_000;
 
+async function fetchRow(id: string) {
+  if (!isOpenLibraryId(id)) return volumeToRow(await getVolume(id));
+  const row = await getOpenLibraryBook(id);
+  if (!row) throw new Error(`Open Library edition ${id} not found`);
+  return row;
+}
+
 export async function loadBook(id: string): Promise<BookData | null> {
   const cached = await db.book.findUnique({ where: { id } });
   if (cached && Date.now() - cached.syncedAt.getTime() < STALE_MS) {
     return cached;
   }
   try {
-    return { ...volumeToRow(await getVolume(id)), syncedAt: new Date() };
+    return { ...(await fetchRow(id)), syncedAt: new Date() };
   } catch {
     return cached;
   }
@@ -136,7 +144,7 @@ export async function ensureBook(id: string) {
     return cached;
   }
   try {
-    const row = volumeToRow(await getVolume(id));
+    const row = await fetchRow(id);
     return db.book.upsert({
       where: { id },
       create: row,
