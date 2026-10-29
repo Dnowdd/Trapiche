@@ -124,6 +124,7 @@ model Book {
   dimensions         String?
   googleRating       Float?
   googleRatingsCount Int?
+  workId             String?
   syncedAt           DateTime @default(now())
   createdAt          DateTime @default(now())
 
@@ -133,6 +134,19 @@ model Book {
   reviews    Review[]
   listItems  ListItem[]
   activities Activity[]
+  work       Work?            @relation(fields: [workId], references: [id], onDelete: SetNull)
+
+  @@index([workId])
+}
+
+model Work {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String
+  author    String?
+  createdAt DateTime @default(now())
+
+  books Book[]
 }
 
 model UserBook {

@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { db } from "../db";
 import { ensureBook } from "../books";
+import { editionIds } from "../works";
 import {
   dayFromISO,
   isISODay,
@@ -666,6 +667,70 @@ export async function deleteReading(readingId: string) {
           where: { id: entry.id },
           data: { status: "READING" },
         });
+    });
+    refresh();
+  });
+}
+
+export async function switchEdition(fromBookId: string, toBookId: string) {
+  return withUser(async (userId) => {
+    if (fromBookId === toBookId) return;
+    await ensureBook(toBookId);
+    const ids = await editionIds(toBookId);
+    if (!ids.includes(fromBookId))
+      fail("Essas edições não são do mesmo livro.");
+    await db.$transaction(async (tx) => {
+      const from = await tx.userBook.findUnique({
+        where: { userId_bookId: { userId, bookId: fromBookId } },
+      });
+      if (!from) fail("Essa edição não está na sua estante.");
+      const to = await tx.userBook.findUnique({
+        where: { userId_bookId: { userId, bookId: toBookId } },
+      });
+      if (to?.status) fail("Esta edição já está na sua estante.");
+      if (to) await tx.userBook.delete({ where: { id: to.id } });
+      await tx.userBook.update({
+        where: { id: from.id },
+        data: { bookId: toBookId },
+      });
+      await tx.reading.updateMany({
+        where: { userId, bookId: fromBookId },
+        data: { bookId: toBookId },
+      });
+      await tx.readingSession.updateMany({
+        where: { userId, bookId: fromBookId },
+        data: { bookId: toBookId },
+      });
+      const hasReview = await tx.review.count({
+        where: { userId, bookId: toBookId },
+      });
+      if (!hasReview)
+        await tx.review.updateMany({
+          where: { userId, bookId: fromBookId },
+          data: { bookId: toBookId },
+        });
+      await tx.activity.updateMany({
+        where: { userId, bookId: fromBookId },
+        data: { bookId: toBookId },
+      });
+      const items = await tx.listItem.findMany({
+        where: {
+          bookId: fromBookId,
+          list: { members: { some: { userId } } },
+        },
+        select: { id: true, listId: true },
+      });
+      for (const item of items) {
+        const clash = await tx.listItem.count({
+          where: { listId: item.listId, bookId: toBookId },
+        });
+        if (clash) await tx.listItem.delete({ where: { id: item.id } });
+        else
+          await tx.listItem.update({
+            where: { id: item.id },
+            data: { bookId: toBookId },
+          });
+      }
     });
     refresh();
   });

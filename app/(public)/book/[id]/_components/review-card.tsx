@@ -78,6 +78,7 @@ export default function ReviewCard({
         </div>
         <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
           {r.date}
+          {r.edition && ` · sobre a edição ${r.edition}`}
         </div>
       </div>
       <p className="text-[14px] leading-[1.6] text-(--ink-3) text-pretty m-0 mb-3.5 whitespace-pre-line">

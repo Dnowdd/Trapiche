@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { db } from "../db";
 import { ensureBook } from "../books";
+import { editionIds } from "../works";
 import { fail, withUser } from "./result";
 import { getViewerId } from "../session";
 import { fmtAgo } from "../dates";
@@ -21,15 +22,24 @@ export async function saveReview(
       fail("A resenha pode ter no máximo 5.000 caracteres.");
 
     await ensureBook(bookId);
+    const ids = await editionIds(bookId);
     await db.$transaction(async (tx) => {
-      const existing = await tx.review.findUnique({
-        where: { userId_bookId: { userId, bookId } },
-      });
-      const review = await tx.review.upsert({
-        where: { userId_bookId: { userId, bookId } },
-        create: { userId, bookId, rating, text: text || null },
-        update: { rating, text: text || null },
-      });
+      const existing =
+        (await tx.review.findUnique({
+          where: { userId_bookId: { userId, bookId } },
+        })) ??
+        (await tx.review.findFirst({
+          where: { userId, bookId: { in: ids } },
+          orderBy: { updatedAt: "desc" },
+        }));
+      const review = existing
+        ? await tx.review.update({
+            where: { id: existing.id },
+            data: { rating, text: text || null },
+          })
+        : await tx.review.create({
+            data: { userId, bookId, rating, text: text || null },
+          });
       const snippet = text ? text.slice(0, 280) : null;
       if (existing) {
         await tx.activity.updateMany({
@@ -55,7 +65,8 @@ export async function saveReview(
 
 export async function deleteReview(bookId: string) {
   return withUser(async (userId) => {
-    await db.review.deleteMany({ where: { userId, bookId } });
+    const ids = await editionIds(bookId);
+    await db.review.deleteMany({ where: { userId, bookId: { in: ids } } });
     refresh();
   });
 }

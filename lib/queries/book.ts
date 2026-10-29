@@ -9,9 +9,12 @@ import {
   type BookSummary,
 } from "../books";
 import { bestCover } from "../cover-probe";
+import { editionIds } from "../works";
 import { cleanAuthor, groupWorks, normalize, workKey } from "../editions";
 import {
+  editionIdByIsbn,
   findOpenLibraryEditions,
+  isOpenLibraryId,
   searchOpenLibraryPt,
   toIsbn13,
   withoutOpenLibraryDuplicates,
@@ -32,6 +35,7 @@ import {
   toISODay,
 } from "../dates";
 import type { ShelfStatus } from "../generated/prisma/client";
+import type { GoogleBooksVolume } from "../types/book";
 
 const ACTIVE_STATUSES: ShelfStatus[] = ["READ", "READING", "REREADING"];
 
@@ -44,10 +48,14 @@ export function initialsOf(name: string) {
     .join("");
 }
 
-async function latestReadingDays(bookId: string, userIds: string[]) {
+async function latestReadingDays(bookIds: string[], userIds: string[]) {
   if (!userIds.length) return new Map<string, number>();
   const readings = await db.reading.findMany({
-    where: { bookId, userId: { in: userIds }, status: "FINISHED" },
+    where: {
+      bookId: { in: bookIds },
+      userId: { in: userIds },
+      status: "FINISHED",
+    },
     orderBy: { endedAt: "desc" },
   });
   const map = new Map<string, number>();
@@ -64,8 +72,9 @@ export async function getReviews(
   viewerId: string | null,
   opts: { take: number; skip?: number; excludeViewer?: boolean },
 ) {
+  const ids = await editionIds(bookId);
   const where = {
-    bookId,
+    bookId: { in: ids },
     text: { not: null },
     ...(opts.excludeViewer && viewerId ? { NOT: { userId: viewerId } } : {}),
   };
@@ -77,6 +86,7 @@ export async function getReviews(
       skip: opts.skip ?? 0,
       include: {
         user: { select: { name: true, handle: true } },
+        book: { select: { publisher: true } },
         _count: { select: { likes: true, comments: true } },
         likes: viewerId
           ? { where: { userId: viewerId }, select: { userId: true } }
@@ -86,7 +96,7 @@ export async function getReviews(
     db.review.count({ where }),
   ]);
   const days = await latestReadingDays(
-    bookId,
+    ids,
     rows.map((r) => r.userId),
   );
   return {
@@ -104,6 +114,8 @@ export async function getReviews(
       comments: r._count.comments,
       liked: Array.isArray(r.likes) && r.likes.length > 0,
       mine: r.userId === viewerId,
+      edition:
+        r.bookId === bookId ? null : (r.book.publisher ?? "outra edição"),
     })),
   };
 }
@@ -112,14 +124,14 @@ export type ReviewItem = Awaited<
   ReturnType<typeof getReviews>
 >["items"][number];
 
-async function relatedBooks(
+export async function relatedBooks(
   id: string,
   categories: string[],
   author: string | null,
-  language: string | null,
 ) {
+  const ids = await editionIds(id);
   const readers = await db.userBook.findMany({
-    where: { bookId: id, status: { in: ACTIVE_STATUSES } },
+    where: { bookId: { in: ids }, status: { in: ACTIVE_STATUSES } },
     select: { userId: true },
     take: 500,
   });
@@ -129,7 +141,7 @@ async function relatedBooks(
       by: ["bookId"],
       where: {
         userId: { in: readers.map((r) => r.userId) },
-        bookId: { not: id },
+        bookId: { notIn: ids },
         status: { in: ACTIVE_STATUSES },
       },
       _count: { bookId: true },
@@ -145,19 +157,17 @@ async function relatedBooks(
       .filter((b): b is BookSummary => Boolean(b));
   }
   if (books.length < 10) {
-    const queries: [string, string | undefined][] = [];
+    const queries: string[] = [];
     if (categories[0]) {
-      queries.push([`subject:"${categories[0]}"`, undefined]);
       const main = categories[0].split(" / ")[0];
-      if (main !== categories[0])
-        queries.push([`subject:"${main}"`, language ?? undefined]);
+      queries.push(`subject:"${main}"`);
     }
-    if (author) queries.push([`inauthor:"${author}"`, undefined]);
+    if (author) queries.push(`author:"${author}"`);
     const seen = new Set([id, ...books.map((b) => b.id)]);
     const titles = new Set(books.map((b) => b.title.toLowerCase()));
-    for (const [query, lang] of queries) {
+    for (const query of queries) {
       if (books.length >= 10) break;
-      const vols = await searchBooks(query, 20, lang).catch(() => []);
+      const vols = await searchOpenLibraryPt(query, 20);
       for (const v of vols) {
         if (books.length >= 10) break;
         const row = volumeToRow(v);
@@ -176,7 +186,11 @@ async function relatedBooks(
   );
 }
 
-async function byAuthor(id: string, title: string, author: string | null) {
+export async function byAuthor(
+  id: string,
+  title: string,
+  author: string | null,
+) {
   if (!author) return null;
   const key = normalize(cleanAuthor(author));
   const [google, openLibrary] = await Promise.all([
@@ -188,38 +202,40 @@ async function byAuthor(id: string, title: string, author: string | null) {
     searchOpenLibraryPt(`author:"${author}"`, 40),
   ]);
   const current = workKey(title, author);
-  const picked = groupWorks(
-    [
-      ...openLibrary,
-      ...withoutOpenLibraryDuplicates(openLibrary, google, author),
-    ].filter(
-      (v) =>
-        v.id !== id &&
-        v.volumeInfo.authors?.some((a) => normalize(cleanAuthor(a)) === key) &&
-        normalize(v.volumeInfo.title) !== key,
-    ),
-    "",
-  )
-    .filter(
-      ({ main }) =>
-        workKey(main.volumeInfo.title, author) !== current &&
-        main.volumeInfo.imageLinks,
-    )
+  const byThisAuthor = (v: GoogleBooksVolume) =>
+    v.id !== id &&
+    Boolean(v.volumeInfo.imageLinks) &&
+    (v.volumeInfo.authors?.some((a) => normalize(cleanAuthor(a)) === key) ??
+      false) &&
+    normalize(v.volumeInfo.title) !== key &&
+    workKey(v.volumeInfo.title, author) !== current;
+  const fromOpen = groupWorks(openLibrary.filter(byThisAuthor), "")
+    .map((w) => w.main)
     .slice(0, 10);
-  if (!picked.length) return null;
+  const fromGoogle =
+    fromOpen.length < 4
+      ? withoutOpenLibraryDuplicates(fromOpen, google, author)
+          .filter(byThisAuthor)
+          .slice(0, 10 - fromOpen.length)
+      : [];
+  if (!fromOpen.length && !fromGoogle.length) return null;
   const items = await Promise.all(
-    picked.map(async ({ main }) => {
-      const row = volumeToRow(main);
+    [...fromOpen, ...fromGoogle].map(async (v) => {
+      const row = volumeToRow(v);
       return {
         cover: toCover({ ...row, coverUrl: await bestCover(row.coverUrl) }),
         year: row.publishedDate?.slice(0, 4) ?? null,
       };
     }),
   );
-  return { author: cleanAuthor(author), items };
+  return {
+    author: cleanAuthor(author),
+    items,
+    fromGoogle: fromGoogle.length > 0,
+  };
 }
 
-async function editionsOf(book: BookData) {
+export async function editionsOf(book: BookData) {
   const { id, title } = book;
   const author = book.authors[0];
   const [vols, stored] = await Promise.all([
@@ -236,9 +252,11 @@ async function editionsOf(book: BookData) {
       : [],
   ]);
   const key = workKey(title, author);
-  const rows: EditionRow[] = vols.map(volumeToRow);
-  for (const r of stored)
-    if (workKey(r.title, r.authors[0]) === key) rows.push(r);
+  const googleRows: EditionRow[] = vols.map(volumeToRow);
+  const storedRows: EditionRow[] = stored.filter(
+    (r) => workKey(r.title, r.authors[0]) === key,
+  );
+  const rows = [...storedRows, ...googleRows];
 
   const isbnsOf = (r: EditionRow) =>
     [toIsbn13(r.isbn13), toIsbn13(r.isbn10)].filter((x): x is string =>
@@ -254,7 +272,7 @@ async function editionsOf(book: BookData) {
   const seenIds = new Set([id]);
   const seenIsbns = new Set(isbnsOf(book));
   const merged: EditionRow[] = [];
-  for (const r of [...rows, ...fromOpenLibrary]) {
+  for (const r of [...fromOpenLibrary, ...storedRows, ...googleRows]) {
     const isbns = isbnsOf(r);
     if (seenIds.has(r.id) || isbns.some((i) => seenIsbns.has(i))) continue;
     seenIds.add(r.id);
@@ -269,6 +287,7 @@ async function editionsOf(book: BookData) {
       year: row.publishedDate?.slice(0, 4) ?? null,
       pages: row.pageCount,
       language: languageLabel(row.language),
+      fromGoogle: !isOpenLibraryId(row.id),
     })),
   );
 }
@@ -281,8 +300,9 @@ async function viewerState(
   bookId: string,
   viewerId: string,
   pageCount: number | null,
+  ids: string[],
 ) {
-  const [entry, active, closed, review, lists] = await Promise.all([
+  const [entry, active, closed, review, lists, others] = await Promise.all([
     db.userBook.findUnique({
       where: { userId_bookId: { userId: viewerId, bookId } },
     }),
@@ -301,8 +321,9 @@ async function viewerState(
       },
       orderBy: { number: "asc" },
     }),
-    db.review.findUnique({
-      where: { userId_bookId: { userId: viewerId, bookId } },
+    db.review.findFirst({
+      where: { userId: viewerId, bookId: { in: ids } },
+      orderBy: { updatedAt: "desc" },
     }),
     db.list.findMany({
       where: { members: { some: { userId: viewerId } } },
@@ -314,6 +335,17 @@ async function viewerState(
         ownerId: true,
         _count: { select: { items: true } },
         items: { where: { bookId }, select: { id: true } },
+      },
+    }),
+    db.userBook.findMany({
+      where: {
+        userId: viewerId,
+        bookId: { in: ids.filter((x) => x !== bookId) },
+        status: { not: null },
+      },
+      select: {
+        status: true,
+        book: { select: { id: true, publisher: true, publishedDate: true } },
       },
     }),
   ]);
@@ -371,6 +403,13 @@ async function viewerState(
       endedPartial: partialToISO(r.endedAt, r.endPrecision),
       days: spanDays(r),
     })),
+    otherEditions: others.map((o) => ({
+      id: o.book.id,
+      status: o.status!,
+      label: [o.book.publisher, o.book.publishedDate?.slice(0, 4)]
+        .filter(Boolean)
+        .join(" · "),
+    })),
     review: review
       ? {
           rating: review.rating,
@@ -392,7 +431,7 @@ async function viewerState(
 export async function getBookPage(id: string, viewerId: string | null) {
   const book = await loadBook(id);
   if (!book) return null;
-  const author = book.authors[0] ?? null;
+  const ids = await editionIds(id);
 
   const [
     ratingGroups,
@@ -400,19 +439,16 @@ export async function getBookPage(id: string, viewerId: string | null) {
     publicListsCount,
     communityLists,
     reviews,
-    related,
-    authorBlock,
-    editions,
     viewer,
   ] = await Promise.all([
     db.review.groupBy({
       by: ["rating"],
-      where: { bookId: id },
+      where: { bookId: { in: ids } },
       _count: { rating: true },
     }),
     db.reading.findMany({
       where: {
-        bookId: id,
+        bookId: { in: ids },
         status: "FINISHED",
         startedAt: { not: null },
         endedAt: { not: null },
@@ -421,12 +457,15 @@ export async function getBookPage(id: string, viewerId: string | null) {
       },
     }),
     db.list.count({
-      where: { visibility: "PUBLIC", items: { some: { bookId: id } } },
+      where: {
+        visibility: "PUBLIC",
+        items: { some: { bookId: { in: ids } } },
+      },
     }),
     db.list.findMany({
       where: {
         visibility: "PUBLIC",
-        items: { some: { bookId: id } },
+        items: { some: { bookId: { in: ids } } },
         ...(viewerId ? { members: { none: { userId: viewerId } } } : {}),
       },
       orderBy: [{ followers: { _count: "desc" } }, { updatedAt: "desc" }],
@@ -439,10 +478,7 @@ export async function getBookPage(id: string, viewerId: string | null) {
       },
     }),
     getReviews(id, viewerId, { take: 4, excludeViewer: true }),
-    relatedBooks(id, book.categories, author, book.language),
-    byAuthor(id, book.title, author),
-    editionsOf(book),
-    viewerId ? viewerState(id, viewerId, book.pageCount) : null,
+    viewerId ? viewerState(id, viewerId, book.pageCount, ids) : null,
   ]);
 
   const distribution: Record<1 | 2 | 3 | 4 | 5, number> = {
@@ -494,11 +530,28 @@ export async function getBookPage(id: string, viewerId: string | null) {
         followers: l._count.followers,
       })),
     },
-    related,
-    byAuthor: authorBlock,
-    editions,
     viewer,
   };
 }
 
+export async function openLibraryEquivalent(book: BookData) {
+  if (isOpenLibraryId(book.id)) return null;
+  const isbns = [toIsbn13(book.isbn13), toIsbn13(book.isbn10)].filter(
+    (x): x is string => Boolean(x),
+  );
+  if (!isbns.length) return null;
+  const [shelved, reviewed, listed] = await Promise.all([
+    db.userBook.count({ where: { bookId: book.id } }),
+    db.review.count({ where: { bookId: book.id } }),
+    db.listItem.count({ where: { bookId: book.id } }),
+  ]);
+  if (shelved || reviewed || listed) return null;
+  for (const isbn of [...new Set(isbns)]) {
+    const id = await editionIdByIsbn(isbn).catch(() => null);
+    if (id) return id;
+  }
+  return null;
+}
+
 export type BookPageData = NonNullable<Awaited<ReturnType<typeof getBookPage>>>;
+export type ByAuthorData = Awaited<ReturnType<typeof byAuthor>>;

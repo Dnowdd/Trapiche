@@ -27,7 +27,7 @@ vi.mock("@/lib/books", async (importOriginal) => ({
 
 beforeEach(async () => {
   await testDb.$executeRawUnsafe(
-    `TRUNCATE "Activity", "ReadingSession", "Reading", "Review", "UserBook", "Book", "User" CASCADE`,
+    `TRUNCATE "Activity", "ReadingSession", "Reading", "Review", "UserBook", "Book", "Work", "User" CASCADE`,
   );
   const now = new Date();
   await testDb.user.create({

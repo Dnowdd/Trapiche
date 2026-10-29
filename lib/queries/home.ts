@@ -5,20 +5,41 @@ import { getFeaturedBooks } from "@/app/catalog";
 import { initialsOf } from "./book";
 
 export async function getHomePopular(limit = 8) {
-  const groups = await db.userBook.groupBy({
-    by: ["bookId"],
+  const entries = await db.userBook.findMany({
     where: { status: { not: null } },
-    _count: { bookId: true },
-    orderBy: { _count: { bookId: "desc" } },
-    take: limit,
+    orderBy: { statusChangedAt: "desc" },
+    take: 5000,
+    select: { userId: true, bookId: true, book: { select: { workId: true } } },
   });
+  const works = new Map<
+    string,
+    { readers: Set<string>; books: Map<string, number> }
+  >();
+  for (const e of entries) {
+    const key = e.book.workId ?? e.bookId;
+    const w = works.get(key) ?? { readers: new Set(), books: new Map() };
+    w.readers.add(e.userId);
+    w.books.set(e.bookId, (w.books.get(e.bookId) ?? 0) + 1);
+    works.set(key, w);
+  }
+  const top = [...works.values()]
+    .sort((a, b) => b.readers.size - a.readers.size)
+    .slice(0, limit);
   const rows = await db.book.findMany({
-    where: { id: { in: groups.map((g) => g.bookId) } },
+    where: { id: { in: top.flatMap((w) => [...w.books.keys()]) } },
     select: bookSummarySelect,
   });
-  const popular = groups.flatMap((g) => {
-    const row = rows.find((r) => r.id === g.bookId);
-    return row ? [{ book: toCover(row), readers: g._count.bookId }] : [];
+  const popular = top.flatMap((w) => {
+    const candidates = [...w.books.entries()]
+      .map(([id, count]) => ({ row: rows.find((r) => r.id === id), count }))
+      .filter((c) => c.row)
+      .sort(
+        (a, b) =>
+          Number(Boolean(b.row!.coverUrl)) - Number(Boolean(a.row!.coverUrl)) ||
+          b.count - a.count,
+      );
+    const best = candidates[0]?.row;
+    return best ? [{ book: toCover(best), readers: w.readers.size }] : [];
   });
   if (popular.length >= limit) return popular;
 

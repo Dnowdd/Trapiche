@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { loadBook } from "@/lib/books";
 import { todayISO } from "@/lib/dates";
-import { getBookPage } from "@/lib/queries/book";
+import { getBookPage, openLibraryEquivalent } from "@/lib/queries/book";
 import { getViewerId } from "@/lib/session";
 import { authorHref } from "@/lib/links";
 import BookHero from "./_components/book-hero";
-import Editions from "./_components/editions";
-import ByAuthor from "./_components/by-author";
 import InLists from "./_components/in-lists";
 import MyReading from "./_components/my-reading";
 import MyReadings from "./_components/my-readings";
-import Related from "./_components/related";
 import ReviewsSection from "./_components/reviews-section";
 import TechDetails from "./_components/tech-details";
+import {
+  EditionsSkeleton,
+  EditionsSlot,
+  MoreSkeleton,
+  MoreSlot,
+} from "./_components/streamed";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -34,6 +38,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BookDetailPage({ params }: Props) {
   const { id } = await params;
   const viewerId = await getViewerId();
+  const book = await loadBook(id);
+  const equivalent = book ? await openLibraryEquivalent(book) : null;
+  if (equivalent) redirect(`/book/${equivalent}`);
   const data = await getBookPage(id, viewerId);
   if (!data) notFound();
   const today = todayISO();
@@ -72,34 +79,27 @@ export default async function BookDetailPage({ params }: Props) {
 
         <BookHero data={data} today={today} />
 
-        <div
-          className={[
-            "mt-12 md:mt-14 grid gap-12 lg:gap-14 items-start",
-            data.editions.length > 0
-              ? "lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]"
-              : "",
-          ].join(" ")}
-        >
+        <div className="mt-12 md:mt-14 grid gap-12 lg:gap-14 items-start lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="flex flex-col gap-12 min-w-0">
             <MyReading data={data} today={today} />
             <MyReadings data={data} today={today} />
             <ReviewsSection data={data} />
             <InLists lists={data.lists} />
-            <TechDetails book={data.book} language={data.languageLabel} />
           </div>
-          {data.editions.length > 0 && (
-            <aside className="min-w-0 order-first lg:order-none lg:sticky lg:top-6">
-              <Editions data={data} />
-            </aside>
-          )}
+          <aside className="min-w-0 flex flex-col gap-10 order-first lg:order-none lg:sticky lg:top-6">
+            <Suspense fallback={<EditionsSkeleton />}>
+              <EditionsSlot
+                book={data.book}
+                languageLabel={data.languageLabel}
+              />
+            </Suspense>
+            <TechDetails book={data.book} language={data.languageLabel} />
+          </aside>
         </div>
 
-        {(data.byAuthor || data.related.length > 0) && (
-          <div className="mt-14 pt-12 border-t border-(--rule) flex flex-col gap-14">
-            <ByAuthor data={data.byAuthor} />
-            {data.related.length > 0 && <Related books={data.related} />}
-          </div>
-        )}
+        <Suspense fallback={<MoreSkeleton />}>
+          <MoreSlot book={data.book} />
+        </Suspense>
       </div>
     </div>
   );

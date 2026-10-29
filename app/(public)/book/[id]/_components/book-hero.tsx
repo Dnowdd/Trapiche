@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   setShelfStatus,
+  switchEdition,
   toggleBookLike,
   toggleFavorite,
 } from "@/lib/actions/shelf";
@@ -302,6 +303,49 @@ export default function BookHero({ data, today }: BookHeroProps) {
             <Share2 className="w-4 h-4" />
           </button>
         </div>
+
+        {viewer && viewer.otherEditions.length > 0 && (
+          <div className="mt-4 text-[13px] text-(--ink-3) bg-(--yellow-soft) border border-(--yellow-deep) rounded-[10px] py-2.5 px-3.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 justify-between">
+            <span>
+              Você tem outra edição deste livro na estante:{" "}
+              {viewer.otherEditions.map((o, i) => (
+                <span key={o.id}>
+                  {i > 0 && ", "}
+                  <Link
+                    href={`/book/${o.id}`}
+                    className="font-semibold text-(--ink-2) border-b border-(--ink-4) hover:border-(--ink-2)"
+                  >
+                    {STATUSES.find((x) => x.id === o.status)?.label ??
+                      "Na estante"}
+                    {o.label ? ` · ${o.label}` : ""}
+                  </Link>
+                </span>
+              ))}
+            </span>
+            {!viewer.status && viewer.otherEditions.length === 1 && (
+              <button
+                type="button"
+                disabled={pending}
+                className="shrink-0 self-start sm:self-auto h-8 px-3 rounded-lg bg-(--ink-2) text-(--yellow) text-[12px] font-semibold cursor-pointer disabled:cursor-wait"
+                onClick={() => {
+                  if (
+                    !window.confirm(
+                      "Usar esta edição? Seu status, suas leituras, sua resenha e as listas passam pra ela.",
+                    )
+                  )
+                    return;
+                  run(
+                    () => switchEdition(viewer.otherEditions[0].id, book.id),
+                    () => toast("Agora esta é a sua edição."),
+                    toast,
+                  );
+                }}
+              >
+                Usar esta edição
+              </button>
+            )}
+          </div>
+        )}
 
         {(facts.length > 0 || categories.length > 0) && (
           <div className="mt-6 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-[13px] text-(--ink-3)">
