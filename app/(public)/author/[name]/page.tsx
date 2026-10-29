@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { getAuthorPage } from "@/lib/queries/people";
 import { initialsOf } from "@/lib/queries/book";
 import Synopsis from "../../book/[id]/_components/synopsis";
-import WorksGrid from "../../_components/works-grid";
+import WorksGrid, { GoogleWorks } from "../../_components/works-grid";
 
 interface Props {
   params: Promise<{ name: string }>;
@@ -67,7 +67,9 @@ export default async function AuthorPage({ params }: Props) {
               {data.name}
             </h1>
             <div className="mt-2 text-[14px] text-(--ink-3)">
-              {works.length} {works.length === 1 ? "obra" : "obras"} no catálogo
+              {works.length + data.googleWorks.length}{" "}
+              {works.length + data.googleWorks.length === 1 ? "obra" : "obras"}{" "}
+              no catálogo
             </div>
             {profile?.bio && (
               <div className="mt-5">
@@ -77,9 +79,12 @@ export default async function AuthorPage({ params }: Props) {
           </div>
         </section>
 
-        <section className="mt-10">
-          <WorksGrid works={works} />
-        </section>
+        {works.length > 0 && (
+          <section className="mt-10">
+            <WorksGrid works={works} />
+          </section>
+        )}
+        <GoogleWorks works={data.googleWorks} />
       </div>
     </div>
   );

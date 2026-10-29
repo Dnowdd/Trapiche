@@ -39,3 +39,36 @@ export default function WorksGrid({
     </div>
   );
 }
+
+export function GoogleWorks({
+  works,
+  showAuthor,
+}: {
+  works: PersonWork[];
+  showAuthor?: boolean;
+}) {
+  if (works.length === 0) return null;
+  return (
+    <section className="mt-14 pt-10 border-t border-(--rule)">
+      <div className="flex items-center justify-between gap-4 mb-5">
+        <div>
+          <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1">
+            Google Books
+          </div>
+          <h2 className="m-0 text-[20px] font-bold tracking-[-0.015em] text-(--ink)">
+            Mais no Google Books
+          </h2>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element -- Google's branding rules require the unaltered official badge. */}
+        <img
+          src="/powered-by-google.png"
+          alt="Powered by Google"
+          width={62}
+          height={30}
+          className="h-6 w-auto"
+        />
+      </div>
+      <WorksGrid works={works} showAuthor={showAuthor} />
+    </section>
+  );
+}

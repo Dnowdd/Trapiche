@@ -1,4 +1,7 @@
+import { cache } from "react";
 import { db } from "./db";
+import { bestCover } from "./cover-probe";
+import { linkWork } from "./works";
 import { coverUrl, getVolume } from "./google-books";
 import { getOpenLibraryBook, isOpenLibraryId } from "./open-library";
 import type { Book as BookRow } from "./generated/prisma/client";
@@ -117,7 +120,8 @@ export function volumeToRow(v: GoogleBooksVolume) {
 
 export type BookData = ReturnType<typeof volumeToRow> & { syncedAt: Date };
 
-const STALE_MS = 7 * 86_400_000;
+const OPEN_DATA_STALE_MS = 30 * 86_400_000;
+const GOOGLE_STALE_MS = 86_400_000;
 
 async function fetchRow(id: string) {
   if (!isOpenLibraryId(id)) return volumeToRow(await getVolume(id));
@@ -126,34 +130,51 @@ async function fetchRow(id: string) {
   return row;
 }
 
-export async function loadBook(id: string): Promise<BookData | null> {
+async function syncBook(id: string, persist: boolean) {
+  const openData = isOpenLibraryId(id);
+  const staleMs = openData ? OPEN_DATA_STALE_MS : GOOGLE_STALE_MS;
   const cached = await db.book.findUnique({ where: { id } });
-  if (cached && Date.now() - cached.syncedAt.getTime() < STALE_MS) {
-    return cached;
-  }
-  try {
-    return { ...(await fetchRow(id)), syncedAt: new Date() };
-  } catch {
-    return cached;
-  }
-}
-
-export async function ensureBook(id: string) {
-  const cached = await db.book.findUnique({ where: { id } });
-  if (cached && Date.now() - cached.syncedAt.getTime() < STALE_MS) {
-    return cached;
+  if (cached && Date.now() - cached.syncedAt.getTime() < staleMs) {
+    if (!cached.workId)
+      cached.workId = await linkWork(cached).catch(() => null);
+    return { cached, fresh: cached };
   }
   try {
     const row = await fetchRow(id);
-    return db.book.upsert({
-      where: { id },
-      create: row,
-      update: { ...row, syncedAt: new Date() },
-    });
+    const data = {
+      ...row,
+      coverUrl: await bestCover(row.coverUrl),
+      syncedAt: new Date(),
+    };
+    const fallback = {
+      ...data,
+      createdAt: cached?.createdAt ?? new Date(),
+      workId: cached?.workId ?? null,
+    };
+    const shouldSave = openData || persist || cached != null;
+    const fresh = shouldSave
+      ? await db.book
+          .upsert({ where: { id }, create: data, update: data })
+          .catch(() => fallback)
+      : fallback;
+    if (shouldSave && !fresh.workId)
+      fresh.workId = await linkWork(fresh).catch(() => null);
+    return { cached, fresh };
   } catch (err) {
-    if (cached) return cached;
-    throw err;
+    return { cached, fresh: null, err };
   }
+}
+
+export const loadBook = cache(async (id: string): Promise<BookData | null> => {
+  const { cached, fresh } = await syncBook(id, false);
+  return fresh ?? cached;
+});
+
+export async function ensureBook(id: string) {
+  const { cached, fresh, err } = await syncBook(id, true);
+  if (fresh) return fresh;
+  if (cached) return cached;
+  throw err ?? new Error(`Book ${id} not found`);
 }
 
 export function languageLabel(code: string | null) {

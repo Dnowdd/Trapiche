@@ -4,14 +4,23 @@ import type {
   GoogleBooksResponse,
   GoogleBooksVolume,
 } from "./types/book";
-import { cachedJson, HttpError, markUnavailable } from "./api-cache";
+import {
+  cachedJson,
+  GOOGLE_TTL,
+  HttpError,
+  markUnavailable,
+} from "./api-cache";
 import { sharpCover } from "./cover-url";
-import { searchOpenLibrary } from "./open-library";
+import {
+  searchOpenLibrary,
+  searchOpenLibraryAuthors,
+  searchOpenLibraryPt,
+  toIsbn13,
+} from "./open-library";
 import {
   authorSurname,
-  cleanAuthor,
   groupWorks,
-  normalize,
+  queryMatch,
   sameWork,
   sortEditions,
   type Work,
@@ -47,7 +56,7 @@ async function googleJson<T>(
   const maxAttempts = Date.now() < degradedUntil ? 1 : 3;
   for (let attempt = 1; ; attempt++) {
     try {
-      return await cachedJson<T>(url, {}, accept);
+      return await cachedJson<T>(url, {}, accept, GOOGLE_TTL);
     } catch (err) {
       const retryable =
         err instanceof HttpError && (err.status >= 500 || err.status === 429);
@@ -104,6 +113,15 @@ export interface SearchAuthor {
 }
 
 const SEARCH_TIMEOUT_MS = 4000;
+const GOOGLE_RESULTS = 3;
+const GOOGLE_WHEN_FEWER_THAN = 3;
+
+export function asIsbn(text: string) {
+  const clean = text.replace(/[\s-]/g, "").toUpperCase();
+  if (/^\d{13}$/.test(clean) && /^97[89]/.test(clean)) return clean;
+  if (/^\d{9}[\dX]$/.test(clean)) return toIsbn13(clean);
+  return null;
+}
 
 function settle<T>(promise: Promise<T[]>): Promise<T[]> {
   return Promise.race([
@@ -114,51 +132,35 @@ function settle<T>(promise: Promise<T[]>): Promise<T[]> {
   ]);
 }
 
+export interface SearchOutcome {
+  works: Work[];
+  authors: SearchAuthor[];
+  google: GoogleBooksVolume[];
+}
+
 export async function smartSearch(
   query: string,
   maxResults = 10,
-): Promise<{ works: Work[]; authors: SearchAuthor[] }> {
+): Promise<SearchOutcome> {
   const q = query.trim();
-  const [byTitle, general, byAuthor, openLibrary] = await Promise.all([
-    settle(fetchVolumes(`intitle:${q}`, 40)),
-    settle(fetchVolumes(q, 40)),
-    settle(fetchVolumes(`inauthor:${q}`, 40)),
-    settle(searchOpenLibrary(q)),
+  const isbn = asIsbn(q);
+  const [openLibrary, authors] = await Promise.all([
+    settle(
+      isbn ? searchOpenLibrary(`isbn:${isbn}`, 5) : searchOpenLibraryPt(q, 20),
+    ),
+    isbn ? [] : settle(searchOpenLibraryAuthors(q)),
   ]);
+  const works = groupWorks(openLibrary, isbn ? "" : q).slice(0, maxResults);
+  const strong = works.some(({ main }) => queryMatch(main, q) >= 4);
+  const google =
+    !strong || works.length < GOOGLE_WHEN_FEWER_THAN - 2
+      ? await settle(fetchVolumes(isbn ? `isbn:${isbn}` : q, GOOGLE_RESULTS))
+      : [];
   return {
-    works: groupWorks([...byTitle, ...openLibrary, ...general], q).slice(
-      0,
-      maxResults,
-    ),
-    authors: matchingAuthors(
-      [...byTitle, ...general, ...byAuthor, ...openLibrary],
-      q,
-    ),
+    works,
+    authors,
+    google: google.slice(0, GOOGLE_RESULTS),
   };
-}
-
-function matchingAuthors(volumes: GoogleBooksVolume[], query: string) {
-  const tokens = normalize(query)
-    .split(" ")
-    .filter((t) => t.length > 1);
-  if (!tokens.length) return [];
-  const byName = new Map<string, { name: string; titles: Set<string> }>();
-  for (const v of volumes) {
-    for (const raw of v.volumeInfo.authors ?? []) {
-      const name = cleanAuthor(raw);
-      const n = normalize(name);
-      if (!tokens.every((t) => n.split(" ").some((w) => w.startsWith(t))))
-        continue;
-      const entry = byName.get(n) ?? { name, titles: new Set<string>() };
-      entry.titles.add(normalize(v.volumeInfo.title));
-      byName.set(n, entry);
-    }
-  }
-  return [...byName.values()]
-    .map((a) => ({ name: a.name, works: a.titles.size }))
-    .filter((a) => a.works >= 2)
-    .sort((a, b) => b.works - a.works)
-    .slice(0, 3);
 }
 
 export async function findEditions(

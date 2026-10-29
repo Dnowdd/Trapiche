@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublisherPage } from "@/lib/queries/people";
-import WorksGrid from "../../_components/works-grid";
+import WorksGrid, { GoogleWorks } from "../../_components/works-grid";
 
 interface Props {
   params: Promise<{ name: string }>;
@@ -45,14 +45,20 @@ export default async function PublisherPage({ params }: Props) {
             {data.name}
           </h1>
           <div className="mt-2 text-[14px] text-(--ink-3)">
-            {data.works.length} {data.works.length === 1 ? "obra" : "obras"} no
-            catálogo
+            {data.works.length + data.googleWorks.length}{" "}
+            {data.works.length + data.googleWorks.length === 1
+              ? "obra"
+              : "obras"}{" "}
+            no catálogo
           </div>
         </section>
 
-        <section className="mt-10">
-          <WorksGrid works={data.works} showAuthor />
-        </section>
+        {data.works.length > 0 && (
+          <section className="mt-10">
+            <WorksGrid works={data.works} showAuthor />
+          </section>
+        )}
+        <GoogleWorks works={data.googleWorks} showAuthor />
       </div>
     </div>
   );

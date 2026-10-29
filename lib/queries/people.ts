@@ -35,6 +35,35 @@ async function toWorks(volumes: GoogleBooksVolume[]) {
 
 export type PersonWork = Awaited<ReturnType<typeof toWorks>>[number];
 
+const GOOGLE_FILL_BELOW = 12;
+
+async function googleExtras(
+  google: GoogleBooksVolume[],
+  shown: PersonWork[],
+  author?: string,
+) {
+  if (shown.length >= GOOGLE_FILL_BELOW) return [];
+  const seen = new Set(shown.map((w) => workKey(w.cover.title, author)));
+  const extras: GoogleBooksVolume[] = [];
+  for (const v of google) {
+    const k = workKey(v.volumeInfo.title, author);
+    if (seen.has(k) || !v.volumeInfo.imageLinks) continue;
+    seen.add(k);
+    extras.push(v);
+    if (extras.length >= GOOGLE_FILL_BELOW) break;
+  }
+  return Promise.all(
+    extras.map(async (v) => {
+      const row = volumeToRow(v);
+      return {
+        cover: toCover({ ...row, coverUrl: await bestCover(row.coverUrl) }),
+        year: row.publishedDate?.slice(0, 4) ?? null,
+        editions: 1,
+      };
+    }),
+  );
+}
+
 export async function getAuthorPage(name: string) {
   const key = squash(name);
   const byName = (v: GoogleBooksVolume) =>
@@ -45,20 +74,25 @@ export async function getAuthorPage(name: string) {
     ),
     searchOpenLibraryPt(`author:"${name}"`, 100),
   ]);
-  const own = [
-    ...openLibrary,
-    ...withoutOpenLibraryDuplicates(openLibrary, google, name),
-  ].filter(byName);
-  if (!own.length) return null;
+  const ownOpen = openLibrary.filter(byName);
+  const ownGoogle = withoutOpenLibraryDuplicates(
+    ownOpen,
+    google.filter(byName),
+    name,
+  );
+  if (!ownOpen.length && !ownGoogle.length) return null;
 
   const canonical = cleanAuthor(
-    own[0].volumeInfo.authors?.find((a) => squash(a) === key) ?? name,
+    (ownOpen[0] ?? ownGoogle[0]).volumeInfo.authors?.find(
+      (a) => squash(a) === key,
+    ) ?? name,
   );
-  const [works, profile] = await Promise.all([
-    toWorks(own),
+  const works = await toWorks(ownOpen);
+  const [googleWorks, profile] = await Promise.all([
+    googleExtras(ownGoogle, works, canonical),
     getAuthorProfile(canonical).catch(() => null),
   ]);
-  return { name: canonical, profile, works };
+  return { name: canonical, profile, works, googleWorks };
 }
 
 export async function getPublisherPage(name: string) {
@@ -94,20 +128,14 @@ export async function getPublisherPage(name: string) {
       editions: 1,
     });
   }
-  for (const w of await toWorks(google)) {
-    if (works.length >= MAX_WORKS) break;
-    const k = workKey(w.cover.title, w.cover.author);
-    if (seen.has(k)) continue;
-    seen.add(k);
-    works.push(w);
-  }
   const covered = works.filter((w) => w.cover.coverUrl);
   const shown = covered.length >= 12 ? covered : works;
-  if (!shown.length) return null;
-  const canonical = google[0]?.volumeInfo.publisher ?? name;
   shown.sort(
     (a, b) =>
       Number(Boolean(b.cover.coverUrl)) - Number(Boolean(a.cover.coverUrl)),
   );
-  return { name: canonical, works: shown };
+  const googleWorks = await googleExtras(google, shown);
+  if (!shown.length && !googleWorks.length) return null;
+  const canonical = google[0]?.volumeInfo.publisher ?? name;
+  return { name: canonical, works: shown, googleWorks };
 }

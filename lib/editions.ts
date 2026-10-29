@@ -161,7 +161,7 @@ export function editionScore(v: GoogleBooksVolume) {
   return score;
 }
 
-function queryMatch(v: GoogleBooksVolume, query: string) {
+export function queryMatch(v: GoogleBooksVolume, query: string) {
   const q = normalize(query);
   if (!q) return 0;
   const byAuthor = v.volumeInfo.authors?.some((a) =>
@@ -223,7 +223,8 @@ export function groupWorks(volumes: GoogleBooksVolume[], query: string) {
       return { main, editions, match, score };
     })
     .sort((a, b) => b.score - a.score);
-  const matching = ranked.filter((w) => w.match > 0);
+  const best = Math.max(0, ...ranked.map((w) => w.match));
+  const matching = ranked.filter((w) => w.match >= (best >= 4 ? 2 : 1));
   return (matching.length ? matching : ranked).map(
     ({ main, editions }): Work => ({ main, editions }),
   );

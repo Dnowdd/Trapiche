@@ -288,6 +288,9 @@ export async function findPublisherWorks(publisher: string, limit = 100) {
     .sort((a, b) => b.popularity - a.popularity);
 }
 
+const PLACEHOLDER_AUTHOR =
+  /^\[.*\]$|not identified|unknown|desconhecid|anonymous|anônimo|anonimo/i;
+
 interface OLSearchDoc {
   key?: string;
   title: string;
@@ -321,7 +324,8 @@ export async function searchOpenLibrary(
   const res = await olFetch<{ docs: OLSearchDoc[] }>(`/search.json?${params}`);
   return (res?.docs ?? []).flatMap((d) => {
     const e = d.editions?.docs[0];
-    if (!e || !d.author_name?.length) return [];
+    const authors = d.author_name?.filter((a) => !PLACEHOLDER_AUTHOR.test(a));
+    if (!e || !authors?.length) return [];
     if (!e.cover_i && !e.isbn?.length) return [];
     const isbn13 = e.isbn?.map(toIsbn13).find(Boolean);
     return [
@@ -329,7 +333,7 @@ export async function searchOpenLibrary(
         id: idOf(e.key),
         volumeInfo: {
           title: e.title ?? d.title,
-          authors: d.author_name,
+          authors,
           publisher: e.publisher?.[0],
           publishedDate:
             year(e.publish_date?.[0]) ??
@@ -376,4 +380,30 @@ export function withoutOpenLibraryDuplicates(
     const own = new Set(tokensOf(v.volumeInfo.title));
     return !known.some((k) => k.every((t) => own.has(t)));
   });
+}
+
+export async function searchOpenLibraryAuthors(query: string, limit = 3) {
+  const tokens = normalize(query)
+    .split(" ")
+    .filter((t) => t.length > 1);
+  if (!tokens.length) return [];
+  const params = new URLSearchParams({ q: query, limit: "10" });
+  const res = await olFetch<{
+    docs: { name: string; work_count?: number }[];
+  }>(`/search/authors.json?${params}`);
+  const best = new Map<string, { name: string; works: number }>();
+  for (const d of res?.docs ?? []) {
+    const n = normalize(d.name);
+    const works = d.work_count ?? 0;
+    if (works < 2) continue;
+    if (!tokens.every((t) => n.split(" ").some((w) => w.startsWith(t))))
+      continue;
+    if ((best.get(n)?.works ?? 0) < works) best.set(n, { name: d.name, works });
+  }
+  return [...best.values()].sort((a, b) => b.works - a.works).slice(0, limit);
+}
+
+export async function editionIdByIsbn(isbn: string) {
+  const edition = await olFetch<OLEdition>(`/isbn/${isbn}.json`);
+  return edition?.key ? idOf(edition.key) : null;
 }

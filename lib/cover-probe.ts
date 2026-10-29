@@ -1,4 +1,4 @@
-import { cachedValue } from "./api-cache";
+import { cachedValue, GOOGLE_TTL } from "./api-cache";
 import { sharpCover } from "./cover-url";
 
 function imageSize(bytes: Uint8Array) {
@@ -43,7 +43,7 @@ export async function bestCover(url: string | null | undefined) {
   if (!url) return null;
   if (!withZoom(url, 1)) return url;
   return (
-    (await cachedValue(`cover:${url}`, () => probeCover(url))) ??
+    (await cachedValue(`cover:${url}`, () => probeCover(url), GOOGLE_TTL)) ??
     sharpCover(url)
   );
 }

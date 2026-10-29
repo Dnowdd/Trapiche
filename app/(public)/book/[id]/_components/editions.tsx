@@ -51,19 +51,27 @@ function EditionCard({
   );
 }
 
-export default function Editions({ data }: { data: BookPageData }) {
+export default function Editions({
+  book,
+  languageLabel,
+  editions,
+}: {
+  book: BookPageData["book"];
+  languageLabel: string | null;
+  editions: EditionItem[];
+}) {
   const [expanded, setExpanded] = useState(false);
-  if (data.editions.length === 0) return null;
+  if (editions.length === 0) return null;
 
-  const { book } = data;
   const current: EditionItem = {
     cover: book.cover,
     publisher: book.publisher,
     year: book.publishedDate?.slice(0, 4) ?? null,
     pages: book.pageCount,
-    language: data.languageLabel,
+    language: languageLabel,
+    fromGoogle: false,
   };
-  const all = [current, ...data.editions];
+  const all = [current, ...editions];
 
   return (
     <section
@@ -87,6 +95,19 @@ export default function Editions({ data }: { data: BookPageData }) {
           ) : null
         }
       />
+      {editions.some((e) => e.fromGoogle) && (
+        <div className="-mt-2 mb-3 flex items-center gap-2 text-[11px] text-(--ink-4)">
+          Algumas edições via
+          {/* eslint-disable-next-line @next/next/no-img-element -- Google's branding rules require the unaltered official badge. */}
+          <img
+            src="/powered-by-google.png"
+            alt="Powered by Google"
+            width={62}
+            height={30}
+            className="h-4 w-auto"
+          />
+        </div>
+      )}
       <div className="flex gap-3.5 overflow-x-auto snap-x snap-mandatory overscroll-x-contain -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:gap-x-3 lg:gap-y-4 lg:overflow-visible lg:mx-0 lg:px-0">
         {all.map((e, i) => (
           <div

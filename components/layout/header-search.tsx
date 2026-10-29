@@ -33,7 +33,9 @@ interface Found {
   query: string;
   items: SearchResult[];
   authors: { name: string; works: number }[];
+  google: SearchResult[];
   failed?: boolean;
+  limited?: boolean;
 }
 
 export default function HeaderSearch() {
@@ -65,18 +67,36 @@ export default function HeaderSearch() {
         `/api/books/search?q=${encodeURIComponent(q)}&max=8`,
         { signal: controller.signal },
       );
+      if (res.status === 429) {
+        setFound({
+          query: q,
+          items: [],
+          authors: [],
+          google: [],
+          failed: true,
+          limited: true,
+        });
+        return;
+      }
       if (!res.ok) throw new Error();
       const data = await res.json();
       setFound({
         query: q,
         items: data.items ?? [],
         authors: data.authors ?? [],
+        google: data.google ?? [],
       });
       setOpen(true);
       setFocusedIdx(-1);
     } catch {
       if (!controller.signal.aborted)
-        setFound({ query: q, items: [], authors: [], failed: true });
+        setFound({
+          query: q,
+          items: [],
+          authors: [],
+          google: [],
+          failed: true,
+        });
     } finally {
       if (!controller.signal.aborted) {
         setLoading(false);
@@ -123,6 +143,13 @@ export default function HeaderSearch() {
     );
   };
 
+  const openResults = () => {
+    const q = trimmed;
+    reset();
+    inputRef.current?.blur();
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  };
+
   const onChange = (value: string) => {
     setQuery(value);
     if (value.trim().length < 2) {
@@ -136,6 +163,7 @@ export default function HeaderSearch() {
     ? [
         ...found.authors.map((a) => ({ kind: "author" as const, ...a })),
         ...found.items.map((item) => ({ kind: "book" as const, item })),
+        ...found.google.map((item) => ({ kind: "book" as const, item })),
       ]
     : [];
   const fresh = found?.query === trimmed;
@@ -154,8 +182,7 @@ export default function HeaderSearch() {
       if (trimmed.length < 2) return;
       if (showDropdown && focusedIdx >= 0 && entries[focusedIdx])
         return go(entries[focusedIdx]);
-      if (fresh && entries.length) return go(entries[0]);
-      search(trimmed);
+      openResults();
       return;
     }
     if (!showDropdown || entries.length === 0) return;
@@ -255,7 +282,9 @@ export default function HeaderSearch() {
             </div>
           ) : entries.length === 0 ? (
             <div className="px-5 py-6 text-center text-[13px] text-(--ink-4)">
-              {found.failed ? (
+              {found.limited ? (
+                <>Muitas buscas seguidas. Espere alguns segundos.</>
+              ) : found.failed ? (
                 <>
                   A busca falhou.{" "}
                   <button
@@ -298,32 +327,48 @@ export default function HeaderSearch() {
               )}
               {found.items.length > 0 && (
                 <Group label={found.authors.length ? "Livros" : null}>
-                  {found.items.map((item, j) => {
-                    const i = found.authors.length + j;
+                  {found.items.map((item, j) => (
+                    <BookRow
+                      key={item.id}
+                      item={item}
+                      active={found.authors.length + j === focusedIdx}
+                      onSelect={() => go({ kind: "book", item })}
+                      onHover={() => setFocusedIdx(found.authors.length + j)}
+                    />
+                  ))}
+                </Group>
+              )}
+              <button
+                type="button"
+                className="w-full mt-1 px-3 py-2.5 rounded-[10px] text-left text-[13px] font-medium text-(--ink-2) hover:bg-[rgba(67,62,18,0.06)] cursor-pointer"
+                onClick={openResults}
+              >
+                Ver todos os resultados para “{found.query}”
+              </button>
+              {found.google.length > 0 && (
+                <Group
+                  label="Google Books"
+                  aside={
+                    // eslint-disable-next-line @next/next/no-img-element -- Google's branding rules require the unaltered official badge.
+                    <img
+                      src="/powered-by-google.png"
+                      alt="Powered by Google"
+                      width={62}
+                      height={30}
+                      className="h-4 w-auto"
+                    />
+                  }
+                >
+                  {found.google.map((item, j) => {
+                    const i = found.authors.length + found.items.length + j;
                     return (
-                      <Row
-                        key={item.id}
+                      <BookRow
+                        key={`g-${item.id}`}
+                        item={item}
                         active={i === focusedIdx}
                         onSelect={() => go({ kind: "book", item })}
                         onHover={() => setFocusedIdx(i)}
-                      >
-                        <CoverThumb url={item.coverUrl} />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[14px] font-semibold text-(--ink) leading-[1.3] line-clamp-2 tracking-[-0.005em]">
-                            {item.title}
-                          </div>
-                          <div className="text-[12px] text-(--ink-4) mt-0.5 truncate">
-                            {[item.authors.join(", ") || null, item.year]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </div>
-                          {item.editions > 1 && (
-                            <div className="text-[11px] text-(--ink-5) mt-0.5">
-                              {item.editions} edições
-                            </div>
-                          )}
-                        </div>
-                      </Row>
+                      />
                     );
                   })}
                 </Group>
@@ -345,18 +390,54 @@ function initials(name: string) {
     .join("");
 }
 
+function BookRow({
+  item,
+  active,
+  onSelect,
+  onHover,
+}: {
+  item: SearchResult;
+  active: boolean;
+  onSelect: () => void;
+  onHover: () => void;
+}) {
+  return (
+    <Row active={active} onSelect={onSelect} onHover={onHover}>
+      <CoverThumb url={item.coverUrl} />
+      <div className="flex-1 min-w-0">
+        <div className="text-[14px] font-semibold text-(--ink) leading-[1.3] line-clamp-2 tracking-[-0.005em]">
+          {item.title}
+        </div>
+        <div className="text-[12px] text-(--ink-4) mt-0.5 truncate">
+          {[item.authors.join(", ") || null, item.year]
+            .filter(Boolean)
+            .join(" · ")}
+        </div>
+        {item.editions > 1 && (
+          <div className="text-[11px] text-(--ink-5) mt-0.5">
+            {item.editions} edições
+          </div>
+        )}
+      </div>
+    </Row>
+  );
+}
+
 function Group({
   label,
+  aside,
   children,
 }: {
   label: string | null;
+  aside?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="[&+&]:mt-1 [&+&]:pt-1 [&+&]:border-t [&+&]:border-[rgba(67,62,18,0.06)]">
       {label && (
-        <div className="px-3 pt-2 pb-1 font-mono text-[10px] text-(--ink-4) tracking-[0.08em] uppercase">
+        <div className="px-3 pt-2 pb-1 flex items-center justify-between font-mono text-[10px] text-(--ink-4) tracking-[0.08em] uppercase">
           {label}
+          {aside}
         </div>
       )}
       <ul className="m-0 p-0 list-none">{children}</ul>

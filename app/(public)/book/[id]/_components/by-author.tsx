@@ -4,14 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import BookCover from "@/components/shared/book-cover";
-import type { BookPageData } from "@/lib/queries/book";
+import type { ByAuthorData } from "@/lib/queries/book";
 import { SectionHeader } from "./section-header";
 import { authorHref } from "@/lib/links";
 
 const arrow =
   "w-9 h-9 rounded-full border border-[rgba(67,62,18,0.16)] bg-(--cream-card) text-(--ink-2) flex items-center justify-center cursor-pointer transition-[background,opacity] duration-150 hover:bg-(--yellow-soft) disabled:opacity-35 disabled:cursor-default disabled:hover:bg-(--cream-card)";
 
-export default function ByAuthor({ data }: { data: BookPageData["byAuthor"] }) {
+export default function ByAuthor({ data }: { data: ByAuthorData }) {
   const track = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ start: true, end: true });
 
@@ -51,6 +51,16 @@ export default function ByAuthor({ data }: { data: BookPageData["byAuthor"] }) {
         title={`Mais de ${data.author}`}
         action={
           <div className="flex items-center gap-4">
+            {data.fromGoogle && (
+              // eslint-disable-next-line @next/next/no-img-element -- Google's branding rules require the unaltered official badge.
+              <img
+                src="/powered-by-google.png"
+                alt="Powered by Google"
+                width={62}
+                height={30}
+                className="h-5 w-auto"
+              />
+            )}
             <Link
               href={authorHref(data.author)}
               className="text-[12px] text-(--ink-3) border-b border-(--ink-4) hover:text-(--ink) whitespace-nowrap"

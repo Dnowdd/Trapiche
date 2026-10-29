@@ -108,3 +108,13 @@ describe("publisherCore", () => {
     expect(publisherCore("Editora")).toBe("Editora");
   });
 });
+
+describe("asIsbn", async () => {
+  const { asIsbn } = await import("@/lib/google-books");
+  it("recognizes ISBN-10 and ISBN-13 and ignores other text", () => {
+    expect(asIsbn("978-65-5587-178-4")).toBe("9786555871784");
+    expect(asIsbn("6555871784")).toBe("9786555871784");
+    expect(asIsbn("1984")).toBeNull();
+    expect(asIsbn("12345678901234")).toBeNull();
+  });
+});

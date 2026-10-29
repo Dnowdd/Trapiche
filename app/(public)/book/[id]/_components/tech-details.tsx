@@ -59,10 +59,39 @@ export default function TechDetails({
           </div>
         ))}
       </dl>
-      <div className="mt-2 text-[11px] text-(--ink-5)">
-        Via {isOpenLibraryId(book.id) ? "Open Library" : "Google Books"} ·
-        atualizado {fmtAgo(book.syncedAt)}
-      </div>
+      {isOpenLibraryId(book.id) ? (
+        <div className="mt-2 text-[11px] text-(--ink-5)">
+          Via{" "}
+          <a
+            href={`https://openlibrary.org/books/${book.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-(--ink-3)"
+          >
+            Open Library
+          </a>{" "}
+          · atualizado {fmtAgo(book.syncedAt)}
+        </div>
+      ) : (
+        <div className="mt-2 flex items-center gap-3 text-[11px] text-(--ink-5)">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Google's branding rules require the unaltered official badge. */}
+          <img
+            src="/powered-by-google.png"
+            alt="Powered by Google"
+            width={62}
+            height={30}
+            className="h-5 w-auto"
+          />
+          <a
+            href={`https://books.google.com/books?id=${encodeURIComponent(book.id)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-(--ink-3)"
+          >
+            Ver no Google Books
+          </a>
+        </div>
+      )}
     </section>
   );
 }
