@@ -33,14 +33,15 @@ export default function ReleiturasTab({ items }: { items: Item[] }) {
         <div className="flex flex-col gap-4">
           {sorted.map((r) => (
             <article
-              className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-5.5 px-6.5 grid grid-cols-[100px_1fr_220px] gap-6 items-center"
+              className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:py-5.5 sm:px-6.5 grid grid-cols-[64px_1fr] sm:grid-cols-[100px_1fr_220px] gap-4 sm:gap-6 items-center"
               key={r.book.id}
             >
               <Link href={`/book/${r.book.id}`}>
                 <BookCover
                   book={r.book}
                   size="md"
-                  style={{ width: 100, height: 150 }}
+                  sizes="(max-width: 640px) 64px, 100px"
+                  style={{ width: "100%", aspectRatio: "2/3" }}
                 />
               </Link>
               <div>
@@ -62,7 +63,7 @@ export default function ReleiturasTab({ items }: { items: Item[] }) {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-2 border-l border-[rgba(67,62,18,0.1)] pl-5.5">
+              <div className="col-span-2 sm:col-span-1 flex flex-col gap-2 border-t sm:border-t-0 sm:border-l border-[rgba(67,62,18,0.1)] pt-3 sm:pt-0 sm:pl-5.5">
                 <div className="text-[32px] font-extrabold text-(--ink) tracking-[-0.025em] leading-none flex items-baseline gap-1.5">
                   {r.times}{" "}
                   <span className="text-[11px] font-medium text-(--ink-4) tracking-normal font-mono uppercase">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
 import LogSessionModal, {
@@ -68,7 +68,7 @@ function DiaryStats({ data }: { data: Data }) {
     ly.books > 0 ? Math.round(((ty.books - ly.books) / ly.books) * 100) : null;
 
   return (
-    <div className="grid grid-cols-4 gap-4.5 mb-5.5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4.5 mb-5.5">
       <div className="bg-(--ink-2) text-(--cream) border border-(--ink-2) rounded-[18px] py-5 px-5.5 flex flex-col gap-1.5 relative min-h-31">
         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--cream-deep)">
           {ty.year} · este ano
@@ -209,9 +209,15 @@ function Heatmap({ data }: { data: Data }) {
   const totalDays = days.filter((d) => d && d.minutes > 0).length;
   const cellBase =
     "w-3.25 h-3.25 rounded-[2px] transition-transform duration-100 relative hover:scale-[1.4] hover:z-2";
+  const scroller = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scroller.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [year]);
 
   return (
-    <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 px-7 mb-5.5">
+    <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7 mb-5.5">
       <div className="flex justify-between items-center mb-4.5">
         <div>
           <h3 className="m-0 text-[16px] font-bold text-(--ink)">
@@ -238,7 +244,7 @@ function Heatmap({ data }: { data: Data }) {
         )}
       </div>
 
-      <div className="overflow-x-auto pb-1">
+      <div ref={scroller} className="overflow-x-auto pb-1">
         <div className="flex mb-1.5 pl-5.5 font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
           {MONTHS.map((m) => (
             <span key={m} className="w-[calc((13px+3px)*4.33)] shrink-0">
@@ -283,7 +289,7 @@ function Heatmap({ data }: { data: Data }) {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mt-4 font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
+      <div className="flex flex-wrap gap-2 justify-between items-center mt-4 font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
         <span>cada quadrado = um dia · cor por minutos lidos</span>
         <div className="flex gap-1.5 items-center">
           <span className="mr-1.5">menos</span>
@@ -348,10 +354,10 @@ export default function DiarioTab({
         ) : (
           data.entries.map((e) => (
             <div
-              className="grid grid-cols-[130px_60px_1fr_auto] gap-5.5 items-center py-3.5 border-b border-(--rule) last:border-b-0"
+              className="grid grid-cols-[44px_1fr_auto] sm:grid-cols-[130px_60px_1fr_auto] gap-3 sm:gap-5.5 items-center py-3.5 border-b border-(--rule) last:border-b-0"
               key={e.id}
             >
-              <div className="font-mono text-[11px] text-(--ink-3) tracking-[0.04em] uppercase">
+              <div className="hidden sm:block font-mono text-[11px] text-(--ink-3) tracking-[0.04em] uppercase">
                 {e.date}
               </div>
               <Link
@@ -376,6 +382,9 @@ export default function DiarioTab({
                 >
                   {e.book.title}
                 </Link>
+                <div className="sm:hidden mt-0.5 font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
+                  {e.date}
+                </div>
                 {e.note && (
                   <div className="text-[12px] text-(--ink-4) leading-[1.4] italic mt-1">
                     &quot;{e.note}&quot;

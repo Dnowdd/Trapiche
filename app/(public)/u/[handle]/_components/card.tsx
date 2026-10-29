@@ -15,9 +15,9 @@ export default function Card({
 }) {
   return (
     <div
-      className={`bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 px-7 ${className}`}
+      className={`bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7 ${className}`}
     >
-      <div className="flex items-center justify-between mb-4.5">
+      <div className="flex items-center justify-between gap-4 mb-4.5">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">
             {eyebrow}

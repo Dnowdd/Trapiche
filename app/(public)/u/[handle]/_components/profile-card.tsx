@@ -12,16 +12,16 @@ export default function ProfileCard({ profile }: { profile: ProfileData }) {
 
   return (
     <section
-      className="pt-10 px-15 pb-9 grid grid-cols-2 gap-10 items-center"
+      className="pt-8 md:pt-10 px-4 sm:px-8 lg:px-15 pb-8 md:pb-9 grid gap-8 lg:grid-cols-2 lg:gap-10 items-center"
       data-screen-label="01 Perfil"
     >
       <div>
-        <div className="flex gap-6 items-center">
-          <div className="w-32 h-32 rounded-full bg-(--yellow) border-[1.5px] border-(--ink-2) flex items-center justify-center text-[42px] font-extrabold text-(--ink-2) tracking-[-0.02em] shrink-0">
+        <div className="flex gap-4 sm:gap-6 items-center">
+          <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full bg-(--yellow) border-[1.5px] border-(--ink-2) flex items-center justify-center text-[28px] sm:text-[42px] font-extrabold text-(--ink-2) tracking-[-0.02em] shrink-0">
             {u.initials}
           </div>
-          <div>
-            <h1 className="m-0 text-[36px] font-extrabold tracking-[-0.025em] text-(--ink) leading-none">
+          <div className="min-w-0">
+            <h1 className="m-0 text-[26px] sm:text-[36px] font-extrabold tracking-[-0.025em] text-(--ink) leading-none">
               {u.name}
             </h1>
             <div className="mt-1.5 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] flex gap-3.5 items-center flex-wrap">
@@ -35,7 +35,7 @@ export default function ProfileCard({ profile }: { profile: ProfileData }) {
               <span className="text-(--ink-5)">·</span>
               <span>desde {u.joined}</span>
             </div>
-            <div className="mt-3.5 flex gap-2.5">
+            <div className="mt-3.5 flex flex-wrap gap-2.5">
               {profile.isOwner && (
                 <button
                   className="text-[12px] font-medium border border-(--yellow-deep) text-(--ink-2) py-1.75 px-3.5 rounded-md bg-(--yellow) cursor-pointer transition-colors duration-150 hover:bg-(--yellow-soft)"
@@ -68,18 +68,18 @@ export default function ProfileCard({ profile }: { profile: ProfileData }) {
           )
         )}
       </div>
-      <div className="grid grid-cols-3 border-l border-[rgba(67,62,18,0.1)] pl-10">
+      <div className="grid grid-cols-3 border-t lg:border-t-0 lg:border-l border-[rgba(67,62,18,0.1)] pt-2 lg:pt-0 lg:pl-10">
         {profile.stats.map((s) => (
           <Link
             href={`/u/${u.handle}?tab=${s.href}`}
             scroll={false}
-            className="py-3.5 px-4 border-r border-b border-[rgba(67,62,18,0.08)] nth-[3n]:border-r-0 nth-last-[-n+3]:border-b-0 transition-colors duration-150 hover:bg-(--yellow-soft)"
+            className="py-3 px-2.5 sm:py-3.5 sm:px-4 border-r border-b border-[rgba(67,62,18,0.08)] nth-[3n]:border-r-0 nth-last-[-n+3]:border-b-0 transition-colors duration-150 hover:bg-(--yellow-soft)"
             key={s.label}
           >
-            <div className="text-[28px] font-bold tracking-[-0.02em] text-(--ink) leading-none">
+            <div className="text-[22px] sm:text-[28px] font-bold tracking-[-0.02em] text-(--ink) leading-none">
               {s.value}
             </div>
-            <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.06em] text-(--ink-4)">
+            <div className="mt-1 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.06em] text-(--ink-4) leading-tight">
               {s.label}
             </div>
           </Link>

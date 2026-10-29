@@ -22,8 +22,11 @@ export default function ProfileTabs({
   counts: ProfileData["counts"];
 }) {
   return (
-    <div className="px-15 border-b border-[rgba(67,62,18,0.12)]">
-      <div className="flex gap-8 overflow-x-auto" role="tablist">
+    <div className="px-4 sm:px-8 lg:px-15 border-b border-[rgba(67,62,18,0.12)]">
+      <div
+        className="flex gap-6 sm:gap-8 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        role="tablist"
+      >
         {(Object.keys(LABELS) as Tab[]).map((t) => (
           <Link
             key={t}

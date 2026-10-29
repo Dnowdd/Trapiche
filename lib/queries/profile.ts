@@ -194,7 +194,7 @@ export async function getReadingNow(userId: string) {
 export async function getInicio(
   userId: string,
   viewerId: string | null,
-  full: boolean,
+  limit: number,
 ) {
   const visibleLists = listsWhereForProfile(userId, viewerId);
   const [favorites, readingNow, activity] = await Promise.all([
@@ -210,7 +210,7 @@ export async function getInicio(
         OR: [{ listId: null }, { list: visibleLists }],
       },
       orderBy: { createdAt: "desc" },
-      take: full ? 200 : 8,
+      take: limit + 1,
       include: {
         book: { select: bookSummarySelect },
         list: {
@@ -226,7 +226,7 @@ export async function getInicio(
   return {
     favorites: favorites.map((f) => toCover(f.book)),
     readingNow,
-    activity: activity.map((a) => ({
+    activity: activity.slice(0, limit).map((a) => ({
       id: a.id,
       kind: a.kind,
       when: fmtAgo(a.createdAt),
@@ -238,7 +238,7 @@ export async function getInicio(
       text: a.text,
       days: a.days,
     })),
-    hasMoreActivity: !full && activity.length === 8,
+    hasMoreActivity: activity.length > limit,
   };
 }
 

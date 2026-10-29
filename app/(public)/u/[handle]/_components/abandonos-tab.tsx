@@ -74,14 +74,15 @@ export default function AbandonosTab({
         <div className="flex flex-col gap-4">
           {sorted.map((a) => (
             <article
-              className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-5.5 px-6.5 grid grid-cols-[100px_1fr_auto] gap-6 items-center"
+              className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:py-5.5 sm:px-6.5 grid grid-cols-[64px_1fr] sm:grid-cols-[100px_1fr_auto] gap-4 sm:gap-6 items-center"
               key={a.book.id}
             >
               <Link href={`/book/${a.book.id}`}>
                 <BookCover
                   book={a.book}
                   size="md"
-                  style={{ width: 100, height: 150 }}
+                  sizes="(max-width: 640px) 64px, 100px"
+                  style={{ width: "100%", aspectRatio: "2/3" }}
                 />
               </Link>
               <div className="min-w-0">
@@ -112,7 +113,7 @@ export default function AbandonosTab({
                   </div>
                 )}
               </div>
-              <div className="text-right flex flex-col items-end gap-2.5">
+              <div className="col-span-2 sm:col-span-1 flex flex-wrap sm:flex-col items-center sm:items-end sm:text-right gap-2.5 pt-3 sm:pt-0 border-t sm:border-t-0 border-(--rule)">
                 <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase">
                   {a.abandonedAt}
                 </span>

@@ -123,8 +123,8 @@ function verb(a: ActivityItem) {
 function ActivityRow({ a }: { a: ActivityItem }) {
   const quote = a.kind === "REVIEW" || a.kind === "ABANDONED" ? a.text : null;
   return (
-    <div className="flex gap-4 py-3.5 border-b border-(--rule) items-start last:border-b-0">
-      <div className="w-22.5 shrink-0 font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase pt-2">
+    <div className="flex gap-3 sm:gap-4 py-3.5 border-b border-(--rule) items-start last:border-b-0">
+      <div className="hidden sm:block w-22.5 shrink-0 font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase pt-2">
         {a.when}
       </div>
       <div className="w-7 h-7 shrink-0 rounded-full bg-(--yellow-soft) border border-(--yellow-deep) flex items-center justify-center text-(--ink-2)">
@@ -148,6 +148,9 @@ function ActivityRow({ a }: { a: ActivityItem }) {
         <div className="text-[13px] text-(--ink-3) [&_strong]:text-(--ink) [&_strong]:font-semibold">
           {verb(a)}
         </div>
+        <div className="sm:hidden mt-0.5 font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
+          {a.when}
+        </div>
         {quote && (
           <div className="mt-1.5 text-[12px] text-(--ink-4) leading-[1.45] border-l-2 border-(--rule) pl-2.5 italic">
             &quot;{quote}&quot;
@@ -165,13 +168,14 @@ export default function InicioTab({
   data,
   handle,
   isOwner,
-  full,
+  page,
 }: {
   data: Data;
   handle: string;
   isOwner: boolean;
-  full: boolean;
+  page: number;
 }) {
+  const full = page > 0;
   return (
     <>
       {!full && (
@@ -192,7 +196,7 @@ export default function InicioTab({
                   : "Nenhum favorito escolhido ainda."}
               </p>
             ) : (
-              <div className="grid grid-cols-5 gap-5">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-5">
                 {data.favorites.map((b, i) => (
                   <Link
                     href={`/book/${b.id}`}
@@ -238,7 +242,7 @@ export default function InicioTab({
                   : "Nenhuma leitura em andamento."}
               </p>
             ) : (
-              <div className="grid grid-cols-3 gap-4.5">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4.5">
                 {data.readingNow.map((r) => (
                   <Link
                     href={`/book/${r.book.id}`}
@@ -312,6 +316,15 @@ export default function InicioTab({
               <ActivityRow key={a.id} a={a} />
             ))}
           </div>
+        )}
+        {full && data.hasMoreActivity && (
+          <Link
+            href={`/u/${handle}?tab=inicio&historico=${page + 1}`}
+            scroll={false}
+            className="mt-4 self-start inline-flex h-9 items-center px-4 rounded-[10px] border border-[rgba(67,62,18,0.18)] text-[13px] font-medium text-(--ink-2) hover:bg-(--yellow-soft)"
+          >
+            Carregar mais
+          </Link>
         )}
       </Card>
     </>

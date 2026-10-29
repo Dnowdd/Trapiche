@@ -57,7 +57,7 @@ export default function EditProfileModal({ open, onOpenChange, user }: Props) {
     >
       <form onSubmit={submit}>
         <FormError message={error} />
-        <div className="grid grid-cols-2 gap-3.5">
+        <div className="grid sm:grid-cols-2 gap-x-3.5">
           <FormField label="Nome">
             <TextInput
               value={name}

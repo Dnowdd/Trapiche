@@ -140,7 +140,7 @@ export default function ListasTab({
             <span>◉ Fixadas</span>
             <span className="flex-1 h-px bg-(--rule)" />
           </div>
-          <div className="grid grid-cols-3 gap-5 mb-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5 mb-6">
             {pinned.map((l) => (
               <ListCardRich key={l.id} list={l} />
             ))}
@@ -154,7 +154,7 @@ export default function ListasTab({
         <span>{filter === "todas" ? "Todas as estantes" : "Resultados"}</span>
         <span className="flex-1 h-px bg-(--rule)" />
       </div>
-      <div className="grid grid-cols-3 gap-5 mb-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5 mb-6">
         {others.map((l) => (
           <ListCardRich key={l.id} list={l} />
         ))}

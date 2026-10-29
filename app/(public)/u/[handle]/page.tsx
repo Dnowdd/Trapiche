@@ -61,13 +61,14 @@ export default async function ProfilePage({ params, searchParams }: Props) {
   let content: React.ReactNode;
   switch (tab) {
     case "inicio": {
-      const full = sp.historico === "1";
+      const pages = Math.min(20, Math.max(0, Number(sp.historico) || 0));
+      const full = pages > 0;
       content = (
         <InicioTab
-          data={await getInicio(uid, viewerId, full)}
+          data={await getInicio(uid, viewerId, full ? pages * 30 : 8)}
           handle={handle}
           isOwner={owner}
-          full={full}
+          page={pages}
         />
       );
       break;
@@ -123,10 +124,16 @@ export default async function ProfilePage({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="bg-(--cream) rounded-[30px] border-15 border-(--yellow) mx-3.75 overflow-hidden">
+    <div
+      data-responsive
+      className="bg-(--cream) rounded-[22px] md:rounded-[30px] border-8 md:border-15 border-(--yellow) mx-2 md:mx-3.75 overflow-hidden"
+    >
       <ProfileCard profile={profile} />
       <ProfileTabs handle={handle} active={tab} counts={profile.counts} />
-      <div className="pt-9 px-15 pb-15" data-screen-label={`Tab: ${tab}`}>
+      <div
+        className="pt-7 md:pt-9 px-4 sm:px-8 lg:px-15 pb-12 md:pb-15"
+        data-screen-label={`Tab: ${tab}`}
+      >
         {content}
       </div>
     </div>

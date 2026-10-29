@@ -57,7 +57,7 @@ export default function EstanteTab({
           Nenhum livro aqui ainda.
         </p>
       ) : (
-        <div className="grid grid-cols-6 gap-4.5 gap-y-7">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4.5 gap-y-6 sm:gap-y-7">
           {shown.map((it) => (
             <Link
               href={`/book/${it.book.id}`}

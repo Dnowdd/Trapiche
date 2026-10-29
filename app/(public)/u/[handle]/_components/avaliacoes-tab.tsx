@@ -1,6 +1,7 @@
 "use client";
 
 import Stars from "@/components/shared/stars";
+import { Heart, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
@@ -31,22 +32,23 @@ export default function AvaliacoesTab({
     <div className="flex flex-col gap-4.5">
       {items.map((r) => (
         <article
-          className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-6.5 px-7 grid grid-cols-[120px_1fr] gap-7"
+          className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:py-6.5 sm:px-7 grid grid-cols-[72px_1fr] sm:grid-cols-[120px_1fr] gap-4 sm:gap-7"
           key={r.id}
         >
           <Link href={`/book/${r.book.id}`}>
             <BookCover
               book={r.book}
               size="md"
-              style={{ width: 120, height: 180 }}
+              sizes="(max-width: 640px) 72px, 120px"
+              style={{ width: "100%", aspectRatio: "2/3" }}
             />
           </Link>
-          <div>
-            <div className="flex items-center gap-3.5 mb-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 mb-2">
               <div>
                 <Link
                   href={`/book/${r.book.id}`}
-                  className="text-[18px] font-bold text-(--ink) tracking-[-0.01em] hover:underline"
+                  className="text-[16px] sm:text-[18px] font-bold text-(--ink) tracking-[-0.01em] hover:underline"
                 >
                   {r.book.title}
                 </Link>
@@ -58,7 +60,7 @@ export default function AvaliacoesTab({
                 <Stars value={r.stars} />
               </div>
             </div>
-            <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase flex gap-3 mt-1 mb-3.5">
+            <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase flex flex-wrap gap-x-3 gap-y-1 mt-1 mb-3.5">
               <span>{r.date}</span>
               {r.days != null && (
                 <>
@@ -76,16 +78,17 @@ export default function AvaliacoesTab({
             ) : (
               <p className="text-[13px] text-(--ink-4) m-0">Só a nota.</p>
             )}
-            <div className="mt-4 pt-3.5 border-t border-(--rule) flex gap-5.5 font-mono text-[11px] text-(--ink-3) tracking-[0.04em] [&_span]:inline-flex [&_span]:items-center [&_span]:gap-1.5 [&_strong]:text-(--ink) [&_strong]:font-['Inter',sans-serif] [&_strong]:font-semibold [&_strong]:text-[13px]">
+            <div className="mt-4 pt-3.5 border-t border-(--rule) flex flex-wrap gap-x-5.5 gap-y-2 font-mono text-[11px] text-(--ink-3) tracking-[0.04em] [&_span]:inline-flex [&_span]:items-center [&_span]:gap-1.5 [&_strong]:text-(--ink) [&_strong]:font-['Inter',sans-serif] [&_strong]:font-semibold [&_strong]:text-[13px]">
               <span>
-                ♡ <strong>{r.likes}</strong>{" "}
+                <Heart className="w-3.5 h-3.5" /> <strong>{r.likes}</strong>{" "}
                 {r.likes === 1 ? "curtida" : "curtidas"}
               </span>
               <Link
                 href={`/book/${r.book.id}/resenhas`}
                 className="inline-flex items-center gap-1.5 hover:text-(--ink)"
               >
-                💬 <strong>{r.comments}</strong>{" "}
+                <MessageCircle className="w-3.5 h-3.5" />{" "}
+                <strong>{r.comments}</strong>{" "}
                 {r.comments === 1 ? "comentário" : "comentários"}
               </Link>
               {isOwner && (

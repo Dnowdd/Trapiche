@@ -1,5 +1,6 @@
 "use client";
 
+import { Heart } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import Chips from "@/components/shared/chips";
@@ -35,7 +36,7 @@ export default function CurtidasTab({ items }: { items: Item[] }) {
           Nenhum livro curtido ainda.
         </p>
       ) : (
-        <div className="grid grid-cols-6 gap-4.5 gap-y-7">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4.5 gap-y-6 sm:gap-y-7">
           {shown.map((it) => (
             <Link
               href={`/book/${it.book.id}`}
@@ -68,8 +69,8 @@ export default function CurtidasTab({ items }: { items: Item[] }) {
               <div className="text-[11px] text-(--ink-4) -mt-0.75">
                 {it.book.author}
               </div>
-              <div className="font-mono text-[10px] text-(--ink-5) tracking-[0.04em] mt-0.5">
-                ♡ {it.when}
+              <div className="font-mono text-[10px] text-(--ink-5) tracking-[0.04em] mt-0.5 flex items-center gap-1">
+                <Heart className="w-3 h-3" /> {it.when}
               </div>
             </Link>
           ))}
