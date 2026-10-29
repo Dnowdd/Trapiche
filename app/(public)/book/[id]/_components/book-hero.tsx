@@ -82,6 +82,13 @@ export default function BookHero({ data, today }: BookHeroProps) {
 
   const chooseStatus = (s: Status | null) => {
     if (!viewer) return router.push("/auth");
+    if (
+      s === null &&
+      !window.confirm(
+        "Remover da estante? As datas e o histórico de leitura deste livro serão apagados. Sua resenha continua.",
+      )
+    )
+      return;
     if (s === "READ") return setModal("finish");
     if (s === "ABANDONED") return setModal("abandon");
     run(
@@ -102,6 +109,9 @@ export default function BookHero({ data, today }: BookHeroProps) {
   const showGoogle = rating.count === 0 && book.googleRating != null;
   const average = showGoogle ? book.googleRating! : rating.average;
   const current = STATUSES.find((s) => s.id === viewer?.status);
+  const canReread = viewer
+    ? viewer.timesRead > (viewer.reading ? 1 : 0)
+    : false;
 
   return (
     <section
@@ -185,6 +195,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
               <StatusMenu
                 current={current.id}
                 onChoose={chooseStatus}
+                canReread={canReread}
                 allowRemove
               />
             </DropdownMenu>
@@ -209,7 +220,11 @@ export default function BookHero({ data, today }: BookHeroProps) {
                 >
                   <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
-                <StatusMenu current="WANT" onChoose={chooseStatus} />
+                <StatusMenu
+                  current="WANT"
+                  onChoose={chooseStatus}
+                  canReread={canReread}
+                />
               </DropdownMenu>
             </div>
           )}
@@ -347,17 +362,21 @@ function StatusMenu({
   current,
   onChoose,
   allowRemove,
+  canReread,
 }: {
   current?: Status;
   onChoose: (s: Status | null) => void;
   allowRemove?: boolean;
+  canReread: boolean;
 }) {
   return (
     <DropdownMenuContent
       align="start"
       className="w-auto min-w-48 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(67,62,18,0.10)] shadow-[0_16px_40px_-8px_rgba(67,62,18,0.22),0_2px_8px_-2px_rgba(67,62,18,0.10)]"
     >
-      {STATUSES.filter((s) => s.id !== current).map((s) => (
+      {STATUSES.filter(
+        (s) => s.id !== current && (canReread || s.id !== "REREADING"),
+      ).map((s) => (
         <DropdownMenuItem
           key={s.id}
           className={menuItem}

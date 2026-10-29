@@ -173,7 +173,8 @@ async function relatedBooks(
 
 async function byAuthor(id: string, title: string, author: string | null) {
   if (!author) return null;
-  const vols = await searchBooks(`inauthor:"${author}"`, 20).catch(() => []);
+  let vols = await searchBooks(`inauthor:"${author}"`, 20).catch(() => []);
+  if (!vols.length) vols = await searchBooks(author, 20).catch(() => []);
   const seen = new Set([workKey(title, author)]);
   const items: { id: string; title: string; year: string | null }[] = [];
   for (const v of vols) {

@@ -14,7 +14,7 @@ import {
   type PartialDate,
 } from "../dates";
 import { fail, withUser } from "./result";
-import type { Prisma } from "../generated/prisma/client";
+import type { ActivityKind, Prisma } from "../generated/prisma/client";
 
 type Tx = Prisma.TransactionClient;
 
@@ -37,6 +37,29 @@ async function activeReading(tx: Tx, userId: string, bookId: string) {
   });
 }
 
+const SHELF_KINDS: ActivityKind[] = [
+  "ADDED_TO_SHELF",
+  "STARTED",
+  "FINISHED",
+  "ABANDONED",
+];
+const UNDO_WINDOW_MS = 30 * 60_000;
+
+async function logShelfActivity(
+  tx: Tx,
+  data: Prisma.ActivityUncheckedCreateInput & { bookId: string },
+) {
+  await tx.activity.deleteMany({
+    where: {
+      userId: data.userId,
+      bookId: data.bookId,
+      kind: { in: SHELF_KINDS },
+      createdAt: { gte: new Date(Date.now() - UNDO_WINDOW_MS) },
+    },
+  });
+  await tx.activity.create({ data });
+}
+
 async function finishedCount(tx: Tx, userId: string, bookId: string) {
   return tx.reading.count({ where: { userId, bookId, status: "FINISHED" } });
 }
@@ -54,6 +77,11 @@ async function closeActive(
   });
   if (sessions === 0) {
     await tx.reading.delete({ where: { id: active.id } });
+    const started = await tx.activity.findFirst({
+      where: { userId, bookId, kind: "STARTED" },
+      orderBy: { createdAt: "desc" },
+    });
+    if (started) await tx.activity.delete({ where: { id: started.id } });
     return;
   }
   await tx.reading.update({
@@ -105,34 +133,53 @@ export async function setShelfStatus(
       const entry = await shelfEntry(tx, userId, bookId);
       if (entry.status === status) return;
 
-      if (status === null || status === "WANT") {
+      if (status === null) {
+        await tx.reading.deleteMany({ where: { userId, bookId } });
+        await tx.activity.deleteMany({
+          where: { userId, bookId, kind: { in: SHELF_KINDS } },
+        });
+        await tx.userBook.update({
+          where: { id: entry.id },
+          data: {
+            status: null,
+            statusChangedAt: new Date(),
+            currentPage: 0,
+            abandonReason: null,
+            wantsToReturn: true,
+          },
+        });
+        return;
+      }
+
+      if (status === "WANT") {
         await closeActive(tx, userId, bookId, entry.currentPage);
         await tx.userBook.update({
           where: { id: entry.id },
           data: { status, statusChangedAt: new Date(), currentPage: 0 },
         });
-        if (status === "WANT") {
-          await tx.activity.create({
-            data: { userId, bookId, kind: "ADDED_TO_SHELF", text: "Quero ler" },
-          });
-        }
+        await logShelfActivity(tx, {
+          userId,
+          bookId,
+          kind: "ADDED_TO_SHELF",
+          text: "Quero ler",
+        });
         return;
       }
 
       const active = await activeReading(tx, userId, bookId);
       if (!active) {
         const done = await finishedCount(tx, userId, bookId);
+        if (status === "REREADING" && done === 0)
+          fail("Você ainda não terminou esse livro. Marque como “Lendo”.");
         await tx.reading.create({
           data: {
             userId,
             bookId,
-            number: status === "REREADING" ? Math.max(done + 1, 2) : done + 1,
+            number: done + 1,
             startedAt: today(),
           },
         });
-        await tx.activity.create({
-          data: { userId, bookId, kind: "STARTED" },
-        });
+        await logShelfActivity(tx, { userId, bookId, kind: "STARTED" });
       }
       await tx.userBook.update({
         where: { id: entry.id },
@@ -197,9 +244,7 @@ export async function finishBook(
           ...(note ? { note } : {}),
         },
       });
-      await tx.activity.create({
-        data: { userId, bookId, kind: "FINISHED", days },
-      });
+      await logShelfActivity(tx, { userId, bookId, kind: "FINISHED", days });
     });
     refresh();
     return { days };
@@ -246,8 +291,11 @@ export async function abandonBook(
           wantsToReturn: Boolean(input.wantsToReturn),
         },
       });
-      await tx.activity.create({
-        data: { userId, bookId, kind: "ABANDONED", text: reason },
+      await logShelfActivity(tx, {
+        userId,
+        bookId,
+        kind: "ABANDONED",
+        text: reason,
       });
     });
     refresh();
