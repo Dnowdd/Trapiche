@@ -9,18 +9,23 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "books": "node scripts/build-books.mjs"
+    "books": "node scripts/build-books.mjs",
+    "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:db": "docker run -d --rm --name trapiche-test-db -e POSTGRES_PASSWORD=test -e POSTGRES_DB=trapiche_test -p 54329:5432 postgres:16-alpine"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^7.8.0",
+    "@prisma/adapter-pg": "^7.8.0",
     "better-auth": "^1.6.14",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
+    "pg": "^8.23.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.12.4",
@@ -35,6 +40,7 @@
     "@prisma/client": "^7.8.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
@@ -42,6 +48,7 @@
     "prettier": "^3.9.10",
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }
