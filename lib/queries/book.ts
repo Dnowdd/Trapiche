@@ -9,7 +9,7 @@ import {
   type BookSummary,
 } from "../books";
 import { bestCover } from "../cover-probe";
-import { workKey } from "../editions";
+import { normalize, workKey } from "../editions";
 import { findOpenLibraryEditions, toIsbn13 } from "../open-library";
 import { findEditions, searchBooks } from "../google-books";
 import {
@@ -173,24 +173,34 @@ async function relatedBooks(
 
 async function byAuthor(id: string, title: string, author: string | null) {
   if (!author) return null;
-  let vols = await searchBooks(`inauthor:"${author}"`, 20).catch(() => []);
-  if (!vols.length) vols = await searchBooks(author, 20).catch(() => []);
+  let vols = await searchBooks(`inauthor:"${author}"`, 40).catch(() => []);
+  if (!vols.length) vols = await searchBooks(author, 40).catch(() => []);
   const seen = new Set([workKey(title, author)]);
-  const items: { id: string; title: string; year: string | null }[] = [];
+  const picked = [];
   for (const v of vols) {
-    const t = v.volumeInfo.title;
-    const key = workKey(t, author);
+    const key = workKey(v.volumeInfo.title, author);
     if (v.id === id || seen.has(key)) continue;
     if (!v.volumeInfo.authors?.includes(author)) continue;
+    if (normalize(v.volumeInfo.title) === normalize(author)) continue;
     seen.add(key);
-    items.push({
-      id: v.id,
-      title: t,
-      year: v.volumeInfo.publishedDate?.slice(0, 4) ?? null,
-    });
-    if (items.length >= 5) break;
+    picked.push(v);
+    if (picked.length >= 10) break;
   }
-  if (!items.length) return null;
+  picked.sort(
+    (a, b) =>
+      Number(Boolean(b.volumeInfo.imageLinks)) -
+      Number(Boolean(a.volumeInfo.imageLinks)),
+  );
+  if (!picked.length) return null;
+  const items = await Promise.all(
+    picked.map(async (v) => {
+      const row = volumeToRow(v);
+      return {
+        cover: toCover({ ...row, coverUrl: await bestCover(row.coverUrl) }),
+        year: row.publishedDate?.slice(0, 4) ?? null,
+      };
+    }),
+  );
   return { author, items };
 }
 
@@ -257,7 +267,7 @@ async function viewerState(
   viewerId: string,
   pageCount: number | null,
 ) {
-  const [entry, active, finished, review, lists] = await Promise.all([
+  const [entry, active, closed, review, lists] = await Promise.all([
     db.userBook.findUnique({
       where: { userId_bookId: { userId: viewerId, bookId } },
     }),
@@ -268,8 +278,13 @@ async function viewerState(
         sessions: { orderBy: [{ date: "desc" }, { createdAt: "desc" }] },
       },
     }),
-    db.reading.count({
-      where: { userId: viewerId, bookId, status: "FINISHED" },
+    db.reading.findMany({
+      where: {
+        userId: viewerId,
+        bookId,
+        status: { in: ["FINISHED", "ABANDONED"] },
+      },
+      orderBy: { number: "asc" },
     }),
     db.review.findUnique({
       where: { userId_bookId: { userId: viewerId, bookId } },
@@ -287,6 +302,8 @@ async function viewerState(
       },
     }),
   ]);
+
+  const finished = closed.filter((r) => r.status === "FINISHED").length;
 
   let reading = null;
   if (active && entry) {
@@ -329,6 +346,16 @@ async function viewerState(
     currentPage: entry?.currentPage ?? 0,
     timesRead: finished + (active ? 1 : 0),
     reading,
+    readings: closed.map((r) => ({
+      id: r.id,
+      number: r.number,
+      status: r.status,
+      started: fmtPartial(r.startedAt, r.startPrecision),
+      ended: fmtPartial(r.endedAt, r.endPrecision),
+      startedPartial: partialToISO(r.startedAt, r.startPrecision),
+      endedPartial: partialToISO(r.endedAt, r.endPrecision),
+      days: spanDays(r),
+    })),
     review: review
       ? {
           rating: review.rating,

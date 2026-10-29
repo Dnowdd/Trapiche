@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Heart,
   ListPlus,
+  RotateCcw,
   Share2,
   Star,
   X,
@@ -195,6 +196,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
               <StatusMenu
                 current={current.id}
                 onChoose={chooseStatus}
+                onReadAgain={() => setModal("finish")}
                 canReread={canReread}
                 allowRemove
               />
@@ -361,11 +363,13 @@ export default function BookHero({ data, today }: BookHeroProps) {
 function StatusMenu({
   current,
   onChoose,
+  onReadAgain,
   allowRemove,
   canReread,
 }: {
   current?: Status;
   onChoose: (s: Status | null) => void;
+  onReadAgain?: () => void;
   allowRemove?: boolean;
   canReread: boolean;
 }) {
@@ -374,6 +378,15 @@ function StatusMenu({
       align="start"
       className="w-auto min-w-48 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(67,62,18,0.10)] shadow-[0_16px_40px_-8px_rgba(67,62,18,0.22),0_2px_8px_-2px_rgba(67,62,18,0.10)]"
     >
+      {current === "READ" && onReadAgain && (
+        <>
+          <DropdownMenuItem className={menuItem} onClick={onReadAgain}>
+            <RotateCcw className="w-3.5 h-3.5" />
+            Li de novo
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
+        </>
+      )}
       {STATUSES.filter(
         (s) => s.id !== current && (canReread || s.id !== "REREADING"),
       ).map((s) => (

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { finishBook, setShelfStatus } from "@/lib/actions/shelf";
+import {
+  addPastReading,
+  deleteReading,
+  finishBook,
+  setShelfStatus,
+  updateReading,
+} from "@/lib/actions/shelf";
 import { saveReview } from "@/lib/actions/reviews";
 import { testDb, viewer } from "./setup";
 
@@ -78,6 +84,35 @@ describe("shelf status", () => {
     expect((await readings()).map((r) => r.number)).toEqual([1]);
   });
 
+  it("treats finish → want → finish within minutes as a correction", async () => {
+    await finishBook(BOOK, {});
+    await setShelfStatus(BOOK, "WANT");
+    await finishBook(BOOK, {});
+    expect((await readings()).map((r) => [r.number, r.status])).toEqual([
+      [1, "FINISHED"],
+    ]);
+    expect(await kinds()).toEqual(["FINISHED"]);
+  });
+
+  it("keeps an old finish when the book goes back to the pile", async () => {
+    await finishBook(BOOK, {});
+    await testDb.userBook.updateMany({
+      data: { statusChangedAt: new Date(Date.now() - 2 * 3_600_000) },
+    });
+    await setShelfStatus(BOOK, "WANT");
+    await finishBook(BOOK, {});
+    expect((await readings()).map((r) => r.number)).toEqual([1, 2]);
+  });
+
+  it("reopens a just-finished book when marked as reading again", async () => {
+    await setShelfStatus(BOOK, "READING");
+    await finishBook(BOOK, {});
+    await setShelfStatus(BOOK, "READING");
+    expect((await readings()).map((r) => [r.number, r.status])).toEqual([
+      [1, "ACTIVE"],
+    ]);
+  });
+
   it("only allows rereading a finished book", async () => {
     const blocked = await setShelfStatus(BOOK, "REREADING");
     expect(blocked.ok).toBe(false);
@@ -133,6 +168,111 @@ describe("finishing with optional dates", () => {
     expect((await finishBook(BOOK, { finishedAt: "2021-02-30" })).ok).toBe(
       false,
     );
+  });
+});
+
+describe("reading history", () => {
+  const status = async () =>
+    (await testDb.userBook.findFirstOrThrow({ where: { bookId: BOOK } }))
+      .status;
+
+  it("registers several past readings and numbers them chronologically", async () => {
+    await addPastReading(BOOK, { finishedAt: "2020" });
+    await addPastReading(BOOK, { finishedAt: "2012-05" });
+    await addPastReading(BOOK, {
+      startedAt: "2016-01-02",
+      finishedAt: "2016-01-20",
+    });
+    await addPastReading(BOOK, {});
+    await addPastReading(BOOK, { finishedAt: "2024-07-01" });
+
+    const rs = await readings();
+    expect(rs).toHaveLength(5);
+    expect(rs.map((r) => r.endedAt?.getUTCFullYear() ?? null)).toEqual([
+      2012,
+      2016,
+      2020,
+      2024,
+      null,
+    ]);
+    expect(await status()).toBe("READ");
+    expect(await kinds()).toEqual([]);
+  });
+
+  it("turns a first read in progress into a reread when a past one is added", async () => {
+    await setShelfStatus(BOOK, "READING");
+    await addPastReading(BOOK, { finishedAt: "2019" });
+    expect(await status()).toBe("REREADING");
+    expect((await readings()).map((r) => [r.number, r.status])).toEqual([
+      [1, "FINISHED"],
+      [2, "ACTIVE"],
+    ]);
+  });
+
+  it("reads again after already finished", async () => {
+    await finishBook(BOOK, { finishedAt: "2021-03-10" });
+    await finishBook(BOOK, { finishedAt: "2026-01-05" });
+    expect((await readings()).map((r) => r.number)).toEqual([1, 2]);
+  });
+
+  it("edits dates and renumbers", async () => {
+    await addPastReading(BOOK, { finishedAt: "2020" });
+    await addPastReading(BOOK, { finishedAt: "2022" });
+    const [first] = await readings();
+    expect((await updateReading(first.id, { finishedAt: "2023-02" })).ok).toBe(
+      true,
+    );
+    const rs = await readings();
+    expect(rs.map((r) => [r.id === first.id, r.number])).toEqual([
+      [false, 1],
+      [true, 2],
+    ]);
+    expect(rs[1].endPrecision).toBe("MONTH");
+    expect(
+      (await updateReading(first.id, { startedAt: "2024", finishedAt: "2023" }))
+        .ok,
+    ).toBe(false);
+  });
+
+  it("deleting the only finished reading takes the book out of Read", async () => {
+    await addPastReading(BOOK, { finishedAt: "2020" });
+    const [r] = await readings();
+    await deleteReading(r.id);
+    expect(await readings()).toHaveLength(0);
+    expect(await status()).toBeNull();
+  });
+
+  it("removes the feed entry of a deleted reading and keeps the others", async () => {
+    await finishBook(BOOK, { finishedAt: "2021" });
+    await testDb.activity.updateMany({
+      data: { createdAt: new Date(Date.now() - 2 * 3_600_000) },
+    });
+    await finishBook(BOOK, { finishedAt: "2026-01" });
+    expect(await kinds()).toEqual(["FINISHED", "FINISHED"]);
+
+    const [first] = await readings();
+    await deleteReading(first.id);
+    const left = await testDb.activity.findMany({ where: { bookId: BOOK } });
+    expect(left).toHaveLength(1);
+    expect(left[0].readingId).toBe((await readings())[0].id);
+  });
+
+  it("cleans feed entries created before readings were linked", async () => {
+    await addPastReading(BOOK, { finishedAt: "2020" });
+    await testDb.activity.create({
+      data: { userId: USER, bookId: BOOK, kind: "FINISHED" },
+    });
+    const [r] = await readings();
+    await deleteReading(r.id);
+    expect(await kinds()).toEqual([]);
+  });
+
+  it("does not let another user touch a reading", async () => {
+    await addPastReading(BOOK, {});
+    const [r] = await readings();
+    viewer.id = "someone-else";
+    expect((await deleteReading(r.id)).ok).toBe(false);
+    expect(await readings()).toHaveLength(1);
   });
 });
 

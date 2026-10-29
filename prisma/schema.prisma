@@ -178,9 +178,10 @@ model Reading {
   endPage        Int?
   createdAt      DateTime      @default(now())
 
-  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book     Book             @relation(fields: [bookId], references: [id])
-  sessions ReadingSession[]
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book       Book             @relation(fields: [bookId], references: [id])
+  sessions   ReadingSession[]
+  activities Activity[]
 
   @@index([userId, bookId])
   @@index([bookId, status])
@@ -316,15 +317,17 @@ model Activity {
   bookId    String?
   listId    String?
   reviewId  String?
+  readingId String?
   rating    Float?
   text      String?
   days      Int?
   createdAt DateTime     @default(now())
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book   Book?   @relation(fields: [bookId], references: [id])
-  list   List?   @relation(fields: [listId], references: [id], onDelete: Cascade)
-  review Review? @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book    Book?    @relation(fields: [bookId], references: [id])
+  list    List?    @relation(fields: [listId], references: [id], onDelete: Cascade)
+  review  Review?  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reading Reading? @relation(fields: [readingId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }

@@ -10,6 +10,7 @@ import Editions from "./_components/editions";
 import ByAuthor from "./_components/by-author";
 import InLists from "./_components/in-lists";
 import MyReading from "./_components/my-reading";
+import MyReadings from "./_components/my-readings";
 import Related from "./_components/related";
 import ReviewsSection from "./_components/reviews-section";
 import TechDetails from "./_components/tech-details";
@@ -84,10 +85,10 @@ export default async function BookDetailPage({ params }: Props) {
         >
           <div className="flex flex-col gap-12 min-w-0">
             <MyReading data={data} today={today} />
+            <MyReadings data={data} today={today} />
             <ReviewsSection data={data} />
             <InLists lists={data.lists} />
             <TechDetails book={data.book} language={data.languageLabel} />
-            <ByAuthor data={data.byAuthor} />
           </div>
           {data.editions.length > 0 && (
             <aside className="min-w-0 order-first lg:order-none lg:sticky lg:top-6">
@@ -96,9 +97,10 @@ export default async function BookDetailPage({ params }: Props) {
           )}
         </div>
 
-        {data.related.length > 0 && (
-          <div className="mt-14 pt-12 border-t border-(--rule)">
-            <Related books={data.related} />
+        {(data.byAuthor || data.related.length > 0) && (
+          <div className="mt-14 pt-12 border-t border-(--rule) flex flex-col gap-14">
+            <ByAuthor data={data.byAuthor} />
+            {data.related.length > 0 && <Related books={data.related} />}
           </div>
         )}
       </div>

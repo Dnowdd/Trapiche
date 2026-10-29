@@ -60,6 +60,40 @@ async function logShelfActivity(
   await tx.activity.create({ data });
 }
 
+async function undoRecentFinish(
+  tx: Tx,
+  entry: {
+    userId: string;
+    bookId: string;
+    status: string | null;
+    statusChangedAt: Date | null;
+  },
+) {
+  const recent =
+    entry.status === "READ" &&
+    entry.statusChangedAt &&
+    Date.now() - entry.statusChangedAt.getTime() < UNDO_WINDOW_MS;
+  if (!recent) return;
+  const { userId, bookId } = entry;
+  const last = await tx.reading.findFirst({
+    where: { userId, bookId, status: "FINISHED" },
+    orderBy: { number: "desc" },
+  });
+  if (!last) return;
+  await tx.reading.update({
+    where: { id: last.id },
+    data: { status: "ACTIVE", endedAt: null, endPrecision: "DAY" },
+  });
+  await tx.activity.deleteMany({
+    where: {
+      userId,
+      bookId,
+      kind: "FINISHED",
+      createdAt: { gte: new Date(Date.now() - UNDO_WINDOW_MS) },
+    },
+  });
+}
+
 async function finishedCount(tx: Tx, userId: string, bookId: string) {
   return tx.reading.count({ where: { userId, bookId, status: "FINISHED" } });
 }
@@ -77,11 +111,7 @@ async function closeActive(
   });
   if (sessions === 0) {
     await tx.reading.delete({ where: { id: active.id } });
-    const started = await tx.activity.findFirst({
-      where: { userId, bookId, kind: "STARTED" },
-      orderBy: { createdAt: "desc" },
-    });
-    if (started) await tx.activity.delete({ where: { id: started.id } });
+    await dropUnlinkedActivity(tx, userId, bookId, "STARTED");
     return;
   }
   await tx.reading.update({
@@ -151,6 +181,8 @@ export async function setShelfStatus(
         return;
       }
 
+      if (status !== "REREADING") await undoRecentFinish(tx, entry);
+
       if (status === "WANT") {
         await closeActive(tx, userId, bookId, entry.currentPage);
         await tx.userBook.update({
@@ -171,7 +203,7 @@ export async function setShelfStatus(
         const done = await finishedCount(tx, userId, bookId);
         if (status === "REREADING" && done === 0)
           fail("Você ainda não terminou esse livro. Marque como “Lendo”.");
-        await tx.reading.create({
+        const reading = await tx.reading.create({
           data: {
             userId,
             bookId,
@@ -179,7 +211,12 @@ export async function setShelfStatus(
             startedAt: today(),
           },
         });
-        await logShelfActivity(tx, { userId, bookId, kind: "STARTED" });
+        await logShelfActivity(tx, {
+          userId,
+          bookId,
+          kind: "STARTED",
+          readingId: reading.id,
+        });
       }
       await tx.userBook.update({
         where: { id: entry.id },
@@ -201,39 +238,27 @@ export async function finishBook(
 ) {
   return withUser(async (userId) => {
     const book = await ensureBook(bookId);
-    const start = parsePartial(input.startedAt, "a data de início");
-    const end = parsePartial(input.finishedAt, "a data de término");
+    const dates = parseDates(input);
     const note = parseOptionalText(input.note, 500);
-    if (start && end && start.date > periodEnd(end))
-      fail("O início não pode ser depois do término.");
-    const dates = {
-      startedAt: start?.date ?? null,
-      startPrecision: start?.precision ?? "DAY",
-      endedAt: end?.date ?? null,
-      endPrecision: end?.precision ?? "DAY",
-    } as const;
     const days = spanDays(dates);
     await db.$transaction(async (tx) => {
       const entry = await shelfEntry(tx, userId, bookId);
       const active = await activeReading(tx, userId, bookId);
 
-      if (active) {
-        await tx.reading.update({
-          where: { id: active.id },
-          data: { status: "FINISHED", ...dates },
-        });
-      } else {
-        const done = await finishedCount(tx, userId, bookId);
-        await tx.reading.create({
-          data: {
-            userId,
-            bookId,
-            number: done + 1,
-            status: "FINISHED",
-            ...dates,
-          },
-        });
-      }
+      const reading = active
+        ? await tx.reading.update({
+            where: { id: active.id },
+            data: { status: "FINISHED", ...dates },
+          })
+        : await tx.reading.create({
+            data: {
+              userId,
+              bookId,
+              number: (await finishedCount(tx, userId, bookId)) + 1,
+              status: "FINISHED",
+              ...dates,
+            },
+          });
       await tx.userBook.update({
         where: { id: entry.id },
         data: {
@@ -244,7 +269,14 @@ export async function finishBook(
           ...(note ? { note } : {}),
         },
       });
-      await logShelfActivity(tx, { userId, bookId, kind: "FINISHED", days });
+      await renumber(tx, userId, bookId);
+      await logShelfActivity(tx, {
+        userId,
+        bookId,
+        kind: "FINISHED",
+        days,
+        readingId: reading.id,
+      });
     });
     refresh();
     return { days };
@@ -262,25 +294,22 @@ export async function abandonBook(
     await db.$transaction(async (tx) => {
       const entry = await shelfEntry(tx, userId, bookId);
       const active = await activeReading(tx, userId, bookId);
-      if (active) {
-        await tx.reading.update({
-          where: { id: active.id },
-          data: { status: "ABANDONED", endedAt: today(), endPage: page },
-        });
-      } else {
-        const done = await finishedCount(tx, userId, bookId);
-        await tx.reading.create({
-          data: {
-            userId,
-            bookId,
-            number: done + 1,
-            status: "ABANDONED",
-            startedAt: today(),
-            endedAt: today(),
-            endPage: page,
-          },
-        });
-      }
+      const reading = active
+        ? await tx.reading.update({
+            where: { id: active.id },
+            data: { status: "ABANDONED", endedAt: today(), endPage: page },
+          })
+        : await tx.reading.create({
+            data: {
+              userId,
+              bookId,
+              number: (await finishedCount(tx, userId, bookId)) + 1,
+              status: "ABANDONED",
+              startedAt: today(),
+              endedAt: today(),
+              endPage: page,
+            },
+          });
       await tx.userBook.update({
         where: { id: entry.id },
         data: {
@@ -296,6 +325,7 @@ export async function abandonBook(
         bookId,
         kind: "ABANDONED",
         text: reason,
+        readingId: reading.id,
       });
     });
     refresh();
@@ -486,4 +516,157 @@ export async function saveFavorites(bookIds: string[]) {
 
 export async function returnToPile(bookId: string) {
   return setShelfStatus(bookId, "WANT");
+}
+
+function parseDates(input: { startedAt?: string; finishedAt?: string }) {
+  const start = parsePartial(input.startedAt, "a data de início");
+  const end = parsePartial(input.finishedAt, "a data de término");
+  if (start && end && start.date > periodEnd(end))
+    fail("O início não pode ser depois do término.");
+  return {
+    startedAt: start?.date ?? null,
+    startPrecision: start?.precision ?? "DAY",
+    endedAt: end?.date ?? null,
+    endPrecision: end?.precision ?? "DAY",
+  } as const;
+}
+
+async function renumber(tx: Tx, userId: string, bookId: string) {
+  const all = await tx.reading.findMany({ where: { userId, bookId } });
+  const when = (r: (typeof all)[number]) =>
+    (r.endedAt ?? r.startedAt ?? r.createdAt).getTime();
+  const sorted = all.sort((a, b) => {
+    if ((a.status === "ACTIVE") !== (b.status === "ACTIVE"))
+      return a.status === "ACTIVE" ? 1 : -1;
+    return when(a) - when(b);
+  });
+  for (const [i, r] of sorted.entries())
+    if (r.number !== i + 1)
+      await tx.reading.update({ where: { id: r.id }, data: { number: i + 1 } });
+}
+
+async function dropUnlinkedActivity(
+  tx: Tx,
+  userId: string,
+  bookId: string,
+  kind: "FINISHED" | "ABANDONED" | "STARTED",
+) {
+  const status = kind === "STARTED" ? undefined : kind;
+  const [remaining, unlinked] = await Promise.all([
+    tx.reading.count({ where: { userId, bookId, status } }),
+    tx.activity.findMany({
+      where: { userId, bookId, kind, readingId: null },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    }),
+  ]);
+  const linked = await tx.activity.count({
+    where: { userId, bookId, kind, readingId: { not: null } },
+  });
+  const extra = linked + unlinked.length - remaining;
+  if (extra > 0)
+    await tx.activity.deleteMany({
+      where: { id: { in: unlinked.slice(0, extra).map((a) => a.id) } },
+    });
+}
+
+async function ownReading(tx: Tx, userId: string, readingId: string) {
+  const reading = await tx.reading.findUnique({ where: { id: readingId } });
+  if (!reading || reading.userId !== userId) fail("Leitura não encontrada.");
+  if (reading.status === "ACTIVE")
+    fail("Essa leitura ainda está em andamento.");
+  return reading;
+}
+
+export async function addPastReading(
+  bookId: string,
+  input: { startedAt?: string; finishedAt?: string },
+) {
+  return withUser(async (userId) => {
+    const book = await ensureBook(bookId);
+    const dates = parseDates(input);
+    await db.$transaction(async (tx) => {
+      const entry = await shelfEntry(tx, userId, bookId);
+      await tx.reading.create({
+        data: {
+          userId,
+          bookId,
+          number: 0,
+          status: "FINISHED",
+          ...dates,
+        },
+      });
+      await renumber(tx, userId, bookId);
+      const status =
+        entry.status === null || entry.status === "WANT"
+          ? "READ"
+          : entry.status === "READING"
+            ? "REREADING"
+            : entry.status;
+      if (status !== entry.status)
+        await tx.userBook.update({
+          where: { id: entry.id },
+          data: {
+            status,
+            statusChangedAt: new Date(),
+            ...(status === "READ"
+              ? { currentPage: book.pageCount ?? entry.currentPage }
+              : {}),
+          },
+        });
+    });
+    refresh();
+  });
+}
+
+export async function updateReading(
+  readingId: string,
+  input: { startedAt?: string; finishedAt?: string },
+) {
+  return withUser(async (userId) => {
+    const dates = parseDates(input);
+    await db.$transaction(async (tx) => {
+      const reading = await ownReading(tx, userId, readingId);
+      await tx.reading.update({
+        where: { id: reading.id },
+        data:
+          reading.status === "ABANDONED"
+            ? {
+                startedAt: dates.startedAt,
+                startPrecision: dates.startPrecision,
+              }
+            : dates,
+      });
+      await renumber(tx, userId, reading.bookId);
+    });
+    refresh();
+  });
+}
+
+export async function deleteReading(readingId: string) {
+  return withUser(async (userId) => {
+    await db.$transaction(async (tx) => {
+      const reading = await ownReading(tx, userId, readingId);
+      const { bookId } = reading;
+      await tx.reading.delete({ where: { id: reading.id } });
+      if (reading.status !== "ACTIVE")
+        await dropUnlinkedActivity(tx, userId, bookId, reading.status);
+      await dropUnlinkedActivity(tx, userId, bookId, "STARTED");
+      await renumber(tx, userId, bookId);
+      const entry = await shelfEntry(tx, userId, bookId);
+      const done = await finishedCount(tx, userId, bookId);
+      if (done > 0) return;
+      if (entry.status === "READ")
+        await tx.userBook.update({
+          where: { id: entry.id },
+          data: { status: null, statusChangedAt: new Date(), currentPage: 0 },
+        });
+      else if (entry.status === "REREADING")
+        await tx.userBook.update({
+          where: { id: entry.id },
+          data: { status: "READING" },
+        });
+    });
+    refresh();
+  });
 }
