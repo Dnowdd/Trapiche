@@ -1,69 +1,48 @@
+import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
-import { getFeaturedBooks } from "@/app/catalog";
-import type { Book } from "@/lib/types/book";
+import { getHomePopular } from "@/lib/queries/home";
 
 const Popular = async () => {
-  const density = 8;
-  const books = await getFeaturedBooks();
-  const list = books.slice(0, density);
+  const items = await getHomePopular(8);
+  if (items.length === 0) return null;
 
   return (
-    <section className="px-12.5" data-screen-label="06 Populares">
-      <div className="flex items-end justify-between px-7.5 pb-4">
-        <div>
-          <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
-            Esta semana
-          </div>
-
-          <h2 className="m-0 text-[22px] font-bold text-(--ink-2) tracking-[-0.01em]">
-            Livros populares no Trapiche
-          </h2>
+    <section
+      id="populares"
+      className="px-4 sm:px-8 lg:px-20 scroll-mt-6"
+      data-screen-label="06 Populares"
+    >
+      <div className="pb-4">
+        <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
+          Nas estantes
         </div>
-
-        <a
-          className="text-[12px] text-(--ink-3) font-medium border-b border-(--ink-4) pb-px transition-colors duration-150 hover:text-(--ink)"
-          href="#"
-        >
-          Ver toda a lista →
-        </a>
+        <h2 className="m-0 text-[22px] font-bold text-(--ink-2) tracking-[-0.01em]">
+          Livros populares no Trapiche
+        </h2>
       </div>
 
-      <div className="px-7.5">
-        <div
-          className="grid gap-4.5"
-          style={{
-            gridTemplateColumns: `repeat(${density}, 1fr)`,
-          }}
-        >
-          {list.map((b: Book, i: number) => {
-            const pct =
-              [92, 87, 84, 81, 79, 76, 74, 71, 68, 66, 64, 62][i] || 60;
-            const reads = 3200 - i * 280;
-            return (
-              <div className="flex flex-col gap-2.5 cursor-pointer" key={b.id}>
-                <BookCover
-                  book={b}
-                  size="md"
-                  style={{ width: "100%", aspectRatio: "2/3" }}
-                />
-
-                <div className="flex justify-between items-center font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
-                  <span>{reads.toLocaleString("pt-BR")} leitoras</span>
-
-                  <span className="text-(--ink-2) font-semibold">{pct}%</span>
-                </div>
-
-                <div className="text-[14px] font-semibold text-(--ink-2) tracking-[-0.005em] leading-tight">
-                  {b.title}
-                </div>
-
-                <div className="text-[12px] text-(--ink-4) -mt-1">
-                  {b.author}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-4 gap-y-6">
+        {items.map(({ book, readers }) => (
+          <Link
+            href={`/book/${book.googleId ?? book.id}`}
+            className="flex flex-col gap-2 transition-transform duration-120 hover:-translate-y-0.5"
+            key={book.id}
+          >
+            <BookCover
+              book={book}
+              size="md"
+              style={{ width: "100%", aspectRatio: "2/3" }}
+            />
+            <div className="text-[13px] font-semibold text-(--ink-2) tracking-[-0.005em] leading-tight line-clamp-2">
+              {book.title}
+            </div>
+            <div className="text-[11px] text-(--ink-4) -mt-1">
+              {readers > 0
+                ? `${readers.toLocaleString("pt-BR")} ${readers === 1 ? "leitor" : "leitores"}`
+                : book.author}
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   );

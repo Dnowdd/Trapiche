@@ -122,7 +122,7 @@ const HowItWorks = () => {
     {
       n: "01",
       title: "Cadastre o que você lê",
-      body: "Adicione livros por título, ISBN ou foto da capa. A gente puxa metadados, mas o resto — anotação, humor, marginália — é seu.",
+      body: "Busque por título, autor ou ISBN. A gente traz capa, edições e dados do livro — as datas, as notas e as anotações são suas.",
     },
     {
       n: "02",
@@ -132,17 +132,17 @@ const HowItWorks = () => {
     {
       n: "03",
       title: "Descubra com gente real",
-      body: "Veja listas e resenhas de leitoras que se parecem com você. Quando travar, peça à IA — ela usa cinco livros seus, não algoritmo opaco.",
+      body: "Veja listas e resenhas de leitoras reais e descubra o que quem leu o mesmo livro leu também. Sem ranking de mais vendidos.",
     },
   ];
 
   return (
     <section
-      className="px-12.5"
+      className="px-4 sm:px-8 lg:px-20 scroll-mt-6"
       id="como-funciona"
       data-screen-label="03 Como funciona"
     >
-      <div className="flex items-end justify-between px-7.5 pb-4">
+      <div className="pb-4">
         <div>
           <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase mb-1.5">
             Como funciona
@@ -154,10 +154,10 @@ const HowItWorks = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 px-7.5 pt-6">
+      <div className="grid gap-4.5 md:grid-cols-3 pt-2">
         {steps.map((s, i) => (
           <div
-            className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] pt-7 px-7 pb-8 flex flex-col gap-3.5 relative min-h-55"
+            className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 md:pt-7 md:px-7 md:pb-8 flex flex-col gap-3.5 relative md:min-h-55"
             key={i}
           >
             <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.08em]">

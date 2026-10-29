@@ -48,24 +48,6 @@ const Header = () => {
       <div className="flex items-center gap-4.5 md:order-last">
         {user ? (
           <>
-            <button
-              className="w-8.5 h-8.5 rounded-lg flex items-center justify-center text-(--ink-2) transition-[background] duration-150 hover:bg-[rgba(67,62,18,0.06)]"
-              aria-label="Notificações"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-              </svg>
-            </button>
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2.5 cursor-pointer outline-none group/trigger">
                 <div className="w-9 h-9 rounded-full bg-(--cream-deep) flex items-center justify-center text-[13px] font-bold text-(--ink-2) border-[1.5px] border-(--ink-2) select-none transition-opacity duration-150 group-data-[popup-open]/trigger:opacity-70">

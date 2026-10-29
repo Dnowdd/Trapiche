@@ -1,14 +1,14 @@
 const Quote = () => {
   return (
     <section
-      className="mt-16 py-30 flex flex-col items-center gap-8 text-center"
+      className="mt-6 py-16 md:py-28 px-6 flex flex-col items-center gap-8 text-center"
       data-screen-label="08 Citacao"
     >
-      <div className="font-['Inter',serif] text-[80px] leading-[0.6] text-(--ink-3) opacity-40 font-bold">
+      <div className="font-['Inter',serif] text-[64px] md:text-[80px] leading-[0.6] text-(--ink-3) opacity-40 font-bold">
         &quot;
       </div>
 
-      <blockquote className="m-0 max-w-205 text-[22px] leading-normal text-(--ink-3) font-normal tracking-[-0.005em] text-balance">
+      <blockquote className="m-0 max-w-205 text-[18px] md:text-[22px] leading-normal text-(--ink-3) font-normal tracking-[-0.005em] text-balance">
         Nunca, porém, vendia os livros, que ia empilhando num canto do trapiche,
         sob tijolos, para que os ratos não os roessem. Lia-os todos numa ânsia
         que era quase febre.

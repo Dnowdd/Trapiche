@@ -1,19 +1,10 @@
 "use client";
 
-import { type CSSProperties, useEffect, useState } from "react";
+import { type CSSProperties } from "react";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import BookCover from "@/components/shared/book-cover";
 import type { Book } from "@/lib/types/book";
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 const BOOK_POSITIONS: CSSProperties[] = [
   {
@@ -63,27 +54,24 @@ const Hero = ({ books }: HeroProps) => {
   const router = useRouter();
   const user = session?.user;
 
-  const [seed, setSeed] = useState(0);
-  const [picked, setPicked] = useState(() => books.slice(0, 3));
-
-  useEffect(() => {
-    setPicked(shuffle(books).slice(0, 3));
-  }, [seed, books]);
+  const picked = books.slice(0, 3);
 
   return (
     <section
-      className="grid grid-cols-2 gap-10 pt-25 px-[125px] pb-[90px] items-center"
+      className="grid gap-6 md:gap-10 md:grid-cols-2 pt-12 md:pt-20 lg:pt-25 px-4 sm:px-8 lg:px-[125px] pb-8 md:pb-[90px] items-center"
       data-screen-label="02 Hero"
     >
       <div>
-        <h1 className="m-0 mb-6 text-[64px] font-extrabold leading-[0.98] tracking-[-0.025em] text-(--ink-2)">
+        <h1 className="m-0 mb-6 text-[40px] sm:text-[52px] lg:text-[64px] font-extrabold leading-[0.98] tracking-[-0.025em] text-(--ink-2)">
           O porto seguro
           <br />
           das suas{" "}
-          <em className="not-italic relative inline-block after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-[0.06em] after:h-[0.32em] after:bg-(--yellow) after:z-[-1] after:[transform:skewX(-6deg)]">
-            leituras
-          </em>
-          .
+          <span className="whitespace-nowrap">
+            <em className="not-italic relative inline-block after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-[0.06em] after:h-[0.32em] after:bg-(--yellow) after:z-[-1] after:[transform:skewX(-6deg)]">
+              leituras
+            </em>
+            .
+          </span>
         </h1>
 
         <p className="m-0 mb-8 max-w-[460px] text-[15px] leading-[1.55] text-(--ink-3)">
@@ -92,7 +80,7 @@ const Hero = ({ books }: HeroProps) => {
           ranking, sem rede social, só você e os seus livros.
         </p>
 
-        <div className="flex items-center gap-3.5">
+        <div className="flex flex-wrap items-center gap-3.5">
           <button
             className="bg-(--yellow) text-(--ink) py-3 px-5.5 rounded-lg text-[14px] font-semibold inline-flex items-center gap-2 border border-(--yellow-deep) transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(67,62,18,0.4)]"
             onClick={() => {
@@ -163,34 +151,13 @@ const Hero = ({ books }: HeroProps) => {
             </a>
           )}
         </div>
-
-        <div className="mt-9 flex gap-8 font-mono text-[11px] text-(--ink-4) tracking-[0.04em]">
-          <div>
-            <strong className="block font-['Inter',sans-serif] text-[20px] font-bold text-(--ink-2) tracking-[-0.01em] mb-0.5">
-              14.8k
-            </strong>
-            leitoras &amp; leitores
-          </div>
-          <div>
-            <strong className="block font-['Inter',sans-serif] text-[20px] font-bold text-(--ink-2) tracking-[-0.01em] mb-0.5">
-              312k
-            </strong>
-            livros cadastrados
-          </div>
-          <div>
-            <strong className="block font-['Inter',sans-serif] text-[20px] font-bold text-(--ink-2) tracking-[-0.01em] mb-0.5">
-              2.4M
-            </strong>
-            páginas viradas
-          </div>
-        </div>
       </div>
 
-      <div className="relative h-95 flex items-center justify-center">
-        <div className="relative w-[460px] h-90">
+      <div className="relative h-72 sm:h-95 flex items-center justify-center overflow-hidden md:overflow-visible">
+        <div className="relative w-[460px] h-90 shrink-0 scale-[0.68] sm:scale-90 lg:scale-100">
           {picked.map((b, idx) => (
             <BookCover
-              key={b.id + seed}
+              key={b.id}
               book={b}
               size="lg"
               style={BOOK_POSITIONS[idx]}
