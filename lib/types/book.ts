@@ -70,6 +70,9 @@ export interface GoogleBooksVolume {
     categories?: string[];
     averageRating?: number;
     ratingsCount?: number;
+    workEditions?: number;
+    olWork?: string;
+    olWorkTitle?: string;
     imageLinks?: {
       smallThumbnail?: string;
       thumbnail?: string;

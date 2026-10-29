@@ -4,10 +4,14 @@ import type {
   GoogleBooksResponse,
   GoogleBooksVolume,
 } from "./types/book";
+import { cachedJson, HttpError, markUnavailable } from "./api-cache";
 import { sharpCover } from "./cover-url";
+import { searchOpenLibrary } from "./open-library";
 import {
   authorSurname,
+  cleanAuthor,
   groupWorks,
+  normalize,
   sameWork,
   sortEditions,
   type Work,
@@ -33,12 +37,25 @@ export function coverUrl(volume: GoogleBooksVolume): string | undefined {
   return url ? sharpCover(url, 4) : undefined;
 }
 
-async function fetchWithRetry(url: string) {
-  for (let attempt = 0; ; attempt++) {
-    const res = await fetch(url, { next: { revalidate: 86400 } });
-    if (res.ok || attempt >= 2 || (res.status < 500 && res.status !== 429))
-      return res;
-    await new Promise((r) => setTimeout(r, 400 * 3 ** attempt));
+const DEGRADED_MS = 60_000;
+let degradedUntil = 0;
+
+async function googleJson<T>(
+  url: string,
+  accept: (data: T) => boolean,
+): Promise<T | null> {
+  const maxAttempts = Date.now() < degradedUntil ? 1 : 3;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await cachedJson<T>(url, {}, accept);
+    } catch (err) {
+      const retryable =
+        err instanceof HttpError && (err.status >= 500 || err.status === 429);
+      if (retryable) degradedUntil = Date.now() + DEGRADED_MS;
+      if (retryable && attempt >= maxAttempts) markUnavailable(url);
+      if (!retryable || attempt >= maxAttempts) throw err;
+      await new Promise((r) => setTimeout(r, 300 * attempt));
+    }
   }
 }
 
@@ -47,15 +64,30 @@ async function fetchVolumes(
   maxResults = 10,
   orderBy: "relevance" | "newest" = "relevance",
   lang?: string,
+  startIndex = 0,
 ): Promise<GoogleBooksVolume[]> {
   const key = getKey();
   const langParam = lang ? `&langRestrict=${encodeURIComponent(lang)}` : "";
-  const url = `${API_BASE}/volumes?q=${encodeURIComponent(query)}&maxResults=${maxResults}&orderBy=${orderBy}&printType=books${langParam}&key=${key}`;
-  const res = await fetchWithRetry(url);
-  if (!res.ok)
-    throw new Error(`Google Books API ${res.status}: ${res.statusText}`);
-  const data: GoogleBooksResponse = await res.json();
-  return (data.items ?? []).filter((v) => v.volumeInfo?.title);
+  const url = `${API_BASE}/volumes?q=${encodeURIComponent(query)}&maxResults=${maxResults}&startIndex=${startIndex}&orderBy=${orderBy}&printType=books${langParam}&key=${key}`;
+  const data = await googleJson<GoogleBooksResponse>(
+    url,
+    (d) => (d.items?.length ?? 0) > 0,
+  );
+  return (data?.items ?? []).filter((v) => v.volumeInfo?.title);
+}
+
+export async function searchPages(
+  query: string,
+  pages = 3,
+): Promise<GoogleBooksVolume[]> {
+  const results = await Promise.all(
+    Array.from({ length: pages }, (_, i) =>
+      fetchVolumes(query, 40, "relevance", undefined, i * 40).catch(
+        () => [] as GoogleBooksVolume[],
+      ),
+    ),
+  );
+  return results.flat();
 }
 
 export async function searchBooks(
@@ -66,16 +98,67 @@ export async function searchBooks(
   return fetchVolumes(query, maxResults, "relevance", lang);
 }
 
+export interface SearchAuthor {
+  name: string;
+  works: number;
+}
+
+const SEARCH_TIMEOUT_MS = 4000;
+
+function settle<T>(promise: Promise<T[]>): Promise<T[]> {
+  return Promise.race([
+    promise.catch(() => [] as T[]),
+    new Promise<T[]>((resolve) =>
+      setTimeout(() => resolve([]), SEARCH_TIMEOUT_MS),
+    ),
+  ]);
+}
+
 export async function smartSearch(
   query: string,
   maxResults = 10,
-): Promise<Work[]> {
+): Promise<{ works: Work[]; authors: SearchAuthor[] }> {
   const q = query.trim();
-  const [byTitle, general] = await Promise.all([
-    fetchVolumes(`intitle:${q}`, 40).catch(() => [] as GoogleBooksVolume[]),
-    fetchVolumes(q, 40).catch(() => [] as GoogleBooksVolume[]),
+  const [byTitle, general, byAuthor, openLibrary] = await Promise.all([
+    settle(fetchVolumes(`intitle:${q}`, 40)),
+    settle(fetchVolumes(q, 40)),
+    settle(fetchVolumes(`inauthor:${q}`, 40)),
+    settle(searchOpenLibrary(q)),
   ]);
-  return groupWorks([...byTitle, ...general], q).slice(0, maxResults);
+  return {
+    works: groupWorks([...byTitle, ...openLibrary, ...general], q).slice(
+      0,
+      maxResults,
+    ),
+    authors: matchingAuthors(
+      [...byTitle, ...general, ...byAuthor, ...openLibrary],
+      q,
+    ),
+  };
+}
+
+function matchingAuthors(volumes: GoogleBooksVolume[], query: string) {
+  const tokens = normalize(query)
+    .split(" ")
+    .filter((t) => t.length > 1);
+  if (!tokens.length) return [];
+  const byName = new Map<string, { name: string; titles: Set<string> }>();
+  for (const v of volumes) {
+    for (const raw of v.volumeInfo.authors ?? []) {
+      const name = cleanAuthor(raw);
+      const n = normalize(name);
+      if (!tokens.every((t) => n.split(" ").some((w) => w.startsWith(t))))
+        continue;
+      const entry = byName.get(n) ?? { name, titles: new Set<string>() };
+      entry.titles.add(normalize(v.volumeInfo.title));
+      byName.set(n, entry);
+    }
+  }
+  return [...byName.values()]
+    .map((a) => ({ name: a.name, works: a.titles.size }))
+    .filter((a) => a.works >= 2)
+    .sort((a, b) => b.works - a.works)
+    .slice(0, 3);
 }
 
 export async function findEditions(
@@ -122,12 +205,12 @@ export async function getBookByQuery(
 
 export async function getVolume(volumeId: string): Promise<GoogleBooksVolume> {
   const key = getKey();
-  const res = await fetchWithRetry(
+  const volume = await googleJson<GoogleBooksVolume>(
     `${API_BASE}/volumes/${encodeURIComponent(volumeId)}?key=${key}`,
+    (v) => Boolean(v.volumeInfo?.title),
   );
-  if (!res.ok)
-    throw new Error(`Google Books API ${res.status}: ${res.statusText}`);
-  return res.json();
+  if (!volume) throw new Error(`Google Books volume ${volumeId} not found`);
+  return volume;
 }
 
 export function volumeToBook(

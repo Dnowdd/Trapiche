@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const works = await smartSearch(q, Math.min(maxResults, 40));
+    const { works, authors } = await smartSearch(q, Math.min(maxResults, 40));
     const items: SearchResult[] = works.map(({ main, editions }) => {
       const info = main.volumeInfo;
       const thumb = info.imageLinks?.thumbnail;
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
         editions: editions.length,
       };
     });
-    return NextResponse.json({ items });
+    return NextResponse.json({ items, authors });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erro desconhecido";
     return NextResponse.json({ error: message }, { status: 500 });

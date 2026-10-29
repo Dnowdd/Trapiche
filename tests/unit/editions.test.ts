@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { editionScore, groupWorks, workKey } from "@/lib/editions";
-import { toIsbn13 } from "@/lib/open-library";
+import { cleanAuthor, editionScore, groupWorks, workKey } from "@/lib/editions";
+import { publisherCore, toIsbn13 } from "@/lib/open-library";
 import type { GoogleBooksVolume } from "@/lib/types/book";
 
 const vol = (
@@ -80,5 +80,31 @@ describe("toIsbn13", () => {
     expect(toIsbn13("978-65-5587-178-4")).toBe("9786555871784");
     expect(toIsbn13("123")).toBeNull();
     expect(toIsbn13(null)).toBeNull();
+  });
+});
+
+describe("cleanAuthor", () => {
+  it("drops catalog dates and flips surname-first names", () => {
+    expect(cleanAuthor("Carla Madeira, 1964-")).toBe("Carla Madeira");
+    expect(cleanAuthor("Machado de Assis (1839-1908)")).toBe(
+      "Machado de Assis",
+    );
+    expect(cleanAuthor("Assis, Machado de, 1839-1908.")).toBe(
+      "Machado de Assis",
+    );
+    expect(cleanAuthor("Friedrich Engels")).toBe("Friedrich Engels");
+    expect(cleanAuthor("Carla Madeira Su00e9rio")).toBe("Carla Madeira Sério");
+    expect(cleanAuthor("Martin Luther King, Jr.")).toBe(
+      "Martin Luther King, Jr.",
+    );
+  });
+});
+
+describe("publisherCore", () => {
+  it("drops generic words from publisher names", () => {
+    expect(publisherCore("Editora Rocco")).toBe("Rocco");
+    expect(publisherCore("Boitempo Editorial")).toBe("Boitempo");
+    expect(publisherCore("Companhia das Letras")).toBe("Companhia das Letras");
+    expect(publisherCore("Editora")).toBe("Editora");
   });
 });

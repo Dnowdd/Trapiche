@@ -92,6 +92,22 @@ const SELF_PUBLISHERS = [
   "perse",
 ];
 
+export function cleanAuthor(name: string) {
+  const cleaned = name
+    .replace(/\\?u00([0-9a-f]{2})/gi, (_, hex: string) =>
+      String.fromCharCode(parseInt(hex, 16)),
+    )
+    .replace(/\([^)]*\)/g, "")
+    .replace(/,?\s*\d{3,4}\??\s*-\s*(\d{3,4})?\.?\s*$/, "")
+    .replace(/,\s*$/, "")
+    .trim();
+  const parts = cleaned.split(",").map((p) => p.trim());
+  const suffix = /^(jr|sr|filho|neto|junior|júnior)\.?$/i;
+  return parts.length === 2 && parts[0] && parts[1] && !suffix.test(parts[1])
+    ? `${parts[1]} ${parts[0]}`
+    : cleaned;
+}
+
 export function normalize(s: string) {
   return s
     .normalize("NFD")
@@ -110,7 +126,7 @@ function titleTokens(title: string) {
 
 export function authorSurname(author?: string) {
   if (!author) return "";
-  const parts = normalize(author).split(" ").filter(Boolean);
+  const parts = normalize(cleanAuthor(author)).split(" ").filter(Boolean);
   return parts[parts.length - 1] ?? "";
 }
 
@@ -141,18 +157,23 @@ export function editionScore(v: GoogleBooksVolume) {
   if (info.language?.startsWith("pt")) score += 1;
   if (info.ratingsCount)
     score += Math.min(3, Math.log10(info.ratingsCount + 1));
+  if (info.workEditions) score += Math.min(6, Math.log2(info.workEditions + 1));
   return score;
 }
 
 function queryMatch(v: GoogleBooksVolume, query: string) {
   const q = normalize(query);
   if (!q) return 0;
+  const byAuthor = v.volumeInfo.authors?.some((a) =>
+    normalize(cleanAuthor(a)).includes(q),
+  );
   const title = normalize(v.volumeInfo.title);
-  if (title === q) return 6;
+  if (title === q) return byAuthor ? 6 : q.includes(" ") ? 4 : 6;
   if (title.startsWith(q)) return 4;
   const tokens = titleTokens(query);
   const own = new Set(titleTokens(v.volumeInfo.title));
   if (tokens.length && tokens.every((t) => own.has(t))) return 2;
+  if (byAuthor) return 5;
   const author = normalize(v.volumeInfo.authors?.join(" ") ?? "");
   if (author && q.split(" ").some((t) => t.length > 2 && author.includes(t)))
     return 1;
