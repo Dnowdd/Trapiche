@@ -25,7 +25,7 @@ export default function RootLayout({
       lang="pt-br"
       className={cn("h-full", "antialiased", "font-sans", inter.variable)}
     >
-      <body className="min-h-full flex flex-col bg-(--yellow) text-(--ink-2) min-w-360 font-features-['ss01','cv11'] [text-rendering:optimizeLegibility]">
+      <body className="min-h-full flex flex-col bg-(--yellow) text-(--ink-2) min-w-360 has-[[data-responsive]]:min-w-0 font-features-['ss01','cv11'] [text-rendering:optimizeLegibility]">
         <main>{children}</main>
         <Toaster />
       </body>

@@ -33,19 +33,19 @@ const Header = () => {
 
   return (
     <header
-      className="h-19 flex items-center justify-between px-18.75 bg-(--yellow)"
+      className="flex flex-wrap md:flex-nowrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-8 md:h-19 md:py-0 lg:px-18.75 bg-(--yellow)"
       data-screen-label="00 Header"
     >
       <Link
         href="/"
-        className="text-[30px] font-extrabold tracking-[-0.02em] text-(--ink-2) flex items-baseline gap-2"
+        className="text-[24px] md:text-[30px] font-extrabold tracking-[-0.02em] text-(--ink-2) flex items-baseline gap-2"
       >
         Trapiche
       </Link>
 
       <HeaderSearch />
 
-      <div className="flex items-center gap-4.5">
+      <div className="flex items-center gap-4.5 md:order-last">
         {user ? (
           <>
             <button
@@ -71,7 +71,7 @@ const Header = () => {
                 <div className="w-9 h-9 rounded-full bg-(--cream-deep) flex items-center justify-center text-[13px] font-bold text-(--ink-2) border-[1.5px] border-(--ink-2) select-none transition-opacity duration-150 group-data-[popup-open]/trigger:opacity-70">
                   {initials(user.name)}
                 </div>
-                <div className="flex flex-col items-start">
+                <div className="hidden sm:flex flex-col items-start">
                   <div className="text-[13px] font-semibold text-(--ink-2) leading-[1.2]">
                     {user.name}
                   </div>

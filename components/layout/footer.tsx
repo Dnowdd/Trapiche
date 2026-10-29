@@ -22,11 +22,11 @@ const Footer = () => {
 
   return (
     <footer
-      className="bg-(--yellow) pt-16 px-18.75 pb-9 flex flex-col gap-12"
+      className="bg-(--yellow) pt-12 md:pt-16 px-4 sm:px-8 lg:px-18.75 pb-9 flex flex-col gap-10 md:gap-12"
       data-screen-label="09 Footer"
     >
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-10">
-        <div>
+      <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr] gap-10">
+        <div className="col-span-2 md:col-span-1">
           <div className="text-[30px] font-extrabold text-(--ink-2) tracking-[-0.02em] mb-2">
             Trapiche
           </div>
@@ -68,7 +68,7 @@ const Footer = () => {
         ))}
       </div>
       <div className="h-px bg-(--yellow-deep)"></div>
-      <div className="flex justify-between items-center text-[12px] text-(--ink-3)">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between sm:items-center text-[12px] text-(--ink-3)">
         <span className="font-mono text-[11px] tracking-[0.04em]">
           © 2026 TRAPICHE · FEITO EM SALVADOR · BA
         </span>

@@ -121,7 +121,10 @@ export default function HeaderSearch() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-110">
+    <div
+      ref={containerRef}
+      className="relative w-full order-last md:order-none md:w-110 md:max-w-[40vw] lg:max-w-none"
+    >
       <label
         className={[
           "h-10 rounded-[10px] bg-(--cream) flex items-center gap-2.5 px-4 cursor-text",
