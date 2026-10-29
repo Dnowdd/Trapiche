@@ -63,8 +63,9 @@ export default function PrivacyPage() {
       <h2>Seus direitos</h2>
       <p>
         Você pode editar seu perfil, apagar resenhas, remover livros da estante
-        e excluir listas a qualquer momento pelo próprio site. Para receber uma
-        cópia dos seus dados ou excluir sua conta por completo, escreva para{" "}
+        e excluir listas a qualquer momento pelo próprio site. Em “Editar
+        perfil” você baixa uma cópia de todos os seus dados ou exclui sua conta
+        de vez. Dúvidas:{" "}
         <a href="mailto:david.queiroz@dnowdd.com">david.queiroz@dnowdd.com</a>.
       </p>
     </LegalPage>

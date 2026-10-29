@@ -41,3 +41,16 @@ export async function updateProfile(input: {
     return { handle };
   });
 }
+
+export async function deleteAccount(confirmHandle: string) {
+  return withUser(async (userId) => {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { handle: true },
+    });
+    if (!user) fail("Conta não encontrada.");
+    if (confirmHandle.trim().replace(/^@/, "") !== user.handle)
+      fail("Digite seu @ exatamente para confirmar.");
+    await db.user.delete({ where: { id: userId } });
+  });
+}
