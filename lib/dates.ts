@@ -15,7 +15,7 @@ const MONTHS = [
   "nov",
   "dez",
 ];
-const MONTHS_LONG = [
+export const MONTHS_LONG = [
   "Janeiro",
   "Fevereiro",
   "Março",

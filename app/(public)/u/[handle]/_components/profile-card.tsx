@@ -52,6 +52,12 @@ export default function ProfileCard({ profile }: { profile: ProfileData }) {
               >
                 Compartilhar
               </button>
+              <Link
+                href={`/u/${u.handle}/retrospectiva`}
+                className="text-[12px] font-medium border border-(--ink-3) text-(--ink-2) py-1.75 px-3.5 rounded-md bg-transparent transition-colors duration-150 hover:bg-(--yellow-soft)"
+              >
+                Retrospectiva
+              </Link>
             </div>
           </div>
         </div>

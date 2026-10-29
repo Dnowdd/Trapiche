@@ -15,7 +15,7 @@ const PUBLIC_EXACT = [
 const PUBLIC_PATTERNS = [
   /^\/book\/[^/]+(\/resenhas|\/opengraph-image[^/]*)?$/,
   /^\/lists\/[^/]+$/,
-  /^\/u\/[^/]+$/,
+  /^\/u\/[^/]+(\/retrospectiva(\/opengraph-image[^/]*)?)?$/,
   /^\/author\/[^/]+$/,
   /^\/publisher\/[^/]+$/,
 ];

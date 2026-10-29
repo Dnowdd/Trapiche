@@ -15,6 +15,8 @@ import {
   TABS,
   type Tab,
 } from "@/lib/queries/profile";
+import { getGoal } from "@/lib/queries/stats";
+import { today } from "@/lib/dates";
 import ProfileCard from "./_components/profile-card";
 import ProfileTabs from "./_components/profile-tabs";
 import InicioTab from "./_components/inicio-tab";
@@ -63,9 +65,14 @@ export default async function ProfilePage({ params, searchParams }: Props) {
     case "inicio": {
       const pages = Math.min(20, Math.max(0, Number(sp.historico) || 0));
       const full = pages > 0;
+      const [data, goal] = await Promise.all([
+        getInicio(uid, viewerId, full ? pages * 30 : 8),
+        full ? Promise.resolve(null) : getGoal(uid, today().getUTCFullYear()),
+      ]);
       content = (
         <InicioTab
-          data={await getInicio(uid, viewerId, full ? pages * 30 : 8)}
+          data={data}
+          goal={goal}
           handle={handle}
           isOwner={owner}
           page={pages}
@@ -102,7 +109,10 @@ export default async function ProfilePage({ params, searchParams }: Props) {
     }
     case "avaliacoes":
       content = (
-        <AvaliacoesTab items={await getAvaliacoes(uid)} isOwner={owner} />
+        <AvaliacoesTab
+          items={await getAvaliacoes(uid, owner)}
+          isOwner={owner}
+        />
       );
       break;
     case "listas":
