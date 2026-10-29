@@ -16,6 +16,7 @@ import {
   toggleFavorite,
 } from "@/lib/actions/shelf";
 import type { BookPageData } from "@/lib/queries/book";
+import { categoryLabels } from "@/lib/categories";
 import Stars from "./stars";
 
 type Status = "READING" | "WANT" | "READ" | "ABANDONED" | "REREADING";
@@ -83,8 +84,9 @@ export default function BookHero({ data, today }: BookHeroProps) {
     );
   };
 
+  const categories = categoryLabels(book.categories);
   const meta = [
-    book.categories[0],
+    categories[0],
     book.publisher,
     book.publishedDate?.slice(0, 4),
   ].filter(Boolean);
@@ -316,9 +318,9 @@ export default function BookHero({ data, today }: BookHeroProps) {
           ))}
         </div>
 
-        {book.categories.length > 0 && (
+        {categories.length > 0 && (
           <div className="flex gap-1.5 flex-wrap mt-4">
-            {book.categories.map((c) => (
+            {categories.map((c) => (
               <span
                 key={c}
                 className="font-mono text-[10px] bg-(--yellow-soft) text-(--ink-2) border border-(--yellow-deep) py-1 px-2.25 rounded tracking-[0.04em] uppercase"

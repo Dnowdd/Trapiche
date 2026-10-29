@@ -153,6 +153,7 @@ export function languageLabel(code: string | null) {
   const names: Record<string, string> = {
     pt: "Português",
     "pt-BR": "Português (Brasil)",
+    "pt-PT": "Português (Portugal)",
     en: "Inglês",
     es: "Espanhol",
     fr: "Francês",

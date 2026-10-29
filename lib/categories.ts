@@ -1,0 +1,115 @@
+const LABELS: Record<string, string> = {
+  "antiques & collectibles": "Antiguidades e colecionáveis",
+  architecture: "Arquitetura",
+  art: "Arte",
+  bibles: "Bíblias",
+  "biography & autobiography": "Biografia",
+  "body, mind & spirit": "Corpo, mente e espírito",
+  "business & economics": "Negócios e economia",
+  "comics & graphic novels": "Quadrinhos",
+  computers: "Computação",
+  cooking: "Culinária",
+  "crafts & hobbies": "Artesanato e hobbies",
+  design: "Design",
+  drama: "Teatro",
+  education: "Educação",
+  "family & relationships": "Família e relacionamentos",
+  fiction: "Ficção",
+  "foreign language study": "Idiomas",
+  "games & activities": "Jogos e atividades",
+  gardening: "Jardinagem",
+  "health & fitness": "Saúde e bem-estar",
+  history: "História",
+  "house & home": "Casa",
+  humor: "Humor",
+  "juvenile fiction": "Ficção infantojuvenil",
+  "juvenile nonfiction": "Não ficção infantojuvenil",
+  "young adult fiction": "Ficção jovem adulto",
+  "young adult nonfiction": "Não ficção jovem adulto",
+  "language arts & disciplines": "Linguística",
+  law: "Direito",
+  "literary collections": "Coletâneas literárias",
+  "literary criticism": "Crítica literária",
+  mathematics: "Matemática",
+  medical: "Medicina",
+  music: "Música",
+  nature: "Natureza",
+  "performing arts": "Artes cênicas",
+  pets: "Animais de estimação",
+  philosophy: "Filosofia",
+  photography: "Fotografia",
+  poetry: "Poesia",
+  "political science": "Ciência política",
+  psychology: "Psicologia",
+  reference: "Referência",
+  religion: "Religião",
+  science: "Ciência",
+  "self-help": "Autoajuda",
+  "social science": "Ciências sociais",
+  "sports & recreation": "Esportes",
+  "study aids": "Material de estudo",
+  "technology & engineering": "Tecnologia e engenharia",
+  transportation: "Transporte",
+  travel: "Viagem",
+  "true crime": "Crime real",
+  "action & adventure": "Ação e aventura",
+  classics: "Clássicos",
+  "coming of age": "Amadurecimento",
+  contemporary: "Contemporâneo",
+  dystopian: "Distopia",
+  fantasy: "Fantasia",
+  historical: "Histórico",
+  horror: "Terror",
+  literary: "Literária",
+  "mystery & detective": "Mistério e policial",
+  romance: "Romance",
+  "science fiction": "Ficção científica",
+  "short stories (single author)": "Contos",
+  thrillers: "Suspense",
+  suspense: "Suspense",
+  women: "Mulheres",
+  "family life": "Vida familiar",
+  political: "Política",
+  "political ideologies": "Ideologias políticas",
+  "communism, post-communism & socialism": "Comunismo e socialismo",
+  anthropology: "Antropologia",
+  sociology: "Sociologia",
+  "economic history": "História econômica",
+  "latin america": "América Latina",
+  brazil: "Brasil",
+  europe: "Europa",
+  modern: "Moderna",
+  world: "Mundial",
+  "personal growth": "Desenvolvimento pessoal",
+  "personal memoirs": "Memórias",
+  essays: "Ensaios",
+  "african american": "Afro-americana",
+  lgbt: "LGBTQIA+",
+  "lgbtq+": "LGBTQIA+",
+  "magical realism": "Realismo mágico",
+  epic: "Épico",
+  paranormal: "Paranormal",
+  general: "",
+};
+
+function translate(segment: string): string | undefined {
+  return LABELS[segment.trim().toLowerCase()];
+}
+
+export function categoryLabel(category: string): string | null {
+  const parts: string[] = [];
+  for (const segment of category.split("/")) {
+    const label = translate(segment);
+    if (label === undefined) break;
+    if (label) parts.push(label);
+  }
+  return parts.length ? parts.join(" · ") : null;
+}
+
+export function categoryLabels(categories: string[]): string[] {
+  return [
+    ...new Set(
+      categories.map(categoryLabel).filter((c): c is string => Boolean(c)),
+    ),
+  ];
+}
