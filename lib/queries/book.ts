@@ -7,7 +7,9 @@ import {
   volumeToRow,
   type BookSummary,
 } from "../books";
-import { searchBooks } from "../google-books";
+import { bestCover } from "../cover-probe";
+import { workKey } from "../editions";
+import { findEditions, searchBooks } from "../google-books";
 import {
   addDays,
   daysBetween,
@@ -157,7 +159,11 @@ async function relatedBooks(
       }
     }
   }
-  return books.map(toCover);
+  return Promise.all(
+    books.map(async (b) =>
+      toCover({ ...b, coverUrl: await bestCover(b.coverUrl) }),
+    ),
+  );
 }
 
 async function byAuthor(id: string, title: string, author: string | null) {
@@ -183,6 +189,41 @@ async function byAuthor(id: string, title: string, author: string | null) {
   if (!items.length) return null;
   return { author, catalogued, items };
 }
+
+async function editionsOf(id: string, title: string, author: string | null) {
+  const [vols, stored] = await Promise.all([
+    findEditions(id, title, author ?? undefined).catch(() => []),
+    author
+      ? db.book.findMany({
+          where: {
+            id: { not: id },
+            authors: { has: author },
+            publisher: { not: null },
+          },
+          take: 100,
+        })
+      : [],
+  ]);
+  const key = workKey(title, author ?? undefined);
+  const rows = vols.map(volumeToRow);
+  const seen = new Set(rows.map((r) => r.id));
+  for (const r of stored) {
+    if (seen.has(r.id) || workKey(r.title, r.authors[0]) !== key) continue;
+    seen.add(r.id);
+    rows.push(r);
+  }
+  return Promise.all(
+    rows.slice(0, 12).map(async (row) => ({
+      cover: toCover({ ...row, coverUrl: await bestCover(row.coverUrl) }),
+      publisher: row.publisher,
+      year: row.publishedDate?.slice(0, 4) ?? null,
+      pages: row.pageCount,
+      language: languageLabel(row.language),
+    })),
+  );
+}
+
+export type EditionItem = Awaited<ReturnType<typeof editionsOf>>[number];
 
 async function viewerState(
   bookId: string,
@@ -290,6 +331,7 @@ export async function getBookPage(id: string, viewerId: string | null) {
     reviews,
     related,
     authorBlock,
+    editions,
     viewer,
   ] = await Promise.all([
     db.review.groupBy({
@@ -322,6 +364,7 @@ export async function getBookPage(id: string, viewerId: string | null) {
     getReviews(id, viewerId, { take: 4, excludeViewer: true }),
     relatedBooks(id, book.categories, author, book.language),
     byAuthor(id, book.title, author),
+    editionsOf(id, book.title, author),
     viewerId ? viewerState(id, viewerId, book.pageCount) : null,
   ]);
 
@@ -377,6 +420,7 @@ export async function getBookPage(id: string, viewerId: string | null) {
     },
     related,
     byAuthor: authorBlock,
+    editions,
     viewer,
   };
 }

@@ -7,6 +7,7 @@ import { getBookPage } from "@/lib/queries/book";
 import { getViewerId } from "@/lib/session";
 import About from "./_components/about";
 import BookHero from "./_components/book-hero";
+import Editions from "./_components/editions";
 import ByAuthor from "./_components/by-author";
 import InLists from "./_components/in-lists";
 import MyReading from "./_components/my-reading";
@@ -74,7 +75,19 @@ export default async function BookDetailPage({ params }: Props) {
 
         <BookHero data={data} today={today} />
         <MyReading data={data} today={today} />
-        <About description={data.book.description} />
+        {(data.book.description || data.editions.length > 0) && (
+          <div
+            className={[
+              "mt-14 grid gap-12 items-start",
+              data.book.description && data.editions.length > 0
+                ? "lg:grid-cols-[minmax(0,1fr)_340px]"
+                : "",
+            ].join(" ")}
+          >
+            <About description={data.book.description} />
+            <Editions data={data} />
+          </div>
+        )}
         <RatingBlock rating={data.rating} />
         <MyReviewBlock data={data} />
         <OtherReviews

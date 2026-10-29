@@ -39,6 +39,16 @@ export interface CatalogBook extends Book {
   matchScore: number | null;
 }
 
+export interface SearchResult {
+  id: string;
+  title: string;
+  authors: string[];
+  year: string | null;
+  publisher: string | null;
+  coverUrl: string | null;
+  editions: number;
+}
+
 export interface BookCatalog {
   generatedAt: string;
   source: string;

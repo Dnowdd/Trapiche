@@ -4,6 +4,14 @@ import type {
   GoogleBooksResponse,
   GoogleBooksVolume,
 } from "./types/book";
+import { sharpCover } from "./cover-url";
+import {
+  authorSurname,
+  groupWorks,
+  sameWork,
+  sortEditions,
+  type Work,
+} from "./editions";
 
 const API_BASE = "https://www.googleapis.com/books/v1";
 
@@ -17,8 +25,12 @@ export function coverUrl(volume: GoogleBooksVolume): string | undefined {
   const links = volume.volumeInfo.imageLinks;
   if (!links) return undefined;
   const url =
-    links.medium ?? links.small ?? links.thumbnail ?? links.smallThumbnail;
-  return url?.replace("http:", "https:").replace("&zoom=1", "&zoom=3");
+    links.large ??
+    links.medium ??
+    links.small ??
+    links.thumbnail ??
+    links.smallThumbnail;
+  return url ? sharpCover(url, 4) : undefined;
 }
 
 async function fetchWithRetry(url: string) {
@@ -43,7 +55,7 @@ async function fetchVolumes(
   if (!res.ok)
     throw new Error(`Google Books API ${res.status}: ${res.statusText}`);
   const data: GoogleBooksResponse = await res.json();
-  return data.items ?? [];
+  return (data.items ?? []).filter((v) => v.volumeInfo?.title);
 }
 
 export async function searchBooks(
@@ -57,23 +69,40 @@ export async function searchBooks(
 export async function smartSearch(
   query: string,
   maxResults = 10,
-): Promise<GoogleBooksVolume[]> {
+): Promise<Work[]> {
   const q = query.trim();
   const [byTitle, general] = await Promise.all([
-    fetchVolumes(`intitle:${q}`, maxResults).catch(
+    fetchVolumes(`intitle:${q}`, 40).catch(() => [] as GoogleBooksVolume[]),
+    fetchVolumes(q, 40).catch(() => [] as GoogleBooksVolume[]),
+  ]);
+  return groupWorks([...byTitle, ...general], q).slice(0, maxResults);
+}
+
+export async function findEditions(
+  id: string,
+  title: string,
+  author?: string,
+): Promise<GoogleBooksVolume[]> {
+  const surname = authorSurname(author);
+  const results = await Promise.all([
+    fetchVolumes(`${title} ${author ?? ""}`.trim(), 40).catch(
       () => [] as GoogleBooksVolume[],
     ),
-    fetchVolumes(q, maxResults).catch(() => [] as GoogleBooksVolume[]),
+    fetchVolumes(
+      surname ? `intitle:${title} inauthor:${surname}` : `intitle:${title}`,
+      40,
+    ).catch(() => [] as GoogleBooksVolume[]),
   ]);
-  const seen = new Set<string>();
-  const merged: GoogleBooksVolume[] = [];
-  for (const vol of [...byTitle, ...general]) {
-    if (!seen.has(vol.id)) {
-      seen.add(vol.id);
-      merged.push(vol);
-    }
-  }
-  return merged.slice(0, maxResults);
+  const vols = results.flat();
+  const seen = new Set([id]);
+  return sortEditions(
+    vols.filter((v) => {
+      if (seen.has(v.id) || !v.volumeInfo.publisher) return false;
+      if (!sameWork(v, title, author)) return false;
+      seen.add(v.id);
+      return true;
+    }),
+  );
 }
 
 export async function getBookByIsbn(
