@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 const PUBLIC_PATHS = ["/auth", "/api/auth"];
-const PUBLIC_EXACT = ["/", "/api/books", "/api/books/search"];
+const PUBLIC_EXACT = [
+  "/",
+  "/termos",
+  "/privacidade",
+  "/api/books",
+  "/api/books/search",
+];
 const PUBLIC_PATTERNS = [
   /^\/book\/[^/]+(\/resenhas)?$/,
   /^\/lists\/[^/]+$/,

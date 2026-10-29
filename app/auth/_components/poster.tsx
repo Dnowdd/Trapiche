@@ -1,17 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import BookCover from "@/components/shared/book-cover";
+import { shuffle } from "@/lib/utils";
 import type { Book } from "@/lib/types/book";
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 const BOOK_SHADOW =
   "0 40px 60px -30px rgba(0,0,0,0.7),0 10px 24px -12px rgba(0,0,0,0.5)";
@@ -69,14 +61,10 @@ interface PosterProps {
 export default function Poster({ books }: PosterProps) {
   const [picked, setPicked] = useState(() => books.slice(0, 3));
 
-  useEffect(() => {
-    setPicked(shuffle(books).slice(0, 3));
-  }, [books]);
-
   const reshuffle = () => setPicked(shuffle(books).slice(0, 3));
 
   return (
-    <div className="relative bg-[#2b2710] text-(--cream) py-12 px-14 flex flex-col justify-between overflow-hidden min-h-screen before:content-[''] before:absolute before:inset-0 before:[background:radial-gradient(120%_80%_at_75%_15%,rgba(255,231,103,0.16),transparent_55%),radial-gradient(90%_70%_at_10%_100%,rgba(255,231,103,0.07),transparent_60%)] before:pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(rgba(255,248,213,0.05)_1px,transparent_1px)] after:bg-size-[4px_4px] after:mix-blend-overlay after:pointer-events-none">
+    <div className="relative bg-[#2b2710] text-(--cream) py-12 px-14 max-[920px]:hidden flex flex-col justify-between overflow-hidden min-h-screen before:content-[''] before:absolute before:inset-0 before:[background:radial-gradient(120%_80%_at_75%_15%,rgba(255,231,103,0.16),transparent_55%),radial-gradient(90%_70%_at_10%_100%,rgba(255,231,103,0.07),transparent_60%)] before:pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(rgba(255,248,213,0.05)_1px,transparent_1px)] after:bg-size-[4px_4px] after:mix-blend-overlay after:pointer-events-none">
       <div className="relative z-1 flex items-center justify-between">
         <div className="text-[26px] font-extrabold tracking-[-0.02em] text-(--cream) flex items-baseline gap-2">
           Trapiche

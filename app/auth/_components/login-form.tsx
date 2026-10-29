@@ -1,4 +1,5 @@
-import { MailIcon, LockIcon, GoogleMark, Arrow, Check, Loader } from "./icons";
+import Link from "next/link";
+import { MailIcon, LockIcon, Arrow, Check, Loader } from "./icons";
 import Field from "./field";
 import type { AuthMode } from "./types";
 
@@ -45,18 +46,6 @@ export default function LoginForm({
         <p className="m-0 text-[14px] text-(--ink-3) leading-[1.55]">
           Suas estantes, seu diário e suas listas estão esperando.
         </p>
-      </div>
-
-      <button
-        type="button"
-        disabled
-        className="w-full h-11.5 rounded-[10px] border border-[rgba(67,62,18,0.10)] bg-(--cream-card) text-(--ink-4) text-[14px] font-semibold flex items-center justify-center gap-2.5 cursor-not-allowed opacity-50 [&_svg]:w-4.5 [&_svg]:h-4.5"
-      >
-        <GoogleMark /> Continuar com Google
-      </button>
-      <div className="flex items-center gap-3.5 my-5.5 font-mono text-[10px] text-(--ink-4) tracking-[0.08em] uppercase">
-        <span className="flex-1 h-px bg-(--rule)"></span>ou com e-mail
-        <span className="flex-1 h-px bg-(--rule)"></span>
       </div>
 
       <Field
@@ -120,13 +109,21 @@ export default function LoginForm({
 
       <div className="mt-5.5 text-center text-[12px] text-(--ink-4) leading-normal">
         Ao entrar você concorda com os{" "}
-        <a className="text-(--ink-3) border-b border-(--ink-4) cursor-pointer hover:text-(--ink-2)">
+        <Link
+          href="/termos"
+          target="_blank"
+          className="text-(--ink-3) border-b border-(--ink-4) hover:text-(--ink-2)"
+        >
           Termos
-        </a>{" "}
+        </Link>{" "}
         e a{" "}
-        <a className="text-(--ink-3) border-b border-(--ink-4) cursor-pointer hover:text-(--ink-2)">
+        <Link
+          href="/privacidade"
+          target="_blank"
+          className="text-(--ink-3) border-b border-(--ink-4) hover:text-(--ink-2)"
+        >
           Política de Privacidade
-        </a>
+        </Link>
         .
       </div>
     </form>

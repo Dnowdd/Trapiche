@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Poster from "./poster";
@@ -170,11 +171,20 @@ export default function AuthContent({ books }: AuthContentProps) {
   };
 
   return (
-    <div className="min-h-screen w-full grid grid-cols-[1.05fr_0.95fr] bg-(--cream) overflow-hidden max-[920px]:grid-cols-1">
+    <div
+      data-responsive
+      className="min-h-screen w-full grid grid-cols-[1.05fr_0.95fr] bg-(--cream) overflow-hidden max-[920px]:grid-cols-1"
+    >
       <Poster books={books} />
 
-      <div className="flex flex-col py-10 px-14 relative min-h-screen">
+      <div className="flex flex-col py-8 md:py-10 px-5 sm:px-10 md:px-14 relative min-h-screen">
         <div className="flex items-center justify-end gap-3 text-[13px] text-(--ink-3)">
+          <Link
+            href="/"
+            className="mr-auto text-[22px] font-extrabold tracking-[-0.02em] text-(--ink-2) min-[921px]:hidden"
+          >
+            Trapiche
+          </Link>
           {mode === "login" && (
             <>
               Ainda não tem conta?{" "}
@@ -296,15 +306,12 @@ export default function AuthContent({ books }: AuthContentProps) {
         <div className="flex items-center justify-between font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase">
           <span>© {new Date().getFullYear()} Trapiche</span>
           <div className="flex gap-4.5">
-            <a href="#" className="hover:text-(--ink-2)">
+            <Link href="/termos" className="hover:text-(--ink-2)">
               Termos
-            </a>
-            <a href="#" className="hover:text-(--ink-2)">
+            </Link>
+            <Link href="/privacidade" className="hover:text-(--ink-2)">
               Privacidade
-            </a>
-            <a href="#" className="hover:text-(--ink-2)">
-              Ajuda
-            </a>
+            </Link>
           </div>
         </div>
       </div>

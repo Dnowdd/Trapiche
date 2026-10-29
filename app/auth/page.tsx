@@ -1,3 +1,4 @@
+import { shuffle } from "@/lib/utils";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import AuthContent from "./_components/auth-content";
@@ -12,7 +13,7 @@ export default async function AuthPage({
   const { token } = await searchParams;
   if (!token && (await getSession())) redirect("/");
 
-  const books = await getFeaturedBooks();
+  const books = shuffle(await getFeaturedBooks());
   return (
     <Suspense>
       <AuthContent books={books} />

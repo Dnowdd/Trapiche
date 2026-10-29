@@ -1,9 +1,9 @@
+import Link from "next/link";
 import {
   MailIcon,
   LockIcon,
   UserIcon,
   AtIcon,
-  GoogleMark,
   Arrow,
   Check,
   Loader,
@@ -66,18 +66,6 @@ export default function RegisterForm({
         </p>
       </div>
 
-      <button
-        type="button"
-        disabled
-        className="w-full h-11.5 rounded-[10px] border border-[rgba(67,62,18,0.10)] bg-(--cream-card) text-(--ink-4) text-[14px] font-semibold flex items-center justify-center gap-2.5 cursor-not-allowed opacity-50 [&_svg]:w-4.5 [&_svg]:h-4.5"
-      >
-        <GoogleMark /> Cadastrar com Google
-      </button>
-      <div className="flex items-center gap-3.5 my-3 font-mono text-[10px] text-(--ink-4) tracking-[0.08em] uppercase">
-        <span className="flex-1 h-px bg-(--rule)"></span>ou com e-mail
-        <span className="flex-1 h-px bg-(--rule)"></span>
-      </div>
-
       <div className="grid grid-cols-2 gap-3.5">
         <Field
           label="Nome"
@@ -130,19 +118,21 @@ export default function RegisterForm({
         </span>
         <span>
           Li e aceito os{" "}
-          <a
-            href="#"
+          <Link
+            href="/termos"
+            target="_blank"
             className="text-(--ink-2) font-semibold border-b border-(--ink-4) hover:border-(--ink-2)"
           >
             Termos de uso
-          </a>{" "}
+          </Link>{" "}
           e a{" "}
-          <a
-            href="#"
+          <Link
+            href="/privacidade"
+            target="_blank"
             className="text-(--ink-2) font-semibold border-b border-(--ink-4) hover:border-(--ink-2)"
           >
             Política de Privacidade
-          </a>{" "}
+          </Link>{" "}
           do Trapiche.
         </span>
       </label>
