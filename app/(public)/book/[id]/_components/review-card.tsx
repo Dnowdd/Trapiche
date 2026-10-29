@@ -1,5 +1,6 @@
 "use client";
 
+import Stars from "@/components/shared/stars";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -72,14 +73,7 @@ export default function ReviewCard({
           </div>
         </div>
         <div className="text-[16px] text-(--ink-2) tracking-[-1px]">
-          {[0, 1, 2, 3, 4].map((s) => (
-            <span
-              key={s}
-              className={s < r.stars ? "" : "text-[rgba(67,62,18,0.18)]"}
-            >
-              ★
-            </span>
-          ))}
+          <Stars value={r.stars} />
         </div>
         <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
           {r.date}

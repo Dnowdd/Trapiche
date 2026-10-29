@@ -1,5 +1,6 @@
 "use client";
 
+import Stars from "@/components/shared/stars";
 import { useState } from "react";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
@@ -54,14 +55,7 @@ export default function AvaliacoesTab({
                 </div>
               </div>
               <div className="flex gap-px text-[18px] text-(--ink-2) tracking-[-1px]">
-                {[0, 1, 2, 3, 4].map((s) => (
-                  <span
-                    key={s}
-                    className={s < r.stars ? "" : "text-[rgba(67,62,18,0.18)]"}
-                  >
-                    ★
-                  </span>
-                ))}
+                <Stars value={r.stars} />
               </div>
             </div>
             <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase flex gap-3 mt-1 mb-3.5">

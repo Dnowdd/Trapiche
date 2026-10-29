@@ -1,21 +1,7 @@
 import { type CSSProperties } from "react";
 import BookCover from "@/components/shared/book-cover";
+import Stars from "@/components/shared/stars";
 import { getReviews } from "@/app/catalog";
-
-const Stars = ({ n }: { n: number }) => {
-  return (
-    <div
-      className="flex gap-px text-[13px] text-(--ink-2) tracking-[-1px]"
-      aria-label={`${n} de 5`}
-    >
-      {[0, 1, 2, 3, 4].map((i) => (
-        <span key={i} className={i < n ? "" : "text-[rgba(67,62,18,0.15)]"}>
-          ★
-        </span>
-      ))}
-    </div>
-  );
-};
 
 const REVIEW_BOOK_STYLE: CSSProperties = {
   width: 42,
@@ -70,7 +56,11 @@ const Reviews = async () => {
                   <div className="text-[11px] text-(--ink-4)">
                     {r.book.author}
                   </div>
-                  <Stars n={r.stars} />
+                  <Stars
+                    value={r.stars}
+                    className="text-[13px]"
+                    emptyClassName="text-[rgba(67,62,18,0.15)]"
+                  />
                 </div>
               </div>
 

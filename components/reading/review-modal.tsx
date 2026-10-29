@@ -12,6 +12,7 @@ import {
 import { saveReview } from "@/lib/actions/reviews";
 import { toast } from "@/components/shared/toast";
 import { useAction } from "./use-action";
+import { Star, fmtRating, starFill } from "@/components/shared/stars";
 
 interface ReviewModalProps {
   open: boolean;
@@ -31,27 +32,51 @@ export function StarPicker({
 }) {
   const [hover, setHover] = useState(0);
   const shown = hover || value;
+  const step = (delta: number) =>
+    onChange(Math.min(5, Math.max(0.5, (value || 0) + delta)));
+
   return (
-    <div
-      className="flex gap-1 text-[30px] leading-none"
-      role="radiogroup"
-      aria-label="Nota"
-      onMouseLeave={() => setHover(0)}
-    >
-      {[1, 2, 3, 4, 5].map((n) => (
-        <button
-          key={n}
-          type="button"
-          role="radio"
-          aria-checked={value === n}
-          aria-label={`${n} estrela${n > 1 ? "s" : ""}`}
-          onMouseEnter={() => setHover(n)}
-          onClick={() => onChange(n)}
-          className={`cursor-pointer transition-[color,transform] duration-100 hover:scale-110 ${n <= shown ? "text-(--ink-2)" : "text-[rgba(67,62,18,0.18)]"}`}
-        >
-          ★
-        </button>
-      ))}
+    <div className="flex items-center gap-3">
+      <div
+        role="slider"
+        tabIndex={0}
+        aria-label="Nota"
+        aria-valuemin={0.5}
+        aria-valuemax={5}
+        aria-valuenow={value || undefined}
+        aria-valuetext={value ? `${fmtRating(value)} estrelas` : "Sem nota"}
+        className="flex text-[32px] leading-none tracking-[-1px] text-(--ink-2) rounded-md outline-none focus-visible:ring-2 focus-visible:ring-(--yellow-deep)"
+        onMouseLeave={() => setHover(0)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+            e.preventDefault();
+            step(0.5);
+          } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+            e.preventDefault();
+            step(-0.5);
+          }
+        }}
+      >
+        {[1, 2, 3, 4, 5].map((n) => (
+          <span key={n} className="relative cursor-pointer">
+            <Star fill={starFill(shown, n - 1)} />
+            {[n - 0.5, n].map((v, half) => (
+              <button
+                key={v}
+                type="button"
+                tabIndex={-1}
+                aria-hidden
+                className={`absolute inset-y-0 w-1/2 cursor-pointer ${half ? "right-0" : "left-0"}`}
+                onMouseEnter={() => setHover(v)}
+                onClick={() => onChange(v)}
+              />
+            ))}
+          </span>
+        ))}
+      </div>
+      <span className="text-[15px] font-bold text-(--ink-2) tabular-nums min-w-8">
+        {shown ? fmtRating(shown) : ""}
+      </span>
     </div>
   );
 }
@@ -71,7 +96,7 @@ export default function ReviewModal({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!rating) {
-      setError("Escolha de 1 a 5 estrelas.");
+      setError("Escolha uma nota de meia a 5 estrelas.");
       return;
     }
     run(

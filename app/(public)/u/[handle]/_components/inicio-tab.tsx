@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import BookCover from "@/components/shared/book-cover";
+import { fmtRating } from "@/components/shared/stars";
 import type { getInicio } from "@/lib/queries/profile";
 import FavoritesEditor from "./favorites-editor";
 import Card from "./card";
@@ -70,7 +71,7 @@ function verb(a: ActivityItem) {
     case "REVIEW":
       return (
         <>
-          Avaliou {book} com <strong>{a.rating} ★</strong>
+          Avaliou {book} com <strong>{fmtRating(a.rating ?? 0)} ★</strong>
         </>
       );
     case "FINISHED":

@@ -11,7 +11,7 @@ import { useAction } from "@/components/reading/use-action";
 import { deleteReview } from "@/lib/actions/reviews";
 import type { BookPageData } from "@/lib/queries/book";
 import ReviewCard from "./review-card";
-import Stars from "./stars";
+import Stars from "@/components/shared/stars";
 import { SectionHeader } from "./section-header";
 
 function promptFor(v: BookPageData["viewer"]) {

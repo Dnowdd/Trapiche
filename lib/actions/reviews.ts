@@ -14,8 +14,8 @@ export async function saveReview(
 ) {
   return withUser(async (userId) => {
     const rating = Number(input.rating);
-    if (!Number.isInteger(rating) || rating < 1 || rating > 5)
-      fail("Escolha de 1 a 5 estrelas.");
+    if (!Number.isInteger(rating * 2) || rating < 0.5 || rating > 5)
+      fail("Escolha uma nota de meia a 5 estrelas.");
     const text = typeof input.text === "string" ? input.text.trim() : "";
     if (text.length > 5000)
       fail("A resenha pode ter no máximo 5.000 caracteres.");
