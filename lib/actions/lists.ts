@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 import { db } from "../db";
 import { ensureBook } from "../books";
 import { fail, withUser } from "./result";
+import { notify, unnotify } from "../notifications";
 import type { ListVisibility } from "../generated/prisma/client";
 
 const VISIBILITIES: ListVisibility[] = ["PUBLIC", "PRIVATE", "SHARED"];
@@ -158,8 +159,19 @@ export async function toggleListFollow(listId: string) {
       fail("Só dá para seguir listas públicas.");
     const key = { listId_userId: { listId, userId } };
     const following = await db.listFollow.findUnique({ where: key });
-    if (following) await db.listFollow.delete({ where: key });
-    else await db.listFollow.create({ data: { listId, userId } });
+    const notice = {
+      userId: list.ownerId,
+      actorId: userId,
+      kind: "LIST_FOLLOWED" as const,
+      listId,
+    };
+    if (following) {
+      await db.listFollow.delete({ where: key });
+      await unnotify(notice);
+    } else {
+      await db.listFollow.create({ data: { listId, userId } });
+      await notify(notice);
+    }
     refresh();
     return { following: !following };
   });
@@ -188,6 +200,12 @@ export async function addCollaborator(listId: string, handle: string) {
       }),
       db.listFollow.deleteMany({ where: { listId, userId: user.id } }),
     ]);
+    await notify({
+      userId: user.id,
+      actorId: userId,
+      kind: "LIST_MEMBER_ADDED",
+      listId,
+    });
     refresh();
   });
 }

@@ -4,6 +4,7 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import HeaderSearch from "./header-search";
+import NotificationBell from "@/components/notifications/notification-bell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +49,7 @@ const Header = () => {
       <div className="flex items-center gap-4.5 md:order-last">
         {user ? (
           <>
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2.5 cursor-pointer outline-none group/trigger">
                 <div className="w-9 h-9 rounded-full bg-(--cream-deep) flex items-center justify-center text-[13px] font-bold text-(--ink-2) border-[1.5px] border-(--ink-2) select-none transition-opacity duration-150 group-data-[popup-open]/trigger:opacity-70">
@@ -104,6 +106,27 @@ const Header = () => {
                   </svg>
                   Meu perfil
                 </DropdownMenuItem>
+
+                {user.isAdmin && (
+                  <DropdownMenuItem
+                    className="gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)"
+                    onClick={() => router.push("/admin/denuncias")}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M4 22V4a1 1 0 0 1 1-1h13l-2 5 2 5H5" />
+                    </svg>
+                    Denúncias
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
 
