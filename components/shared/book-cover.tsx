@@ -1,5 +1,6 @@
 import { type CSSProperties } from "react";
 import Image from "next/image";
+import { sharpCover } from "@/lib/cover-url";
 
 interface BookCoverProps {
   book: {
@@ -37,11 +38,15 @@ const BookCover = ({ book, size = "lg", style, loading }: BookCoverProps) => {
         style={{ ...style, background: p.bg ?? "#2a2920" }}
       >
         <Image
-          src={book.coverUrl}
+          src={sharpCover(book.coverUrl)}
           alt={`Capa de ${book.title}`}
           fill
           className="object-cover"
-          sizes="(max-width: 768px) 120px, 160px"
+          sizes={
+            typeof style?.width === "number"
+              ? `${style.width}px`
+              : "(max-width: 768px) 45vw, 240px"
+          }
           loading={loading}
         />
       </div>
