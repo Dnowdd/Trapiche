@@ -33,8 +33,11 @@ export default async function ReviewsPage({ params, searchParams }: Props) {
   const pages = Math.max(1, Math.ceil(reviews.total / PAGE_SIZE));
 
   return (
-    <div className="bg-(--cream) rounded-[30px] border-15 border-(--yellow) mx-3.75 overflow-hidden">
-      <div className="pt-12.5 px-18.75 pb-15 max-w-240">
+    <div
+      data-responsive
+      className="bg-(--cream) rounded-[22px] md:rounded-[30px] border-8 md:border-15 border-(--yellow) mx-2 md:mx-3.75 overflow-hidden"
+    >
+      <div className="pt-7 md:pt-12.5 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15 max-w-240">
         <div className="flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
           <Link href="/" className="hover:text-(--ink-2)">
             Trapiche

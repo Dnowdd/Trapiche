@@ -1,6 +1,7 @@
 "use client";
 
 import Stars from "@/components/shared/stars";
+import { Heart, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -95,7 +96,11 @@ export default function ReviewCard({
           }
           className="inline-flex items-center gap-1 cursor-pointer hover:text-(--ink-2) aria-pressed:text-(--ink) disabled:cursor-default"
         >
-          {r.liked ? "♥" : "♡"} <strong>{r.likes}</strong>
+          <Heart
+            className="w-3.5 h-3.5"
+            fill={r.liked ? "currentColor" : "none"}
+          />{" "}
+          <strong>{r.likes}</strong>
         </button>
         <button
           type="button"
@@ -103,7 +108,8 @@ export default function ReviewCard({
           onClick={toggleComments}
           className="inline-flex items-center gap-1 cursor-pointer hover:text-(--ink-2)"
         >
-          💬 <strong>{r.comments}</strong>
+          <MessageCircle className="w-3.5 h-3.5" />{" "}
+          <strong>{r.comments}</strong>
         </button>
         {r.days != null && (
           <span className="ml-auto">

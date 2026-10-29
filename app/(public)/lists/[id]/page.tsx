@@ -24,8 +24,11 @@ export default async function ListPage({ params }: Props) {
   if (!list) notFound();
 
   return (
-    <div className="bg-(--cream) rounded-[30px] border-15 border-(--yellow) mx-3.75 overflow-hidden">
-      <div className="pt-12.5 px-18.75 pb-15">
+    <div
+      data-responsive
+      className="bg-(--cream) rounded-[22px] md:rounded-[30px] border-8 md:border-15 border-(--yellow) mx-2 md:mx-3.75 overflow-hidden"
+    >
+      <div className="pt-7 md:pt-12.5 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15">
         <div className="flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
           <Link href="/" className="hover:text-(--ink-2)">
             Trapiche
@@ -43,8 +46,8 @@ export default async function ListPage({ params }: Props) {
           <span className="text-(--ink-2) truncate max-w-80">{list.title}</span>
         </div>
 
-        <section className="grid grid-cols-[1fr_auto] gap-10 items-end pb-8 border-b border-(--rule)">
-          <div>
+        <section className="grid gap-6 md:grid-cols-[1fr_auto] md:gap-10 items-end pb-8 border-b border-(--rule)">
+          <div className="min-w-0">
             <div className="font-mono text-[11px] text-(--ink-4) uppercase tracking-[0.06em] flex gap-2 items-center">
               {list.viewer.pinned && (
                 <>
@@ -56,7 +59,7 @@ export default async function ListPage({ params }: Props) {
               <span className="text-(--ink-5)">·</span>
               <span>Atualizada {list.updated}</span>
             </div>
-            <h1 className="mt-3 mb-2 text-[44px] font-extrabold tracking-[-0.025em] leading-[1.02] text-(--ink) text-balance max-w-200">
+            <h1 className="mt-3 mb-2 text-[32px] sm:text-[44px] font-extrabold tracking-[-0.025em] leading-[1.02] text-(--ink) text-balance max-w-200">
               {list.title}
             </h1>
             {list.note && (
@@ -64,7 +67,7 @@ export default async function ListPage({ params }: Props) {
                 {list.note}
               </p>
             )}
-            <div className="mt-4 flex items-center gap-5 text-[13px] text-(--ink-3)">
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-(--ink-3)">
               <span className="flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-(--cream-deep) border border-(--ink-3) text-[10px] font-bold flex items-center justify-center text-(--ink-2)">
                   {list.owner.initials}
@@ -108,7 +111,7 @@ export default async function ListPage({ params }: Props) {
             </p>
           </div>
         ) : (
-          <div className="mt-10 grid grid-cols-6 gap-4.5 gap-y-8">
+          <div className="mt-8 md:mt-10 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4.5 gap-y-6 sm:gap-y-8">
             {list.items.map((it) => (
               <div key={it.book.id} className="relative group">
                 <Link

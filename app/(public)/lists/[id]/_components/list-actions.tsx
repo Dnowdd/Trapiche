@@ -24,7 +24,7 @@ export default function ListActions({ list }: { list: ListPageData }) {
   const small = "h-9 px-3.5 text-[12px]";
 
   return (
-    <div className="flex gap-2 flex-wrap justify-end">
+    <div className="flex gap-2 flex-wrap md:justify-end">
       {!v.isMember && list.visibility === "PUBLIC" && (
         <Button
           className={small}
