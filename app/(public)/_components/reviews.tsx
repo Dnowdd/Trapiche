@@ -2,6 +2,7 @@ import { type CSSProperties } from "react";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
 import Stars from "@/components/shared/stars";
+import SpoilerText from "@/components/shared/spoiler-text";
 import { getHomeReviews } from "@/lib/queries/home";
 
 const REVIEW_BOOK_STYLE: CSSProperties = {
@@ -58,9 +59,12 @@ const Reviews = async () => {
               </div>
             </Link>
 
-            <p className="m-0 text-[13px] leading-[1.55] text-(--ink-3) line-clamp-5 whitespace-pre-line">
+            <SpoilerText
+              spoiler={r.spoiler}
+              className="m-0 text-[13px] leading-[1.55] text-(--ink-3) line-clamp-5 whitespace-pre-line"
+            >
               {r.text}
-            </p>
+            </SpoilerText>
 
             <div className="mt-auto flex items-center justify-between border-t border-(--rule) pt-3 text-[11px]">
               <Link

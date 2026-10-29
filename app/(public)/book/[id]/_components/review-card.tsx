@@ -1,7 +1,7 @@
 "use client";
 
 import Stars from "@/components/shared/stars";
-import { Heart, MessageCircle } from "lucide-react";
+import { Flag, Heart, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,6 +15,8 @@ import {
   toggleReviewLike,
 } from "@/lib/actions/reviews";
 import type { ReviewItem } from "@/lib/queries/book";
+import SpoilerText from "@/components/shared/spoiler-text";
+import ReportModal from "@/components/moderation/report-modal";
 
 type Comment = Awaited<ReturnType<typeof getReviewComments>>[number];
 
@@ -29,6 +31,9 @@ export default function ReviewCard({
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [text, setText] = useState("");
+  const [reporting, setReporting] = useState<
+    { reviewId: string } | { commentId: string } | null
+  >(null);
   const like = useAction();
   const comment = useAction();
 
@@ -49,6 +54,9 @@ export default function ReviewCard({
       },
     );
   };
+
+  const report = (target: { reviewId: string } | { commentId: string }) =>
+    loggedIn ? setReporting(target) : router.push("/auth");
 
   const remove = (id: string) =>
     comment.run(() => deleteReviewComment(id), load, toast);
@@ -81,9 +89,12 @@ export default function ReviewCard({
           {r.edition && ` · sobre a edição ${r.edition}`}
         </div>
       </div>
-      <p className="text-[14px] leading-[1.6] text-(--ink-3) text-pretty m-0 mb-3.5 whitespace-pre-line">
+      <SpoilerText
+        spoiler={r.spoiler}
+        className="text-[14px] leading-[1.6] text-(--ink-3) text-pretty m-0 mb-3.5 whitespace-pre-line"
+      >
         {r.text}
-      </p>
+      </SpoilerText>
       <div className="pt-3 border-t border-(--rule) flex items-center gap-4.5 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] [&_strong]:text-(--ink-2) [&_strong]:font-['Inter',sans-serif]">
         <button
           type="button"
@@ -116,6 +127,17 @@ export default function ReviewCard({
           <span className="ml-auto">
             lido em {r.days} {r.days === 1 ? "dia" : "dias"}
           </span>
+        )}
+        {!r.mine && (
+          <button
+            type="button"
+            title="Denunciar resenha"
+            aria-label="Denunciar resenha"
+            onClick={() => report({ reviewId: r.id })}
+            className={`${r.days != null ? "" : "ml-auto "}inline-flex items-center cursor-pointer hover:text-(--ink-2)`}
+          >
+            <Flag className="w-3.5 h-3.5" />
+          </button>
         )}
       </div>
 
@@ -154,6 +176,15 @@ export default function ReviewCard({
                           className="ml-2 text-(--ink-4) underline underline-offset-2 cursor-pointer hover:text-(--ink-2)"
                         >
                           apagar
+                        </button>
+                      )}
+                      {!c.mine && loggedIn && (
+                        <button
+                          type="button"
+                          onClick={() => report({ commentId: c.id })}
+                          className="ml-2 text-(--ink-4) underline underline-offset-2 cursor-pointer hover:text-(--ink-2)"
+                        >
+                          denunciar
                         </button>
                       )}
                     </div>
@@ -197,6 +228,13 @@ export default function ReviewCard({
             </Link>
           )}
         </div>
+      )}
+      {reporting && (
+        <ReportModal
+          open
+          onOpenChange={(o) => !o && setReporting(null)}
+          target={reporting}
+        />
       )}
     </article>
   );

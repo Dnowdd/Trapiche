@@ -155,6 +155,11 @@ export default function ReviewsSection({ data }: { data: BookPageData }) {
                 <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
                   {review.date}
                 </span>
+                {review.spoiler && (
+                  <span className="font-mono text-[10px] text-(--ink-3) tracking-[0.06em] uppercase border border-(--ink-4) rounded-full px-2 py-0.5">
+                    Spoiler
+                  </span>
+                )}
                 <div className="ml-auto flex gap-2">
                   <Button
                     variant="ghost"
@@ -181,6 +186,12 @@ export default function ReviewsSection({ data }: { data: BookPageData }) {
                   </Button>
                 </div>
               </div>
+              {review.hidden && (
+                <p className="m-0 mb-2 text-[12px] text-[#9a4a2a]">
+                  O texto desta resenha foi ocultado pela moderação e só você o
+                  vê. Sua nota continua valendo.
+                </p>
+              )}
               {review.text ? (
                 <p className="m-0 text-[14px] leading-[1.6] text-(--ink-2) whitespace-pre-line">
                   {review.text}

@@ -81,13 +81,14 @@ export async function getHomeLists(limit = 3) {
 
 export async function getHomeReviews(limit = 6) {
   const reviews = await db.review.findMany({
-    where: { text: { not: null } },
+    where: { text: { not: null }, hiddenAt: null },
     orderBy: { createdAt: "desc" },
     take: limit,
     select: {
       id: true,
       rating: true,
       text: true,
+      spoiler: true,
       createdAt: true,
       user: { select: { name: true, handle: true } },
       book: { select: bookSummarySelect },
@@ -97,6 +98,7 @@ export async function getHomeReviews(limit = 6) {
     id: r.id,
     stars: r.rating,
     text: r.text!,
+    spoiler: r.spoiler,
     date: fmtDay(dayOf(r.createdAt)),
     user: r.user.name,
     handle: r.user.handle,

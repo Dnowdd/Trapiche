@@ -76,6 +76,7 @@ export async function getReviews(
   const where = {
     bookId: { in: ids },
     text: { not: null },
+    hiddenAt: null,
     ...(opts.excludeViewer && viewerId ? { NOT: { userId: viewerId } } : {}),
   };
   const [rows, total] = await Promise.all([
@@ -110,6 +111,7 @@ export async function getReviews(
       date: fmtAgo(r.createdAt),
       days: days.get(r.userId) ?? null,
       text: r.text ?? "",
+      spoiler: r.spoiler,
       likes: r._count.likes,
       comments: r._count.comments,
       liked: Array.isArray(r.likes) && r.likes.length > 0,
@@ -414,6 +416,8 @@ async function viewerState(
       ? {
           rating: review.rating,
           text: review.text ?? "",
+          spoiler: review.spoiler,
+          hidden: review.hiddenAt != null,
           date: fmtAgo(review.createdAt),
         }
       : null,

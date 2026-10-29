@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 import { db } from "../db";
 import { ensureBook } from "../books";
 import { editionIds } from "../works";
+import { notify, unnotify } from "../notifications";
 import { fail, withUser } from "./result";
 import { getViewerId } from "../session";
 import { fmtAgo } from "../dates";
@@ -11,7 +12,7 @@ import { initialsOf } from "../queries/book";
 
 export async function saveReview(
   bookId: string,
-  input: { rating: number; text?: string },
+  input: { rating: number; text?: string; spoiler?: boolean },
 ) {
   return withUser(async (userId) => {
     const rating = Number(input.rating);
@@ -20,6 +21,8 @@ export async function saveReview(
     const text = typeof input.text === "string" ? input.text.trim() : "";
     if (text.length > 5000)
       fail("A resenha pode ter no máximo 5.000 caracteres.");
+
+    const spoiler = Boolean(text && input.spoiler);
 
     await ensureBook(bookId);
     const ids = await editionIds(bookId);
@@ -35,10 +38,10 @@ export async function saveReview(
       const review = existing
         ? await tx.review.update({
             where: { id: existing.id },
-            data: { rating, text: text || null },
+            data: { rating, text: text || null, spoiler },
           })
         : await tx.review.create({
-            data: { userId, bookId, rating, text: text || null },
+            data: { userId, bookId, rating, text: text || null, spoiler },
           });
       const snippet = text ? text.slice(0, 280) : null;
       if (existing) {
@@ -82,8 +85,19 @@ export async function toggleReviewLike(reviewId: string) {
       fail("Você não pode curtir a própria resenha.");
     const key = { userId_reviewId: { userId, reviewId } };
     const liked = await db.reviewLike.findUnique({ where: key });
-    if (liked) await db.reviewLike.delete({ where: key });
-    else await db.reviewLike.create({ data: { userId, reviewId } });
+    const notice = {
+      userId: review.userId,
+      actorId: userId,
+      kind: "REVIEW_LIKED" as const,
+      reviewId,
+    };
+    if (liked) {
+      await db.reviewLike.delete({ where: key });
+      await unnotify(notice);
+    } else {
+      await db.reviewLike.create({ data: { userId, reviewId } });
+      await notify(notice);
+    }
     refresh();
     return { liked: !liked };
   });
@@ -97,7 +111,16 @@ export async function addReviewComment(reviewId: string, text: string) {
       fail("O comentário pode ter no máximo 1.000 caracteres.");
     const review = await db.review.findUnique({ where: { id: reviewId } });
     if (!review) fail("Essa resenha não existe mais.");
-    await db.reviewComment.create({ data: { reviewId, userId, text: value } });
+    const comment = await db.reviewComment.create({
+      data: { reviewId, userId, text: value },
+    });
+    await notify({
+      userId: review.userId,
+      actorId: userId,
+      kind: "REVIEW_COMMENTED",
+      reviewId,
+      commentId: comment.id,
+    });
     refresh();
   });
 }
@@ -124,7 +147,7 @@ export async function getReviewComments(reviewId: string) {
   });
   if (!review) return [];
   const rows = await db.reviewComment.findMany({
-    where: { reviewId },
+    where: { reviewId, hiddenAt: null },
     orderBy: { createdAt: "asc" },
     take: 200,
     include: { user: { select: { name: true, handle: true } } },
@@ -137,5 +160,6 @@ export async function getReviewComments(reviewId: string) {
     initials: initialsOf(c.user.name),
     date: fmtAgo(c.createdAt),
     canDelete: viewerId === c.userId || viewerId === review.userId,
+    mine: viewerId === c.userId,
   }));
 }

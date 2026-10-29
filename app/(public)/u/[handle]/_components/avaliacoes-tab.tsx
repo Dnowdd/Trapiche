@@ -7,6 +7,7 @@ import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
 import ReviewModal from "@/components/reading/review-modal";
 import type { getAvaliacoes } from "@/lib/queries/profile";
+import SpoilerText from "@/components/shared/spoiler-text";
 
 type Item = Awaited<ReturnType<typeof getAvaliacoes>>[number];
 
@@ -71,10 +72,18 @@ export default function AvaliacoesTab({
                 </>
               )}
             </div>
-            {r.text ? (
-              <p className="text-[14px] leading-[1.6] text-(--ink-3) text-pretty m-0 whitespace-pre-line">
-                {r.text}
+            {isOwner && r.hidden && (
+              <p className="m-0 mb-2 text-[12px] text-[#9a4a2a]">
+                Texto ocultado pela moderação. Só você o vê.
               </p>
+            )}
+            {r.text ? (
+              <SpoilerText
+                spoiler={r.spoiler && !isOwner}
+                className="text-[14px] leading-[1.6] text-(--ink-3) text-pretty m-0 whitespace-pre-line"
+              >
+                {r.text}
+              </SpoilerText>
             ) : (
               <p className="text-[13px] text-(--ink-4) m-0">Só a nota.</p>
             )}
@@ -110,7 +119,11 @@ export default function AvaliacoesTab({
           onOpenChange={(o) => !o && setEditing(null)}
           bookId={editing.book.id}
           title={editing.book.title}
-          initial={{ rating: editing.stars, text: editing.text }}
+          initial={{
+            rating: editing.stars,
+            text: editing.text,
+            spoiler: editing.spoiler,
+          }}
         />
       )}
     </div>

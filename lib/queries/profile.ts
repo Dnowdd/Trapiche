@@ -213,6 +213,7 @@ export async function getInicio(
       take: limit + 1,
       include: {
         book: { select: bookSummarySelect },
+        review: { select: { spoiler: true, hiddenAt: true } },
         list: {
           select: {
             title: true,
@@ -235,7 +236,8 @@ export async function getInicio(
         ? { id: a.list.id, title: a.list.title, count: a.list._count.items }
         : null,
       rating: a.rating,
-      text: a.text,
+      text: a.review?.hiddenAt ? null : a.text,
+      spoiler: a.review?.spoiler ?? false,
       days: a.days,
     })),
     hasMoreActivity: activity.length > limit,
@@ -380,7 +382,7 @@ export async function getDiario(userId: string, entriesLimit: number) {
   };
 }
 
-export async function getAvaliacoes(userId: string) {
+export async function getAvaliacoes(userId: string, isOwner: boolean) {
   const rows = await db.review.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -403,7 +405,9 @@ export async function getAvaliacoes(userId: string) {
       id: r.id,
       book: toCover(r.book),
       stars: r.rating,
-      text: r.text ?? "",
+      text: r.hiddenAt && !isOwner ? "" : (r.text ?? ""),
+      spoiler: r.spoiler,
+      hidden: r.hiddenAt != null,
       date: fmtDay(dayOf(r.createdAt)),
       days: reading ? spanDays(reading) : null,
       likes: r._count.likes,

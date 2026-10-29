@@ -5,6 +5,9 @@ import { fmtRating } from "@/components/shared/stars";
 import type { getInicio } from "@/lib/queries/profile";
 import FavoritesEditor from "./favorites-editor";
 import Card from "./card";
+import SpoilerText from "@/components/shared/spoiler-text";
+import GoalCard from "@/components/goals/goal-card";
+import type { GoalData } from "@/lib/queries/stats";
 
 type Data = Awaited<ReturnType<typeof getInicio>>;
 type ActivityItem = Data["activity"][number];
@@ -152,9 +155,12 @@ function ActivityRow({ a }: { a: ActivityItem }) {
           {a.when}
         </div>
         {quote && (
-          <div className="mt-1.5 text-[12px] text-(--ink-4) leading-[1.45] border-l-2 border-(--rule) pl-2.5 italic">
+          <SpoilerText
+            spoiler={a.spoiler}
+            className="m-0 mt-1.5 text-[12px] text-(--ink-4) leading-[1.45] border-l-2 border-(--rule) pl-2.5 italic"
+          >
             &quot;{quote}&quot;
-          </div>
+          </SpoilerText>
         )}
       </div>
     </div>
@@ -166,11 +172,13 @@ const linkCls =
 
 export default function InicioTab({
   data,
+  goal,
   handle,
   isOwner,
   page,
 }: {
   data: Data;
+  goal: GoalData | null;
   handle: string;
   isOwner: boolean;
   page: number;
@@ -180,6 +188,9 @@ export default function InicioTab({
     <>
       {!full && (
         <>
+          {goal && (isOwner || goal.target != null || goal.done > 0) && (
+            <GoalCard goal={goal} isOwner={isOwner} handle={handle} />
+          )}
           <Card
             eyebrow="Curadoria do leitor"
             title={isOwner ? "Meus 5 livros favoritos" : "5 livros favoritos"}

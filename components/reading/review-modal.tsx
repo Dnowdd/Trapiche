@@ -19,7 +19,7 @@ interface ReviewModalProps {
   onOpenChange: (open: boolean) => void;
   bookId: string;
   title: string;
-  initial?: { rating: number; text: string } | null;
+  initial?: { rating: number; text: string; spoiler?: boolean } | null;
   eyebrow?: string;
 }
 
@@ -91,6 +91,7 @@ export default function ReviewModal({
 }: ReviewModalProps) {
   const [rating, setRating] = useState(initial?.rating ?? 0);
   const [text, setText] = useState(initial?.text ?? "");
+  const [spoiler, setSpoiler] = useState(initial?.spoiler ?? false);
   const { pending, error, setError, run } = useAction();
 
   const submit = (e: React.FormEvent) => {
@@ -100,7 +101,7 @@ export default function ReviewModal({
       return;
     }
     run(
-      () => saveReview(bookId, { rating, text }),
+      () => saveReview(bookId, { rating, text, spoiler }),
       () => {
         onOpenChange(false);
         toast(initial ? "Resenha atualizada." : "Resenha publicada.");
@@ -132,10 +133,21 @@ export default function ReviewModal({
             value={text}
             maxLength={5000}
             className="min-h-40"
-            placeholder="Conte o que ficou com você, sem spoilers…"
+            placeholder="Conte o que ficou com você…"
             onChange={(e) => setText(e.target.value)}
           />
         </FormField>
+        {text.trim() && (
+          <label className="flex items-center gap-2 -mt-1 mb-4 text-[13px] text-(--ink-2) cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={spoiler}
+              onChange={(e) => setSpoiler(e.target.checked)}
+              className="size-4 accent-(--yellow-deep)"
+            />
+            Contém spoiler
+          </label>
+        )}
         <FormActions>
           <Button
             type="button"
