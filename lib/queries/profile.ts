@@ -11,7 +11,6 @@ import {
   fmtJoined,
   fmtPartial,
   longestStreak,
-  readingDays,
   spanDays,
   streakFrom,
   today,
@@ -21,7 +20,11 @@ import {
 import { initialsOf } from "./book";
 import { finishedCount } from "./stats";
 import { byLine } from "./lists";
-import type { Prisma, ShelfStatus } from "../generated/prisma/client";
+import type {
+  DatePrecision,
+  Prisma,
+  ShelfStatus,
+} from "../generated/prisma/client";
 
 export const TABS = [
   "inicio",
@@ -213,6 +216,14 @@ export async function getInicio(
       include: {
         book: { select: bookSummarySelect },
         review: { select: { spoiler: true, hiddenAt: true } },
+        reading: {
+          select: {
+            startedAt: true,
+            startPrecision: true,
+            endedAt: true,
+            endPrecision: true,
+          },
+        },
         list: {
           select: {
             title: true,
@@ -229,7 +240,11 @@ export async function getInicio(
     activity: activity.slice(0, limit).map((a) => ({
       id: a.id,
       kind: a.kind,
-      when: fmtAgo(a.createdAt),
+      when: !a.reading
+        ? fmtAgo(a.createdAt)
+        : a.kind === "STARTED"
+          ? fmtPartial(a.reading.startedAt, a.reading.startPrecision)
+          : fmtPartial(a.reading.endedAt, a.reading.endPrecision),
       book: a.book ? toCover(a.book) : null,
       list: a.list
         ? { id: a.list.id, title: a.list.title, count: a.list._count.items }
@@ -241,6 +256,29 @@ export async function getInicio(
     })),
     hasMoreActivity: activity.length > limit,
   };
+}
+
+function shelfDate(
+  status: string,
+  readings: {
+    status: string;
+    startedAt: Date | null;
+    startPrecision: DatePrecision;
+    endedAt: Date | null;
+    endPrecision: DatePrecision;
+  }[],
+) {
+  if (status === "READ") {
+    const last = readings.find((x) => x.status === "FINISHED");
+    return last ? fmtPartial(last.endedAt, last.endPrecision) : null;
+  }
+  if (status === "READING" || status === "REREADING") {
+    const active = readings.find((x) => x.status === "ACTIVE");
+    const started =
+      active && fmtPartial(active.startedAt, active.startPrecision);
+    return started ? `desde ${started}` : null;
+  }
+  return null;
 }
 
 export async function getEstante(userId: string) {
@@ -257,7 +295,9 @@ export async function getEstante(userId: string) {
         bookId: true,
         status: true,
         startedAt: true,
+        startPrecision: true,
         endedAt: true,
+        endPrecision: true,
         endPage: true,
       },
     }),
@@ -270,15 +310,12 @@ export async function getEstante(userId: string) {
     if (r.status === "ABANDONED") {
       const reading = mine.find((x) => x.status === "ABANDONED");
       const page = reading?.endPage ?? r.currentPage;
-      const ended = reading?.endedAt ?? today();
       abandoned = {
         percent: total ? Math.min(100, Math.round((page / total) * 100)) : 0,
         page,
         total,
-        at: fmtDay(ended),
-        spentDays: reading?.startedAt
-          ? readingDays(reading.startedAt, ended)
-          : 1,
+        at: reading ? fmtPartial(reading.endedAt, reading.endPrecision) : null,
+        spentDays: reading ? spanDays(reading) : null,
         reason: r.abandonReason,
         again: r.wantsToReturn,
       };
@@ -286,7 +323,7 @@ export async function getEstante(userId: string) {
     return {
       book: toCover(r.book),
       status: r.status!,
-      since: r.statusChangedAt ? fmtAgo(r.statusChangedAt) : null,
+      date: shelfDate(r.status!, mine),
       reads,
       progress:
         total && (r.status === "READING" || r.status === "REREADING")

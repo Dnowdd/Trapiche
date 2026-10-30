@@ -102,10 +102,11 @@ function CoverTile({ it }: { it: Item }) {
         <div className="text-[11px] text-(--ink-4) mt-0.5 truncate">
           {it.book.author}
         </div>
-        {it.since && (
+        {(it.date || it.progress != null) && (
           <div className="mt-1 font-mono text-[10px] text-(--ink-5) tracking-[0.04em]">
-            {it.progress != null ? `${it.progress}% · ` : ""}
-            {it.since}
+            {[it.progress != null && `${it.progress}%`, it.date]
+              .filter(Boolean)
+              .join(" · ")}
           </div>
         )}
       </div>
@@ -155,7 +156,13 @@ function AbandonedRow({ it, isOwner }: { it: Item; isOwner: boolean }) {
       </div>
       <div className="col-span-2 sm:col-span-1 flex flex-wrap sm:flex-col items-center sm:items-end gap-2.5 pt-3 sm:pt-0 border-t sm:border-t-0 border-(--rule)">
         <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase">
-          {a.at} · {a.spentDays} {a.spentDays === 1 ? "dia" : "dias"}
+          {[
+            a.at,
+            a.spentDays != null &&
+              `${a.spentDays} ${a.spentDays === 1 ? "dia" : "dias"}`,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         </span>
         {a.again ? (
           isOwner ? (
