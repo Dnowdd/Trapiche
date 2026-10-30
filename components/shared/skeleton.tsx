@@ -43,22 +43,9 @@ export function CoverGridSkeleton({
 
 export function PageSpinner({ label = "Carregando" }: { label?: string }) {
   return (
-    <div
-      role="status"
-      className="flex flex-col items-center justify-center gap-4 py-32 text-(--ink-3)"
-    >
-      <div className="flex gap-1.5">
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            className="w-2.5 h-8 rounded-[3px] bg-(--ink-2) origin-bottom animate-[book-bounce_1s_ease-in-out_infinite]"
-            style={{ animationDelay: `${i * 0.15}s` }}
-          />
-        ))}
-      </div>
-      <span className="font-mono text-[10px] uppercase tracking-[0.12em]">
-        {label}…
-      </span>
+    <div role="status" className="flex items-center justify-center py-32">
+      <div className="loader" aria-hidden />
+      <span className="sr-only">{label}…</span>
     </div>
   );
 }
