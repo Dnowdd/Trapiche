@@ -39,14 +39,9 @@ import type { GoogleBooksVolume } from "../types/book";
 
 const ACTIVE_STATUSES: ShelfStatus[] = ["READ", "READING", "REREADING"];
 
-export function initialsOf(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join("");
-}
+import { initialsOf } from "../utils";
+
+export { initialsOf };
 
 async function latestReadingDays(bookIds: string[], userIds: string[]) {
   if (!userIds.length) return new Map<string, number>();

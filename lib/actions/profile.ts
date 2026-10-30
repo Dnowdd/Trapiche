@@ -54,3 +54,48 @@ export async function deleteAccount(confirmHandle: string) {
     await db.user.delete({ where: { id: userId } });
   });
 }
+
+const AVATAR_MAX_BYTES = 512 * 1024;
+
+function imageType(bytes: Uint8Array) {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff)
+    return "image/jpeg";
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e)
+    return "image/png";
+  if (
+    String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
+    String.fromCharCode(...bytes.slice(8, 12)) === "WEBP"
+  )
+    return "image/webp";
+  return null;
+}
+
+export async function uploadAvatar(form: FormData) {
+  return withUser(async (userId) => {
+    const file = form.get("file");
+    if (!(file instanceof Blob) || file.size === 0) fail("Escolha uma imagem.");
+    if (file.size > AVATAR_MAX_BYTES) fail("A imagem ficou grande demais.");
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const mimeType = imageType(bytes);
+    if (!mimeType) fail("Use uma imagem JPG, PNG ou WebP.");
+
+    const avatar = await db.userAvatar.upsert({
+      where: { userId },
+      create: { userId, data: bytes, mimeType },
+      update: { data: bytes, mimeType },
+      select: { updatedAt: true },
+    });
+    const image = `/api/avatars/${userId}?v=${avatar.updatedAt.getTime()}`;
+    await db.user.update({ where: { id: userId }, data: { image } });
+    refresh();
+    return { image };
+  });
+}
+
+export async function removeAvatar() {
+  return withUser(async (userId) => {
+    await db.userAvatar.deleteMany({ where: { userId } });
+    await db.user.update({ where: { id: userId }, data: { image: null } });
+    refresh();
+  });
+}
