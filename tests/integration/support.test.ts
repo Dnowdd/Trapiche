@@ -157,3 +157,44 @@ describe("support tickets", () => {
     expect(await canSeeTicket("user-test", "user-other")).toBe(false);
   });
 });
+
+describe("data export", () => {
+  it("includes goals, support tickets with images and the avatar", async () => {
+    const { GET } = await import("@/app/api/me/export/route");
+    const png = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
+    const files = new FormData();
+    files.append("file", new Blob([png]), "x");
+    files.append("width", "10");
+    files.append("height", "10");
+    const res = await openTicket(
+      { subject: "Exportar meus dados", category: "ACCOUNT", body: "Oi" },
+      files,
+    );
+    expect(res.ok).toBe(true);
+    await testDb.readingGoal.create({
+      data: { userId: "user-test", year: 2026, target: 12 },
+    });
+    await testDb.userAvatar.create({
+      data: { userId: "user-test", data: png, mimeType: "image/png" },
+    });
+
+    const data = await (await GET()).json();
+    expect(data.readingGoals).toEqual([
+      expect.objectContaining({ year: 2026, target: 12 }),
+    ]);
+    expect(data.supportTickets[0].subject).toBe("Exportar meus dados");
+    expect(data.supportTickets[0].messages[0]).toMatchObject({
+      body: "Oi",
+      from: "you",
+    });
+    expect(data.supportTickets[0].messages[0].attachments[0].image).toMatch(
+      /^data:image\/png;base64,/,
+    );
+    expect(data.avatar.image).toMatch(/^data:image\/png;base64,/);
+
+    viewer.id = null;
+    expect((await GET()).status).toBe(401);
+  });
+});
