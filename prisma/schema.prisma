@@ -169,7 +169,6 @@ model UserBook {
   likedAt          DateTime?
   favoritePosition Int?
   currentPage      Int          @default(0)
-  note             String?
   abandonReason    String?
   wantsToReturn    Boolean      @default(true)
   createdAt        DateTime     @default(now())

@@ -18,7 +18,6 @@ import { toast } from "@/components/shared/toast";
 import StartModal from "@/components/reading/start-modal";
 import FinishModal from "@/components/reading/finish-modal";
 import AbandonModal from "@/components/reading/abandon-modal";
-import ReviewModal from "@/components/reading/review-modal";
 import AddToListModal from "@/components/lists/add-to-list-modal";
 import { useAction } from "@/components/reading/use-action";
 import { shareLink } from "@/components/reading/share";
@@ -78,9 +77,9 @@ export default function BookHero({ data, today }: BookHeroProps) {
   const router = useRouter();
   const { book, rating, viewer } = data;
   const loggedIn = viewer != null;
-  const [modal, setModal] = useState<
-    null | "finish" | "abandon" | "review" | "lists"
-  >(null);
+  const [modal, setModal] = useState<null | "finish" | "abandon" | "lists">(
+    null,
+  );
   const { pending, run } = useAction();
   const [starting, setStarting] = useState<"READING" | "REREADING" | null>(
     null,
@@ -433,9 +432,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
           title={book.title}
           today={today}
           startedAt={viewer.reading?.startedPartial}
-          onFinished={() => {
-            if (!viewer.review) setModal("review");
-          }}
+          review={viewer.review}
         />
       )}
       {viewer && modal === "abandon" && (
@@ -446,15 +443,6 @@ export default function BookHero({ data, today }: BookHeroProps) {
           title={book.title}
           currentPage={viewer.currentPage}
           pageCount={book.pageCount}
-        />
-      )}
-      {viewer && modal === "review" && (
-        <ReviewModal
-          open
-          onOpenChange={(o) => !o && setModal(null)}
-          bookId={book.id}
-          title={book.title}
-          eyebrow="Leitura concluída · que tal uma resenha?"
         />
       )}
       {viewer && modal === "lists" && (

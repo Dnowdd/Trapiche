@@ -4,7 +4,6 @@ import { useState } from "react";
 import LogSessionModal from "@/components/reading/log-session-modal";
 import FinishModal from "@/components/reading/finish-modal";
 import ProgressModal from "@/components/reading/progress-modal";
-import ReviewModal from "@/components/reading/review-modal";
 import type { BookPageData } from "@/lib/queries/book";
 
 const ghost =
@@ -17,9 +16,9 @@ export default function MyReading({
   data: BookPageData;
   today: string;
 }) {
-  const [modal, setModal] = useState<
-    null | "log" | "finish" | "progress" | "review"
-  >(null);
+  const [modal, setModal] = useState<null | "log" | "finish" | "progress">(
+    null,
+  );
   const v = data.viewer;
   const r = v?.reading;
   const book = data.book;
@@ -99,12 +98,6 @@ export default function MyReading({
                 ))}
               </div>
 
-              {v.note && (
-                <div className="mt-3.5 italic text-[13px] text-(--cream-deep) border-l-2 border-[rgba(255,231,103,0.4)] pl-3 leading-normal">
-                  &quot;{v.note}&quot;
-                </div>
-              )}
-
               <div className="mt-5.5 flex gap-2 flex-wrap">
                 <button
                   className="text-[12px] font-medium py-2.25 px-3.5 rounded-[7px] bg-(--yellow) text-(--ink) cursor-pointer transition-transform duration-100 hover:-translate-y-px"
@@ -178,9 +171,7 @@ export default function MyReading({
           title={book.title}
           today={today}
           startedAt={r?.startedPartial}
-          onFinished={() => {
-            if (!v.review) setModal("review");
-          }}
+          review={v.review}
         />
       )}
       {r && modal === "progress" && (
@@ -192,16 +183,6 @@ export default function MyReading({
           currentPage={r.page}
           pageCount={book.pageCount}
           startedAt={r.startedPartial}
-          note={v.note}
-        />
-      )}
-      {modal === "review" && (
-        <ReviewModal
-          open
-          onOpenChange={(o) => !o && setModal(null)}
-          bookId={book.id}
-          title={book.title}
-          eyebrow="Leitura concluída · que tal uma resenha?"
         />
       )}
     </>

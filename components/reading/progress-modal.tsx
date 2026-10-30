@@ -7,7 +7,6 @@ import {
   FormActions,
   FormError,
   FormField,
-  TextArea,
   TextInput,
 } from "@/components/shared/form";
 import { updateProgress } from "@/lib/actions/shelf";
@@ -47,7 +46,6 @@ interface ProgressModalProps {
   currentPage: number;
   pageCount: number | null;
   startedAt: string;
-  note: string | null;
 }
 
 export default function ProgressModal({
@@ -58,12 +56,10 @@ export default function ProgressModal({
   currentPage,
   pageCount,
   startedAt,
-  note: initialNote,
 }: ProgressModalProps) {
   const [page, setPage] = useState(String(currentPage));
   const [start, setStart] = useState<string | null>(startedAt);
   const [total, setTotal] = useState("");
-  const [note, setNote] = useState(initialNote ?? "");
   const { pending, error, run } = useAction();
   const invalid = start === null || start > today.slice(0, start.length);
   const max = pageCount ?? (Number(total) || undefined);
@@ -76,7 +72,6 @@ export default function ProgressModal({
         updateProgress(bookId, {
           currentPage: page,
           startedAt: start,
-          note,
           pageCount: pageCount ? null : total,
         }),
       () => onOpenChange(false),
@@ -89,7 +84,7 @@ export default function ProgressModal({
       onOpenChange={onOpenChange}
       eyebrow="Sua leitura"
       title="Editar progresso"
-      description="Corrija a página atual, quando começou ou a sua nota. A data é opcional: pode ser só o ano, o mês ou o dia certinho."
+      description="Corrija a página atual ou quando começou. A data é opcional: pode ser só o ano, o mês ou o dia certinho."
     >
       <form onSubmit={submit}>
         <FormError message={error} />
@@ -127,17 +122,6 @@ export default function ProgressModal({
             today={today}
           />
         )}
-        <FormField
-          label="Nota da leitura"
-          hint="Aparece no card “Sua leitura”."
-        >
-          <TextArea
-            value={note}
-            maxLength={500}
-            placeholder="Reli o capítulo do Sem-Pernas duas vezes…"
-            onChange={(e) => setNote(e.target.value)}
-          />
-        </FormField>
         <FormActions>
           <Button
             type="button"

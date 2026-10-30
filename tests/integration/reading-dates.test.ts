@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  finishBook,
   logReadingSession,
   setShelfStatus,
   updateProgress,
@@ -104,5 +105,36 @@ describe("page count filled by the reader", () => {
     expect(
       (await updateProgress(BOOK, { currentPage: 1, pageCount: 0 })).ok,
     ).toBe(true);
+  });
+});
+
+describe("finishing with a review", () => {
+  it("publishes the rating and review together with the finished reading", async () => {
+    await setShelfStatus(BOOK, "READING");
+    const res = await finishBook(BOOK, {
+      finishedAt: "2026-03",
+      review: { rating: 4.5, text: "Ótimo.", spoiler: true },
+    });
+    expect(res.ok).toBe(true);
+    const review = await testDb.review.findFirstOrThrow({
+      where: { userId: USER, bookId: BOOK },
+    });
+    expect(review).toMatchObject({
+      rating: 4.5,
+      text: "Ótimo.",
+      spoiler: true,
+    });
+    const kinds = await testDb.activity.findMany({
+      where: { userId: USER, bookId: BOOK },
+      select: { kind: true },
+    });
+    expect(kinds.map((a) => a.kind).sort()).toEqual(["FINISHED", "REVIEW"]);
+  });
+
+  it("rejects an invalid rating without finishing the book", async () => {
+    await setShelfStatus(BOOK, "READING");
+    const res = await finishBook(BOOK, { review: { rating: 7 } });
+    expect(res.ok).toBe(false);
+    expect((await active()).status).toBe("ACTIVE");
   });
 });

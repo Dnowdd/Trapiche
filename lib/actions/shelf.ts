@@ -13,6 +13,7 @@ import {
   type PartialDate,
 } from "../dates";
 import { fail, withUser } from "./result";
+import { parseReview, upsertReview, type ReviewInput } from "../reviews";
 import type { ActivityKind, Prisma } from "../generated/prisma/client";
 
 type Tx = Prisma.TransactionClient;
@@ -249,12 +250,13 @@ export async function setShelfStatus(
 
 export async function finishBook(
   bookId: string,
-  input: { startedAt?: string; finishedAt?: string; note?: string },
+  input: { startedAt?: string; finishedAt?: string; review?: ReviewInput },
 ) {
   return withUser(async (userId) => {
     const book = await ensureBook(bookId);
     const dates = parseDates(input);
-    const note = parseOptionalText(input.note, 500);
+    const review = input.review ? parseReview(input.review) : null;
+    const ids = review ? await editionIds(bookId) : [];
     const days = spanDays(dates);
     await db.$transaction(async (tx) => {
       const entry = await shelfEntry(tx, userId, bookId);
@@ -281,7 +283,6 @@ export async function finishBook(
           statusChangedAt: new Date(),
           currentPage: book.pageCount ?? entry.currentPage,
           abandonReason: null,
-          ...(note ? { note } : {}),
         },
       });
       await renumber(tx, userId, bookId);
@@ -292,6 +293,7 @@ export async function finishBook(
         days,
         readingId: reading.id,
       });
+      if (review) await upsertReview(tx, userId, bookId, ids, review);
     });
     refresh();
     return { days };
@@ -426,7 +428,6 @@ export async function updateProgress(
   input: {
     currentPage: number | string;
     startedAt?: string | null;
-    note?: string;
     pageCount?: number | string | null;
   },
 ) {
@@ -435,7 +436,6 @@ export async function updateProgress(
     const pageCount = await fillPageCount(book, input.pageCount);
     const currentPage = parsePage(input.currentPage, pageCount);
     const start = parsePartial(input.startedAt, "a data de início");
-    const note = parseOptionalText(input.note, 500);
     await db.$transaction(async (tx) => {
       const entry = await shelfEntry(tx, userId, bookId);
       const active = await activeReading(tx, userId, bookId);
@@ -457,7 +457,7 @@ export async function updateProgress(
       });
       await tx.userBook.update({
         where: { id: entry.id },
-        data: { currentPage, note },
+        data: { currentPage },
       });
     });
     refresh();

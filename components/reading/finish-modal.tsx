@@ -10,7 +10,9 @@ import {
   TextArea,
 } from "@/components/shared/form";
 import { finishBook } from "@/lib/actions/shelf";
+import { toast } from "@/components/shared/toast";
 import PartialDateInput from "./partial-date-input";
+import { StarPicker } from "./review-modal";
 import { useAction } from "./use-action";
 
 interface FinishModalProps {
@@ -20,6 +22,7 @@ interface FinishModalProps {
   title: string;
   today: string;
   startedAt?: string | null;
+  review?: { rating: number; text: string; spoiler?: boolean } | null;
   onFinished?: () => void;
 }
 
@@ -30,6 +33,7 @@ export default function FinishModal({
   title,
   today,
   startedAt,
+  review,
   onFinished,
 }: FinishModalProps) {
   const [start, setStart] = useState<string | null>(startedAt ?? "");
@@ -39,21 +43,34 @@ export default function FinishModal({
     end === null ||
     start > today.slice(0, start.length) ||
     end > today.slice(0, end.length);
-  const [note, setNote] = useState("");
-  const { pending, error, run } = useAction();
+  const [rating, setRating] = useState(review?.rating ?? 0);
+  const [text, setText] = useState(review?.text ?? "");
+  const [spoiler, setSpoiler] = useState(review?.spoiler ?? false);
+  const { pending, error, setError, run } = useAction();
+  const reviewChanged =
+    rating !== (review?.rating ?? 0) ||
+    text.trim() !== (review?.text ?? "").trim() ||
+    spoiler !== (review?.spoiler ?? false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (invalid) return;
+    if (text.trim() && !rating) {
+      setError("Escolha uma nota para publicar a resenha.");
+      return;
+    }
+    const sendReview = rating > 0 && reviewChanged;
     run(
       () =>
         finishBook(bookId, {
           startedAt: start ?? "",
           finishedAt: end ?? "",
-          note,
+          review: sendReview ? { rating, text, spoiler } : undefined,
         }),
       () => {
         onOpenChange(false);
+        if (sendReview)
+          toast(review ? "Resenha atualizada." : "Resenha publicada.");
         onFinished?.();
       },
     );
@@ -65,7 +82,8 @@ export default function FinishModal({
       onOpenChange={onOpenChange}
       eyebrow="Leitura concluída"
       title={`Terminou ${title}?`}
-      description="As datas são opcionais. Preencha só o que lembrar: o ano, o mês ou o dia certinho."
+      description="Tudo aqui é opcional. Nas datas, preencha só o que lembrar: o ano, o mês ou o dia certinho."
+      width={560}
     >
       <form onSubmit={submit}>
         <FormError message={error} />
@@ -83,14 +101,41 @@ export default function FinishModal({
             today={today}
           />
         </div>
-        <FormField label="Uma nota sobre a leitura" hint="Opcional">
+        <div className="mb-4">
+          <span className="block font-mono text-[10px] text-(--ink-3) tracking-[0.06em] uppercase mb-1.5">
+            Sua nota
+          </span>
+          <StarPicker
+            value={rating}
+            onChange={(v) => {
+              setRating(v);
+              setError("");
+            }}
+          />
+        </div>
+        <FormField
+          label="Resenha"
+          hint={`Opcional. Fica pública no livro e no seu perfil. ${text.length}/5000`}
+        >
           <TextArea
-            value={note}
-            maxLength={500}
-            placeholder="O que ficou com você?"
-            onChange={(e) => setNote(e.target.value)}
+            value={text}
+            maxLength={5000}
+            className="min-h-32"
+            placeholder="Conte o que ficou com você…"
+            onChange={(e) => setText(e.target.value)}
           />
         </FormField>
+        {text.trim() && (
+          <label className="flex items-center gap-2 -mt-1 mb-4 text-[13px] text-(--ink-2) cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={spoiler}
+              onChange={(e) => setSpoiler(e.target.checked)}
+              className="size-4 accent-(--yellow-deep)"
+            />
+            Contém spoiler
+          </label>
+        )}
         <FormActions>
           <Button
             type="button"

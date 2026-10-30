@@ -48,7 +48,6 @@ export async function GET() {
         liked: true,
         favoritePosition: true,
         currentPage: true,
-        note: true,
         abandonReason: true,
         wantsToReturn: true,
         book,

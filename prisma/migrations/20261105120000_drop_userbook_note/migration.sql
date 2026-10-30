@@ -1,0 +1,1 @@
+ALTER TABLE "UserBook" DROP COLUMN "note";

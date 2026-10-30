@@ -9,59 +9,16 @@ import { fail, withUser } from "./result";
 import { getViewerId } from "../session";
 import { fmtAgo } from "../dates";
 import { initialsOf } from "../queries/book";
+import { parseReview, upsertReview, type ReviewInput } from "../reviews";
 
-export async function saveReview(
-  bookId: string,
-  input: { rating: number; text?: string; spoiler?: boolean },
-) {
+export async function saveReview(bookId: string, input: ReviewInput) {
   return withUser(async (userId) => {
-    const rating = Number(input.rating);
-    if (!Number.isInteger(rating * 2) || rating < 0.5 || rating > 5)
-      fail("Escolha uma nota de meia a 5 estrelas.");
-    const text = typeof input.text === "string" ? input.text.trim() : "";
-    if (text.length > 5000)
-      fail("A resenha pode ter no máximo 5.000 caracteres.");
-
-    const spoiler = Boolean(text && input.spoiler);
-
+    const review = parseReview(input);
     await ensureBook(bookId);
     const ids = await editionIds(bookId);
-    await db.$transaction(async (tx) => {
-      const existing =
-        (await tx.review.findUnique({
-          where: { userId_bookId: { userId, bookId } },
-        })) ??
-        (await tx.review.findFirst({
-          where: { userId, bookId: { in: ids } },
-          orderBy: { updatedAt: "desc" },
-        }));
-      const review = existing
-        ? await tx.review.update({
-            where: { id: existing.id },
-            data: { rating, text: text || null, spoiler },
-          })
-        : await tx.review.create({
-            data: { userId, bookId, rating, text: text || null, spoiler },
-          });
-      const snippet = text ? text.slice(0, 280) : null;
-      if (existing) {
-        await tx.activity.updateMany({
-          where: { reviewId: review.id },
-          data: { rating, text: snippet },
-        });
-      } else {
-        await tx.activity.create({
-          data: {
-            userId,
-            bookId,
-            reviewId: review.id,
-            kind: "REVIEW",
-            rating,
-            text: snippet,
-          },
-        });
-      }
-    });
+    await db.$transaction((tx) =>
+      upsertReview(tx, userId, bookId, ids, review),
+    );
     refresh();
   });
 }
