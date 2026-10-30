@@ -30,7 +30,8 @@ export default function AuthContent({ books }: AuthContentProps) {
 
   const [mode, setMode] = useState<AuthMode>(() => {
     if (searchParams.get("token")) return "reset";
-    return searchParams.get("mode") === "register" ? "register" : "login";
+    const m = searchParams.get("mode");
+    return m === "register" || m === "forgot" ? m : "login";
   });
   const [sentContext, setSentContext] = useState<SentContext>("forgot");
   const [error, setError] = useState(() =>

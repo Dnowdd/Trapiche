@@ -3,6 +3,8 @@
 import { db } from "../db";
 import { fail, withUser } from "./result";
 import { rateLimited } from "../rate-limit";
+import { sendSupportReply } from "../emails/send";
+import { appUrl } from "../emails/layout";
 import {
   markTicketRead,
   newMessagesSince,
@@ -56,6 +58,35 @@ async function replaceNotice(
       data: to.map((userId) => ({ userId, actorId, ticketId, kind })),
     }),
   ]);
+}
+
+async function emailReply(ticketId: string, body: string, sentAt: Date) {
+  const t = await db.supportTicket.findUnique({
+    where: { id: ticketId },
+    select: {
+      number: true,
+      subject: true,
+      userReadAt: true,
+      user: { select: { email: true, name: true } },
+      messages: {
+        where: { staff: true, createdAt: { lt: sentAt } },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { createdAt: true },
+      },
+    },
+  });
+  if (!t) return;
+  const previous = t.messages[0]?.createdAt;
+  if (previous && (!t.userReadAt || t.userReadAt < previous)) return;
+  await sendSupportReply({
+    to: t.user.email,
+    name: t.user.name,
+    number: t.number,
+    subject: t.subject,
+    excerpt: body,
+    url: appUrl(`/suporte/${ticketId}`),
+  });
 }
 
 async function adminIds() {
@@ -131,9 +162,10 @@ export async function sendSupportMessage(ticketId: string, rawBody: string) {
       }),
     ]);
 
-    if (staff)
+    if (staff) {
       await replaceNotice([ticket.userId], userId, ticketId, "SUPPORT_REPLIED");
-    else
+      await emailReply(ticketId, body, now).catch(() => null);
+    } else
       await replaceNotice(
         await adminIds(),
         userId,

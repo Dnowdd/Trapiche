@@ -1,6 +1,13 @@
 import { Resend } from "resend";
-import fs from "node:fs";
-import path from "node:path";
+import { renderEmail, renderText, type EmailContent } from "./layout";
+import {
+  changeEmailConfirmation,
+  newEmailVerification,
+  passwordChangedEmail,
+  passwordResetEmail,
+  supportReplyEmail,
+  verificationEmail,
+} from "./templates";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -8,66 +15,35 @@ function from() {
   return process.env.RESEND_FROM_EMAIL ?? "Trapiche <onboarding@resend.dev>";
 }
 
-function loadTemplate(filename: string): string {
-  return fs.readFileSync(
-    path.join(process.cwd(), "app/emails", filename),
-    "utf-8",
-  );
-}
-
-function render(template: string, vars: Record<string, string>): string {
-  return Object.entries(vars).reduce(
-    (html, [key, value]) => html.replaceAll(`{{${key}}}`, value),
-    template,
-  );
-}
-
-export async function sendPasswordReset({
-  to,
-  name,
-  handle,
-  url,
-}: {
-  to: string;
-  name: string;
-  handle: string;
-  url: string;
-}) {
-  const html = render(loadTemplate("password_recovery.html"), {
-    user_name: name,
-    user_handle: handle,
-    reset_url: url,
-  });
-
+function send(to: string, content: EmailContent) {
   return resend.emails.send({
     from: from(),
     to,
-    subject: "Redefina sua senha no Trapiche",
-    html,
+    subject: content.subject,
+    html: renderEmail(content),
+    text: renderText(content),
   });
 }
 
-export async function sendVerificationEmail({
-  to,
-  name,
-  handle,
-  url,
-}: {
-  to: string;
-  name: string;
-  handle: string;
-  url: string;
-}) {
-  const html = render(loadTemplate("email_verification.html"), {
-    user_name: name,
-    user_handle: handle,
-    verify_url: url,
-  });
+type Who = { to: string; name: string };
 
-  return resend.emails.send({
-    from: from(),
-    to,
-    subject: "Confirme seu e-mail no Trapiche",
-    html,
-  });
-}
+export const sendVerificationEmail = (
+  v: Who & { handle: string; url: string },
+) => send(v.to, verificationEmail(v));
+
+export const sendNewEmailVerification = (v: Who & { url: string }) =>
+  send(v.to, newEmailVerification({ ...v, email: v.to }));
+
+export const sendChangeEmailConfirmation = (
+  v: Who & { newEmail: string; url: string },
+) => send(v.to, changeEmailConfirmation(v));
+
+export const sendPasswordReset = (v: Who & { handle: string; url: string }) =>
+  send(v.to, passwordResetEmail(v));
+
+export const sendPasswordChanged = (v: Who) =>
+  send(v.to, passwordChangedEmail(v));
+
+export const sendSupportReply = (
+  v: Who & { number: number; subject: string; excerpt: string; url: string },
+) => send(v.to, supportReplyEmail(v));

@@ -16,6 +16,23 @@ vi.mock("@/lib/session", () => ({
   getViewerId: async () => viewer.id,
   getSession: async () => (viewer.id ? { user: { id: viewer.id } } : null),
 }));
+export const sentEmails: { kind: string; to: string }[] = [];
+
+vi.mock("@/lib/emails/send", () => {
+  const record =
+    (kind: string) =>
+    async ({ to }: { to: string }) => {
+      sentEmails.push({ kind, to });
+    };
+  return {
+    sendVerificationEmail: record("verification"),
+    sendNewEmailVerification: record("new-email"),
+    sendChangeEmailConfirmation: record("change-email"),
+    sendPasswordReset: record("reset"),
+    sendPasswordChanged: record("password-changed"),
+    sendSupportReply: record("support-reply"),
+  };
+});
 vi.mock("next/cache", () => ({
   refresh: () => {},
   revalidatePath: () => {},
@@ -26,6 +43,7 @@ vi.mock("@/lib/books", async (importOriginal) => ({
 }));
 
 beforeEach(async () => {
+  sentEmails.length = 0;
   await testDb.$executeRawUnsafe(
     `TRUNCATE "Activity", "ReadingSession", "Reading", "Review", "UserBook", "Book", "Work", "User" CASCADE`,
   );

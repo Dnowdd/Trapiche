@@ -6,7 +6,7 @@ import {
   setTicketClosed,
 } from "@/lib/actions/support";
 import { getMyTickets, getStaffTickets } from "@/lib/queries/support";
-import { testDb, viewer } from "./setup";
+import { sentEmails, testDb, viewer } from "./setup";
 
 async function addUser(id: string, handle: string, isAdmin = false) {
   const now = new Date();
@@ -59,6 +59,11 @@ describe("support tickets", () => {
       where: { id },
     });
     expect(ticket.status).toBe("ANSWERED");
+    expect(sentEmails).toEqual([
+      { kind: "support-reply", to: "teste@example.com" },
+    ]);
+    await sendSupportMessage(id, "Mais um detalhe.");
+    expect(sentEmails).toHaveLength(1);
     expect(
       await testDb.notification.count({
         where: { userId: "user-test", ticketId: id, kind: "SUPPORT_REPLIED" },
@@ -70,6 +75,7 @@ describe("support tickets", () => {
     const polled = await pollTicket(id, ticket.createdAt.toISOString());
     expect(polled.ok && polled.data?.messages.map((m) => m.body)).toEqual([
       "Já estamos olhando!",
+      "Mais um detalhe.",
     ]);
     expect((await getMyTickets("user-test"))[0].unread).toBe(false);
 
