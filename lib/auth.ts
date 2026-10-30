@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "./db";
+import { authRateLimitStorage } from "./rate-limit";
 import {
   sendChangeEmailConfirmation,
   sendNewEmailVerification,
@@ -63,6 +64,20 @@ export const auth = betterAuth({
         handle: handleOf(user) || user.email,
         url,
       });
+    },
+  },
+
+  rateLimit: {
+    window: 60,
+    max: 100,
+    customStorage: authRateLimitStorage,
+    customRules: {
+      "/sign-in/email": { window: 60, max: 8 },
+      "/sign-up/email": { window: 3600, max: 6 },
+      "/request-password-reset": { window: 900, max: 4 },
+      "/send-verification-email": { window: 900, max: 4 },
+      "/change-password": { window: 900, max: 6 },
+      "/change-email": { window: 3600, max: 4 },
     },
   },
 

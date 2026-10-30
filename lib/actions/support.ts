@@ -145,7 +145,7 @@ export async function openTicket(
     if (!(input.category in TICKET_CATEGORIES)) fail("Escolha uma categoria.");
     const body = cleanBody(input.body);
     const attachments = await readAttachments(files);
-    if (rateLimited(`ticket:${userId}`, 5, 60 * 60_000))
+    if (await rateLimited(`ticket:${userId}`, 5, 60 * 60_000))
       fail("Muitos tickets em pouco tempo. Tente de novo mais tarde.");
     const open = await db.supportTicket.count({
       where: { userId, status: { not: "CLOSED" } },
@@ -188,7 +188,7 @@ export async function sendSupportMessage(
     const { ticket, staff } = await access(ticketId, userId);
     const attachments = await readAttachments(files);
     const body = cleanBody(rawBody, attachments.length > 0);
-    if (rateLimited(`ticket-msg:${userId}`, 20, 60_000))
+    if (await rateLimited(`ticket-msg:${userId}`, 20, 60_000))
       fail("Calma! Muitas mensagens seguidas. Espere um pouquinho.");
 
     const now = new Date();

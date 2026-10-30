@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   if (!q || q.trim().length < 2) {
     return NextResponse.json({ error: "Query muito curta" }, { status: 400 });
   }
-  if (rateLimited(`search:${clientIp(req.headers)}`, 30, 60_000)) {
+  if (await rateLimited(`search:${clientIp(req.headers)}`, 30, 60_000)) {
     return NextResponse.json(
       { error: "Muitas buscas seguidas. Espere um pouco." },
       { status: 429 },
