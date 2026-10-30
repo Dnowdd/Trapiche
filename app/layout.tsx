@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/shared/toast";
+import NavigationProgress from "@/components/layout/navigation-progress";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -26,10 +27,11 @@ export default function RootLayout({
   return (
     <html
       lang="pt-br"
-      className={cn("h-full", "antialiased", "font-sans", inter.variable)}
+      className={cn("antialiased", "font-sans", inter.variable)}
     >
-      <body className="min-h-full flex flex-col bg-(--yellow) text-(--ink-2) min-w-360 has-[[data-responsive]]:min-w-0 font-features-['ss01','cv11'] [text-rendering:optimizeLegibility]">
-        <main>{children}</main>
+      <body className="min-h-screen flex flex-col bg-(--yellow) text-(--ink-2) min-w-360 has-[[data-responsive]]:min-w-0 font-features-['ss01','cv11'] [text-rendering:optimizeLegibility]">
+        <NavigationProgress />
+        {children}
         <Toaster />
       </body>
     </html>

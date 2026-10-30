@@ -36,7 +36,7 @@ const Footer = () => {
       </div>
       <div className="h-px bg-(--yellow-deep)" />
       <div className="flex flex-col sm:flex-row gap-3 justify-between sm:items-center font-mono text-[11px] tracking-[0.04em] text-(--ink-3)">
-        <span>© 2026 TRAPICHE · FEITO EM SALVADOR · BA</span>
+        <span>© {new Date().getFullYear()} TRAPICHE</span>
         <div className="flex gap-5 uppercase">
           <Link href="/termos" className="hover:text-(--ink)">
             Termos
