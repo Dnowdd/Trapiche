@@ -1,5 +1,6 @@
 "use client";
 
+import Avatar from "@/components/shared/avatar";
 import { useState } from "react";
 import Link from "next/link";
 import type React from "react";
@@ -68,9 +69,12 @@ const ListCardRich = ({ list }: { list: ListItem }) => (
     </div>
     <div className="flex items-center justify-between border-t border-(--rule) pt-3 mt-auto text-[11px]">
       <div className="flex items-center gap-1.5 text-(--ink-3)">
-        <span className="w-4.5 h-4.5 rounded-full bg-(--cream-deep) border border-(--ink-3) text-[9px] font-bold flex items-center justify-center text-(--ink-2)">
-          {list.byInitials}
-        </span>
+        <Avatar
+          name={list.byName}
+          image={list.byImage}
+          size={18}
+          className="border border-(--ink-3)"
+        />
         Por <strong className="text-(--ink-2) font-semibold">{list.by}</strong>
       </div>
       <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">

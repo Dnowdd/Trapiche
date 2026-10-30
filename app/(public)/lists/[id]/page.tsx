@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Avatar from "@/components/shared/avatar";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import BookCover from "@/components/shared/book-cover";
@@ -69,9 +70,12 @@ export default async function ListPage({ params }: Props) {
             )}
             <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-(--ink-3)">
               <span className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-(--cream-deep) border border-(--ink-3) text-[10px] font-bold flex items-center justify-center text-(--ink-2)">
-                  {list.owner.initials}
-                </span>
+                <Avatar
+                  name={list.owner.name}
+                  image={list.owner.image}
+                  size={24}
+                  className="border border-(--ink-3)"
+                />
                 Por{" "}
                 <Link
                   href={`/u/${list.owner.handle}`}

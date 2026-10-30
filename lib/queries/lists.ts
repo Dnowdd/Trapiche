@@ -27,10 +27,12 @@ export async function getListPage(id: string, viewerId: string | null) {
   const list = await db.list.findFirst({
     where: { id, ...visibleListsWhere(viewerId) },
     include: {
-      owner: { select: { id: true, name: true, handle: true } },
+      owner: { select: { id: true, name: true, handle: true, image: true } },
       members: {
         orderBy: { createdAt: "asc" },
-        include: { user: { select: { id: true, name: true, handle: true } } },
+        include: {
+          user: { select: { id: true, name: true, handle: true, image: true } },
+        },
       },
       items: {
         orderBy: { createdAt: "desc" },
@@ -73,6 +75,7 @@ export async function getListPage(id: string, viewerId: string | null) {
       name: m.user.name,
       handle: m.user.handle,
       initials: initialsOf(m.user.name),
+      image: m.user.image,
       role: m.role,
     })),
     items: list.items.map((i) => ({

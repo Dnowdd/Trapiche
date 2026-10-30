@@ -1,4 +1,5 @@
 import { type CSSProperties } from "react";
+import Avatar from "@/components/shared/avatar";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
 import { getHomeLists } from "@/lib/queries/home";
@@ -90,9 +91,12 @@ const Lists = async () => {
                   {l.title}
                 </div>
                 <div className="text-[12px] text-(--ink-4) mt-1 flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-(--cream-deep) border border-(--ink-3) text-[8px] font-bold flex items-center justify-center text-(--ink-2)">
-                    {l.byInitials}
-                  </span>
+                  <Avatar
+                    name={l.byName}
+                    image={l.byImage}
+                    size={16}
+                    className="border border-(--ink-3)"
+                  />
                   Por {l.by}
                 </div>
               </div>

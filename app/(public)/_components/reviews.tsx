@@ -1,4 +1,5 @@
 import { type CSSProperties } from "react";
+import Avatar from "@/components/shared/avatar";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
 import Stars from "@/components/shared/stars";
@@ -71,9 +72,12 @@ const Reviews = async () => {
                 href={`/u/${r.handle}`}
                 className="flex items-center gap-2 text-(--ink-3) min-w-0 hover:text-(--ink)"
               >
-                <span className="w-5 h-5 shrink-0 rounded-full bg-(--cream-deep) border border-(--ink-3) text-[9px] font-bold flex items-center justify-center text-(--ink-2)">
-                  {r.initials}
-                </span>
+                <Avatar
+                  name={r.user}
+                  image={r.image}
+                  size={20}
+                  className="border border-(--ink-3)"
+                />
                 <span className="truncate">
                   <strong className="text-(--ink-2) font-semibold">
                     {r.user}

@@ -1,5 +1,6 @@
 "use client";
 
+import Avatar from "@/components/shared/avatar";
 import { useState } from "react";
 import Modal from "@/components/shared/modal";
 import { Button, FormError, TextInput } from "@/components/shared/form";
@@ -43,9 +44,12 @@ export default function MembersModal({
             key={m.id}
             className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[10px] py-2.5 px-3.5"
           >
-            <span className="w-8 h-8 rounded-full bg-(--cream-deep) border border-(--ink-3) text-[11px] font-bold flex items-center justify-center text-(--ink-2)">
-              {m.initials}
-            </span>
+            <Avatar
+              name={m.name}
+              image={m.image}
+              size={32}
+              className="border border-(--ink-3)"
+            />
             <span className="min-w-0 flex-1">
               <span className="block text-[13px] font-semibold text-(--ink-2)">
                 {m.name}

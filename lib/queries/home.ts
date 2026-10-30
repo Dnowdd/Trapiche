@@ -59,7 +59,7 @@ export async function getHomeLists(limit = 3) {
     select: {
       id: true,
       title: true,
-      owner: { select: { name: true } },
+      owner: { select: { name: true, image: true } },
       _count: { select: { items: true, followers: true } },
       items: {
         orderBy: { createdAt: "asc" },
@@ -73,6 +73,8 @@ export async function getHomeLists(limit = 3) {
     title: l.title,
     by: l.owner.name,
     byInitials: initialsOf(l.owner.name),
+    byName: l.owner.name,
+    byImage: l.owner.image,
     count: l._count.items,
     followers: l._count.followers,
     books: l.items.map((i) => toCover(i.book)),
@@ -90,7 +92,7 @@ export async function getHomeReviews(limit = 6) {
       text: true,
       spoiler: true,
       createdAt: true,
-      user: { select: { name: true, handle: true } },
+      user: { select: { name: true, handle: true, image: true } },
       book: { select: bookSummarySelect },
     },
   });
@@ -103,6 +105,7 @@ export async function getHomeReviews(limit = 6) {
     user: r.user.name,
     handle: r.user.handle,
     initials: initialsOf(r.user.name),
+    image: r.user.image,
     book: toCover(r.book),
   }));
 }

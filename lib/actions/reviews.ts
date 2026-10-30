@@ -150,7 +150,7 @@ export async function getReviewComments(reviewId: string) {
     where: { reviewId, hiddenAt: null },
     orderBy: { createdAt: "asc" },
     take: 200,
-    include: { user: { select: { name: true, handle: true } } },
+    include: { user: { select: { name: true, handle: true, image: true } } },
   });
   return rows.map((c) => ({
     id: c.id,
@@ -158,6 +158,7 @@ export async function getReviewComments(reviewId: string) {
     user: c.user.name,
     handle: c.user.handle,
     initials: initialsOf(c.user.name),
+    image: c.user.image,
     date: fmtAgo(c.createdAt),
     canDelete: viewerId === c.userId || viewerId === review.userId,
     mine: viewerId === c.userId,

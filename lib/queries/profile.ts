@@ -461,7 +461,7 @@ export async function getListas(userId: string, viewerId: string | null) {
     where: listsWhereForProfile(userId, viewerId),
     orderBy: { updatedAt: "desc" },
     include: {
-      owner: { select: { name: true } },
+      owner: { select: { name: true, image: true } },
       members: { select: { userId: true, pinned: true } },
       items: {
         orderBy: { createdAt: "desc" },
@@ -480,7 +480,7 @@ export async function getListas(userId: string, viewerId: string | null) {
           },
           orderBy: { updatedAt: "desc" },
           include: {
-            owner: { select: { name: true } },
+            owner: { select: { name: true, image: true } },
             members: { select: { userId: true, pinned: true } },
             items: {
               orderBy: { createdAt: "desc" },
@@ -501,6 +501,8 @@ export async function getListas(userId: string, viewerId: string | null) {
     mine: l.ownerId === userId,
     following,
     byInitials: initialsOf(l.owner.name),
+    byName: l.owner.name,
+    byImage: l.owner.image,
     by: byLine(l.owner, l._count.members, l.ownerId === userId),
     updated: fmtAgo(l.updatedAt),
     pinned: l.members.find((m) => m.userId === userId)?.pinned ?? false,

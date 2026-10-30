@@ -81,7 +81,7 @@ export async function getReviews(
       take: opts.take,
       skip: opts.skip ?? 0,
       include: {
-        user: { select: { name: true, handle: true } },
+        user: { select: { name: true, handle: true, image: true } },
         book: { select: { publisher: true } },
         _count: { select: { likes: true, comments: true } },
         likes: viewerId
@@ -102,6 +102,7 @@ export async function getReviews(
       user: r.user.name,
       handle: r.user.handle,
       initials: initialsOf(r.user.name),
+      image: r.user.image,
       stars: r.rating,
       date: fmtAgo(r.createdAt),
       days: days.get(r.userId) ?? null,

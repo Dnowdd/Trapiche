@@ -9,7 +9,7 @@ export async function getNotifications(userId: string, take = 30) {
       orderBy: { createdAt: "desc" },
       take,
       include: {
-        actor: { select: { name: true, handle: true } },
+        actor: { select: { name: true, handle: true, image: true } },
         review: { select: { book: { select: { id: true, title: true } } } },
         list: { select: { id: true, title: true } },
         ticket: { select: { id: true, number: true } },
@@ -48,6 +48,7 @@ export async function getNotifications(userId: string, take = 30) {
         id: n.id,
         actor,
         initials: staffReply ? "TR" : initialsOf(n.actor.name),
+        image: staffReply ? null : n.actor.image,
         text,
         href,
         when: fmtAgo(n.createdAt),

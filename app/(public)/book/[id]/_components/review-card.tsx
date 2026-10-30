@@ -1,5 +1,6 @@
 "use client";
 
+import Avatar from "@/components/shared/avatar";
 import { loginHref } from "@/lib/links";
 import Stars from "@/components/shared/stars";
 import { Flag, Heart, MessageCircle } from "lucide-react";
@@ -66,11 +67,13 @@ export default function ReviewCard({
   return (
     <article className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-5.5 px-6.5">
       <div className="flex items-center gap-3.5 mb-3">
-        <Link
-          href={`/u/${r.handle}`}
-          className="w-9 h-9 rounded-full bg-(--cream-deep) border-[1.5px] border-(--ink-3) flex items-center justify-center text-[12px] font-bold text-(--ink-2)"
-        >
-          {r.initials}
+        <Link href={`/u/${r.handle}`} className="shrink-0">
+          <Avatar
+            name={r.user}
+            image={r.image}
+            size={36}
+            className="border-(--ink-3)"
+          />
         </Link>
         <div className="flex-1 min-w-0">
           <Link
@@ -155,11 +158,13 @@ export default function ReviewCard({
             <ul className="m-0 p-0 list-none flex flex-col gap-3 mb-4">
               {comments.map((c) => (
                 <li key={c.id} className="flex gap-3">
-                  <Link
-                    href={`/u/${c.handle}`}
-                    className="w-7 h-7 shrink-0 rounded-full bg-(--cream-deep) border border-(--ink-3) flex items-center justify-center text-[10px] font-bold text-(--ink-2)"
-                  >
-                    {c.initials}
+                  <Link href={`/u/${c.handle}`} className="shrink-0">
+                    <Avatar
+                      name={c.user}
+                      image={c.image}
+                      size={28}
+                      className="border border-(--ink-3)"
+                    />
                   </Link>
                   <div className="flex-1 min-w-0">
                     <div className="text-[12px] text-(--ink-4)">
