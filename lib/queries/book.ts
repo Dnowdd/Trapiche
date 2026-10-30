@@ -22,7 +22,6 @@ import {
 import { findEditions, searchBooks } from "../google-books";
 import {
   addDays,
-  dayOf,
   daysBetween,
   fmtAgo,
   fmtDayWeek,
@@ -32,7 +31,6 @@ import {
   spanDays,
   streakFrom,
   today,
-  toISODay,
 } from "../dates";
 import type { ShelfStatus } from "../generated/prisma/client";
 import type { GoogleBooksVolume } from "../types/book";
@@ -354,27 +352,37 @@ async function viewerState(
   if (active && entry) {
     const page = entry.currentPage;
     const total = pageCount ?? 0;
-    const startedAt = active.startedAt ?? dayOf(active.createdAt);
-    const elapsed = Math.max(1, daysBetween(startedAt, today()) + 1);
+    const daily = active.sessions.filter((s) => s.datePrecision === "DAY");
+    const paceFrom =
+      active.startedAt ??
+      active.sessions.reduce<Date | null>(
+        (min, s) => (!min || s.date < min ? s.date : min),
+        null,
+      );
+    const elapsed = paceFrom
+      ? Math.max(1, daysBetween(paceFrom, today()) + 1)
+      : 0;
     const pagesRead = Math.max(0, page);
-    const pace = pagesRead / elapsed;
+    const pace = elapsed ? pagesRead / elapsed : 0;
     const remaining = Math.max(0, total - page);
     reading = {
       number: active.number,
       progress: total ? Math.min(100, Math.round((page / total) * 100)) : 0,
       page,
       total,
-      started: fmtPartial(startedAt, active.startPrecision)!,
-      startedISO: toISODay(startedAt),
+      started: fmtPartial(active.startedAt, active.startPrecision),
       startedPartial: partialToISO(active.startedAt, active.startPrecision),
       expectedDone:
         total && pace > 0
           ? fmtExpected(addDays(today(), Math.ceil(remaining / pace)))
           : null,
-      streakDays: streakFrom(active.sessions.map((s) => s.date)),
+      streakDays: streakFrom(daily.map((s) => s.date)),
       sessions: active.sessions.slice(0, 5).map((s) => ({
         id: s.id,
-        date: fmtDayWeek(s.date),
+        date:
+          s.datePrecision === "DAY"
+            ? fmtDayWeek(s.date)
+            : fmtPartial(s.date, s.datePrecision)!,
         pages: s.pages,
         minutes: s.minutes,
         pageEnd: s.pageEnd,

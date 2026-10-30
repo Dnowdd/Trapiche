@@ -43,9 +43,20 @@ export default function MyReading({
                 {r.progress}
                 <span className="text-[28px] ml-1 text-(--cream-deep)">%</span>
               </div>
-              <div className="mt-1.5 font-mono text-[12px] text-(--cream-deep) tracking-[0.04em]">
-                página {r.page}
-                {r.total ? ` de ${r.total}` : ""}
+              <div className="mt-1.5 font-mono text-[12px] text-(--cream-deep) tracking-[0.04em] flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>
+                  página {r.page}
+                  {r.total ? ` de ${r.total}` : ""}
+                </span>
+                {!r.total && (
+                  <button
+                    type="button"
+                    onClick={() => setModal("progress")}
+                    className="font-sans text-[12px] text-(--yellow) underline underline-offset-2 cursor-pointer hover:text-(--cream)"
+                  >
+                    Informar total de páginas
+                  </button>
+                )}
               </div>
               <div className="mt-4 h-2 bg-[rgba(255,231,103,0.15)] rounded-sm overflow-hidden">
                 <div
@@ -56,7 +67,18 @@ export default function MyReading({
 
               <div className="mt-4 flex gap-9 flex-wrap">
                 {[
-                  { value: r.started, label: "Começou em" },
+                  {
+                    value: r.started ?? (
+                      <button
+                        type="button"
+                        onClick={() => setModal("progress")}
+                        className="text-(--cream-deep) underline decoration-dotted underline-offset-4 cursor-pointer hover:text-(--yellow)"
+                      >
+                        Não informado
+                      </button>
+                    ),
+                    label: "Começou em",
+                  },
                   { value: r.expectedDone ?? "—", label: "Previsão" },
                   {
                     value: `${r.streakDays} ${r.streakDays === 1 ? "dia" : "dias"}`,
@@ -88,7 +110,7 @@ export default function MyReading({
                   className="text-[12px] font-medium py-2.25 px-3.5 rounded-[7px] bg-(--yellow) text-(--ink) cursor-pointer transition-transform duration-100 hover:-translate-y-px"
                   onClick={() => setModal("log")}
                 >
-                  + Registrar leitura de hoje
+                  + Registrar leitura
                 </button>
                 <button className={ghost} onClick={() => setModal("finish")}>
                   Marcar como concluído
@@ -169,7 +191,7 @@ export default function MyReading({
           today={today}
           currentPage={r.page}
           pageCount={book.pageCount}
-          startedAt={r.startedISO}
+          startedAt={r.startedPartial}
           note={v.note}
         />
       )}

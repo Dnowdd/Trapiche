@@ -210,16 +210,17 @@ model Reading {
 }
 
 model ReadingSession {
-  id        String   @id @default(cuid())
-  userId    String
-  bookId    String
-  readingId String
-  date      DateTime @db.Date
-  pages     Int
-  minutes   Int
-  pageEnd   Int
-  note      String?
-  createdAt DateTime @default(now())
+  id            String        @id @default(cuid())
+  userId        String
+  bookId        String
+  readingId     String
+  date          DateTime      @db.Date
+  datePrecision DatePrecision @default(DAY)
+  pages         Int
+  minutes       Int
+  pageEnd       Int
+  note          String?
+  createdAt     DateTime      @default(now())
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   book    Book    @relation(fields: [bookId], references: [id])

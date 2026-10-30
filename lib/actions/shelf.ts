@@ -5,8 +5,6 @@ import { db } from "../db";
 import { ensureBook } from "../books";
 import { editionIds } from "../works";
 import {
-  dayFromISO,
-  isISODay,
   parsePartialISO,
   periodEnd,
   spanDays,
@@ -121,15 +119,6 @@ async function closeActive(
   });
 }
 
-function parseDay(value: unknown, label: string) {
-  if (!isISODay(value)) fail(`Informe ${label}.`);
-  const d = dayFromISO(value);
-  if (Number.isNaN(d.getTime())) fail(`Informe ${label}.`);
-  if (d > today())
-    fail(`${label[0].toUpperCase()}${label.slice(1)} não pode ser no futuro.`);
-  return d;
-}
-
 function parsePartial(value: unknown, label: string): PartialDate | null {
   if (value == null || value === "") return null;
   const parsed = typeof value === "string" ? parsePartialISO(value) : null;
@@ -147,6 +136,28 @@ function parseOptionalText(value: unknown, max: number) {
   return v;
 }
 
+function parsePageCount(value: unknown) {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 1 || n > 10000)
+    fail("Informe o total de páginas (de 1 a 10.000).");
+  return n;
+}
+
+async function fillPageCount(
+  book: { id: string; pageCount: number | null },
+  value: unknown,
+) {
+  if (book.pageCount) return book.pageCount;
+  const pageCount = parsePageCount(value);
+  if (!pageCount) return null;
+  await db.book.updateMany({
+    where: { id: book.id, pageCount: null },
+    data: { pageCount },
+  });
+  return pageCount;
+}
+
 function parsePage(value: unknown, pageCount: number | null) {
   const n = Number(value);
   if (!Number.isInteger(n) || n < 0) fail("Informe uma página válida.");
@@ -157,9 +168,11 @@ function parsePage(value: unknown, pageCount: number | null) {
 export async function setShelfStatus(
   bookId: string,
   status: SimpleStatus | null,
+  input: { startedAt?: string | null } = {},
 ) {
   return withUser(async (userId) => {
     await ensureBook(bookId);
+    const start = parsePartial(input.startedAt, "a data de início");
     await db.$transaction(async (tx) => {
       const entry = await shelfEntry(tx, userId, bookId);
       if (entry.status === status) return;
@@ -209,7 +222,8 @@ export async function setShelfStatus(
             userId,
             bookId,
             number: done + 1,
-            startedAt: today(),
+            startedAt: start?.date ?? null,
+            startPrecision: start?.precision ?? "DAY",
           },
         });
         await logShelfActivity(tx, {
@@ -340,12 +354,16 @@ export async function logReadingSession(
     pageEnd: number | string;
     minutes: number | string;
     note?: string;
+    pageCount?: number | string | null;
   },
 ) {
   return withUser(async (userId) => {
     const book = await ensureBook(bookId);
-    const date = parseDay(input.date, "a data");
-    const pageEnd = parsePage(input.pageEnd, book.pageCount);
+    const when = parsePartial(input.date, "a data");
+    if (!when) fail("Informe quando você leu.");
+    const date = when.date;
+    const pageCount = await fillPageCount(book, input.pageCount);
+    const pageEnd = parsePage(input.pageEnd, pageCount);
     const minutes = Number(input.minutes);
     if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440)
       fail("Informe quantos minutos você leu (de 1 a 1440).");
@@ -377,6 +395,7 @@ export async function logReadingSession(
           bookId,
           readingId: active.id,
           date,
+          datePrecision: when.precision,
           pages: Math.max(0, pageEnd - startPage),
           minutes,
           pageEnd,
@@ -386,7 +405,7 @@ export async function logReadingSession(
       if (!active.startedAt || date < active.startedAt) {
         await tx.reading.update({
           where: { id: active.id },
-          data: { startedAt: date, startPrecision: "DAY" },
+          data: { startedAt: date, startPrecision: when.precision },
         });
       }
       if (!later) {
@@ -395,7 +414,7 @@ export async function logReadingSession(
           data: { currentPage: pageEnd },
         });
       }
-      return Boolean(book.pageCount && pageEnd >= book.pageCount);
+      return Boolean(pageCount && pageEnd >= pageCount);
     });
     refresh();
     return { reachedEnd };
@@ -404,12 +423,18 @@ export async function logReadingSession(
 
 export async function updateProgress(
   bookId: string,
-  input: { currentPage: number | string; startedAt: string; note?: string },
+  input: {
+    currentPage: number | string;
+    startedAt?: string | null;
+    note?: string;
+    pageCount?: number | string | null;
+  },
 ) {
   return withUser(async (userId) => {
     const book = await ensureBook(bookId);
-    const currentPage = parsePage(input.currentPage, book.pageCount);
-    const startedAt = parseDay(input.startedAt, "a data de início");
+    const pageCount = await fillPageCount(book, input.pageCount);
+    const currentPage = parsePage(input.currentPage, pageCount);
+    const start = parsePartial(input.startedAt, "a data de início");
     const note = parseOptionalText(input.note, 500);
     await db.$transaction(async (tx) => {
       const entry = await shelfEntry(tx, userId, bookId);
@@ -419,13 +444,16 @@ export async function updateProgress(
         where: { readingId: active.id },
         orderBy: { date: "asc" },
       });
-      if (firstSession && startedAt > firstSession.date)
+      if (start && firstSession && start.date > firstSession.date)
         fail(
           `Você já registrou leitura em ${toISODay(firstSession.date).split("-").reverse().join("/")}. O início precisa ser antes disso.`,
         );
       await tx.reading.update({
         where: { id: active.id },
-        data: { startedAt, startPrecision: "DAY" },
+        data: {
+          startedAt: start?.date ?? null,
+          startPrecision: start?.precision ?? "DAY",
+        },
       });
       await tx.userBook.update({
         where: { id: entry.id },

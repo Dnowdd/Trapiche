@@ -6,10 +6,10 @@ import {
   dayOf,
   fmtAgo,
   fmtDay,
-  fmtDayShort,
   fmtDayWeek,
   fmtExpected,
   fmtJoined,
+  fmtPartial,
   longestStreak,
   readingDays,
   spanDays,
@@ -160,9 +160,11 @@ export async function getReadingNow(userId: string) {
   return rows.map((r) => {
     const reading = readings.find((x) => x.bookId === r.bookId);
     const total = r.book.pageCount ?? 0;
-    const started = reading?.startedAt ?? today();
-    const elapsed = Math.max(1, daysBetween(started, today()) + 1);
-    const pace = r.currentPage / elapsed;
+    const started = reading?.startedAt ?? null;
+    const elapsed = started
+      ? Math.max(1, daysBetween(started, today()) + 1)
+      : 0;
+    const pace = elapsed ? r.currentPage / elapsed : 0;
     return {
       book: toCover(r.book),
       currentPage: r.currentPage,
@@ -172,7 +174,9 @@ export async function getReadingNow(userId: string) {
         : 0,
       page: r.currentPage,
       total,
-      started: fmtDayShort(started),
+      started: reading
+        ? fmtPartial(reading.startedAt, reading.startPrecision)
+        : null,
       expected:
         total && pace > 0
           ? fmtExpected(
@@ -302,7 +306,7 @@ export async function getDiario(userId: string, entriesLimit: number) {
   const [sessions, finished, entries, entriesTotal] = await Promise.all([
     db.readingSession.findMany({
       where: { userId },
-      select: { date: true, minutes: true, pages: true },
+      select: { date: true, datePrecision: true, minutes: true, pages: true },
     }),
     db.reading.findMany({
       where: { userId, status: "FINISHED", endedAt: { not: null } },
@@ -325,6 +329,7 @@ export async function getDiario(userId: string, entriesLimit: number) {
 
   const minutesByDay: Record<string, number> = {};
   for (const s of sessions) {
+    if (s.datePrecision !== "DAY") continue;
     const k = toISODay(s.date);
     minutesByDay[k] = (minutesByDay[k] ?? 0) + s.minutes;
   }
@@ -381,7 +386,7 @@ export async function getDiario(userId: string, entriesLimit: number) {
     (k) => new Date(`${k}T00:00:00Z`),
   );
   const years = [
-    ...new Set([year, ...sessionDays.map((d) => d.getUTCFullYear())]),
+    ...new Set([year, ...sessions.map((s) => s.date.getUTCFullYear())]),
   ].sort((a, b) => b - a);
 
   return {
@@ -404,7 +409,10 @@ export async function getDiario(userId: string, entriesLimit: number) {
     today: toISODay(now),
     entries: entries.map((e) => ({
       id: e.id,
-      date: fmtDayWeek(e.date),
+      date:
+        e.datePrecision === "DAY"
+          ? fmtDayWeek(e.date)
+          : fmtPartial(e.date, e.datePrecision)!,
       book: toCover(e.book),
       pages: e.pages,
       minutes: e.minutes,

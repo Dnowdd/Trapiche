@@ -143,6 +143,7 @@ async function syncBook(id: string, persist: boolean) {
     const row = await fetchRow(id);
     const data = {
       ...row,
+      pageCount: row.pageCount ?? cached?.pageCount ?? null,
       coverUrl: await bestCover(row.coverUrl),
       syncedAt: new Date(),
     };

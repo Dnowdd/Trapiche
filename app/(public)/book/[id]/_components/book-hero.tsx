@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import BookCover from "@/components/shared/book-cover";
 import { toast } from "@/components/shared/toast";
+import StartModal from "@/components/reading/start-modal";
 import FinishModal from "@/components/reading/finish-modal";
 import AbandonModal from "@/components/reading/abandon-modal";
 import ReviewModal from "@/components/reading/review-modal";
@@ -81,6 +82,9 @@ export default function BookHero({ data, today }: BookHeroProps) {
     null | "finish" | "abandon" | "review" | "lists"
   >(null);
   const { pending, run } = useAction();
+  const [starting, setStarting] = useState<"READING" | "REREADING" | null>(
+    null,
+  );
   const [opt, patch] = useOptimistic<ViewerState, Partial<ViewerState>>(
     {
       liked: viewer?.liked ?? false,
@@ -109,6 +113,8 @@ export default function BookHero({ data, today }: BookHeroProps) {
       return;
     if (s === "READ") return setModal("finish");
     if (s === "ABANDONED") return setModal("abandon");
+    if ((s === "READING" || s === "REREADING") && !viewer.reading)
+      return setStarting(s);
     run(
       () => {
         patch({ status: s });
@@ -400,6 +406,25 @@ export default function BookHero({ data, today }: BookHeroProps) {
         )}
       </div>
 
+      {viewer && starting && (
+        <StartModal
+          title={book.title}
+          today={today}
+          rereading={starting === "REREADING"}
+          pending={pending}
+          onCancel={() => setStarting(null)}
+          onConfirm={(startedAt) =>
+            run(
+              () => {
+                patch({ status: starting });
+                return setShelfStatus(book.id, starting, { startedAt });
+              },
+              () => setStarting(null),
+              toast,
+            )
+          }
+        />
+      )}
       {viewer && modal === "finish" && (
         <FinishModal
           open

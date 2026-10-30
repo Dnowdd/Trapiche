@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
 import FinishModal from "@/components/reading/finish-modal";
+import StartModal from "@/components/reading/start-modal";
 import { toast } from "@/components/shared/toast";
 import { useAction } from "@/components/reading/use-action";
 import { setShelfStatus } from "@/lib/actions/shelf";
@@ -58,11 +59,15 @@ function Pick({
 }) {
   const id = book.googleId ?? book.id;
   const [finishing, setFinishing] = useState(false);
+  const [starting, setStarting] = useState(false);
   const { pending, run } = useAction();
-  const add = (status: "WANT" | "READING", label: string) =>
+  const add = (status: "WANT" | "READING", label: string, startedAt?: string) =>
     run(
-      () => setShelfStatus(id, status),
-      () => onDone(book.id, label),
+      () => setShelfStatus(id, status, { startedAt }),
+      () => {
+        setStarting(false);
+        onDone(book.id, label);
+      },
       toast,
     );
   const btn =
@@ -92,7 +97,7 @@ function Pick({
         <button
           type="button"
           disabled={pending}
-          onClick={() => add("READING", "lendo")}
+          onClick={() => setStarting(true)}
           className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
         >
           Lendo
@@ -106,6 +111,15 @@ function Pick({
           Quero
         </button>
       </div>
+      {starting && (
+        <StartModal
+          title={book.title}
+          today={today}
+          pending={pending}
+          onCancel={() => setStarting(false)}
+          onConfirm={(startedAt) => add("READING", "lendo", startedAt)}
+        />
+      )}
       {finishing && (
         <FinishModal
           open

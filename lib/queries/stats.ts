@@ -112,9 +112,14 @@ export async function getRetrospective(
         },
       }),
       db.readingSession.findMany({
-        where: { userId, date: { gte: from, lt: to } },
+        where: {
+          userId,
+          date: { gte: from, lt: to },
+          ...(month ? { datePrecision: { not: "YEAR" as const } } : {}),
+        },
         select: {
           date: true,
+          datePrecision: true,
           pages: true,
           minutes: true,
           book: { select: bookSummarySelect },
@@ -166,7 +171,9 @@ export async function getRetrospective(
   const pages =
     sessions.reduce((s, x) => s + x.pages, 0) + unloggedPages(books);
   const minutes = sessions.reduce((s, x) => s + x.minutes, 0);
-  const sessionDays = sessions.map((s) => s.date);
+  const sessionDays = sessions
+    .filter((s) => s.datePrecision === "DAY")
+    .map((s) => s.date);
   const readingDays = new Set(sessionDays.map(toISODay)).size;
 
   const byBookMinutes = new Map<
@@ -205,7 +212,7 @@ export async function getRetrospective(
             !(b.reading.endedAt && b.reading.endPrecision === "YEAR"),
         );
         const monthSessions = sessions.filter(
-          (s) => s.date.getUTCMonth() === i,
+          (s) => s.datePrecision !== "YEAR" && s.date.getUTCMonth() === i,
         );
         return {
           month: i + 1,

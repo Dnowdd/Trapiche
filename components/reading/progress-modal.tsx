@@ -12,6 +12,32 @@ import {
 } from "@/components/shared/form";
 import { updateProgress } from "@/lib/actions/shelf";
 import { useAction } from "./use-action";
+import PartialDateInput from "./partial-date-input";
+
+export function PageCountField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <FormField
+      label="Total de páginas"
+      hint="Esse livro veio sem o número de páginas. Se souber, conta pra gente."
+    >
+      <TextInput
+        type="number"
+        inputMode="numeric"
+        min={1}
+        max={10000}
+        value={value}
+        placeholder="Ex.: 320"
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </FormField>
+  );
+}
 
 interface ProgressModalProps {
   open: boolean;
@@ -35,15 +61,24 @@ export default function ProgressModal({
   note: initialNote,
 }: ProgressModalProps) {
   const [page, setPage] = useState(String(currentPage));
-  const [start, setStart] = useState(startedAt);
+  const [start, setStart] = useState<string | null>(startedAt);
+  const [total, setTotal] = useState("");
   const [note, setNote] = useState(initialNote ?? "");
   const { pending, error, run } = useAction();
+  const invalid = start === null || start > today.slice(0, start.length);
+  const max = pageCount ?? (Number(total) || undefined);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (invalid) return;
     run(
       () =>
-        updateProgress(bookId, { currentPage: page, startedAt: start, note }),
+        updateProgress(bookId, {
+          currentPage: page,
+          startedAt: start,
+          note,
+          pageCount: pageCount ? null : total,
+        }),
       () => onOpenChange(false),
     );
   };
@@ -54,7 +89,7 @@ export default function ProgressModal({
       onOpenChange={onOpenChange}
       eyebrow="Sua leitura"
       title="Editar progresso"
-      description="Corrija a página atual, a data de início ou a sua nota. Para registrar tempo de leitura, use “Registrar leitura de hoje”."
+      description="Corrija a página atual, quando começou ou a sua nota. A data é opcional: pode ser só o ano, o mês ou o dia certinho."
     >
       <form onSubmit={submit}>
         <FormError message={error} />
@@ -67,22 +102,31 @@ export default function ProgressModal({
               type="number"
               inputMode="numeric"
               min={0}
-              max={pageCount ?? undefined}
+              max={max}
               required
               value={page}
               onChange={(e) => setPage(e.target.value)}
             />
           </FormField>
-          <FormField label="Começou em">
-            <TextInput
-              type="date"
+          {pageCount ? (
+            <PartialDateInput
+              label="Começou em"
               value={start}
-              max={today}
-              required
-              onChange={(e) => setStart(e.target.value)}
+              onChange={setStart}
+              today={today}
             />
-          </FormField>
+          ) : (
+            <PageCountField value={total} onChange={setTotal} />
+          )}
         </div>
+        {!pageCount && (
+          <PartialDateInput
+            label="Começou em"
+            value={start}
+            onChange={setStart}
+            today={today}
+          />
+        )}
         <FormField
           label="Nota da leitura"
           hint="Aparece no card “Sua leitura”."
@@ -102,7 +146,7 @@ export default function ProgressModal({
           >
             Cancelar
           </Button>
-          <Button type="submit" loading={pending}>
+          <Button type="submit" loading={pending} disabled={invalid}>
             Salvar
           </Button>
         </FormActions>

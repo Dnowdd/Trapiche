@@ -13,6 +13,8 @@ import {
 import { logReadingSession } from "@/lib/actions/shelf";
 import { toast } from "@/components/shared/toast";
 import { useAction } from "./use-action";
+import PartialDateInput from "./partial-date-input";
+import { PageCountField } from "./progress-modal";
 
 export interface ReadingOption {
   id: string;
@@ -38,7 +40,8 @@ export default function LogSessionModal({
 }: LogSessionModalProps) {
   const [bookId, setBookId] = useState(books[0]?.id ?? "");
   const book = books.find((b) => b.id === bookId) ?? books[0];
-  const [date, setDate] = useState(today);
+  const [date, setDate] = useState<string | null>(today);
+  const [total, setTotal] = useState("");
   const [page, setPage] = useState("");
   const [minutes, setMinutes] = useState("");
   const [note, setNote] = useState("");
@@ -47,16 +50,20 @@ export default function LogSessionModal({
   const pagesRead =
     book && page ? Math.max(0, Number(page) - book.currentPage) : 0;
 
+  const dateInvalid = !date || date > today.slice(0, date.length);
+  const max = book?.pageCount ?? (Number(total) || undefined);
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!book) return;
+    if (!book || dateInvalid) return;
     run(
       () =>
         logReadingSession(book.id, {
-          date,
+          date: date!,
           pageEnd: page,
           minutes,
           note,
+          pageCount: book.pageCount ? null : total,
         }),
       (data) => {
         onOpenChange(false);
@@ -77,7 +84,7 @@ export default function LogSessionModal({
       title="Registrar leitura"
       description={
         books.length
-          ? "Anote até onde você chegou e quanto tempo leu."
+          ? "Anote até onde você chegou e quanto tempo leu. Não lembra o dia? Pode colocar só o mês ou o ano."
           : undefined
       }
     >
@@ -104,16 +111,16 @@ export default function LogSessionModal({
               </select>
             </FormField>
           )}
-          <div className="grid grid-cols-3 gap-3.5">
-            <FormField label="Dia">
-              <TextInput
-                type="date"
-                value={date}
-                max={today}
-                required
-                onChange={(e) => setDate(e.target.value)}
-              />
-            </FormField>
+          <PartialDateInput
+            label="Quando"
+            value={date}
+            onChange={setDate}
+            today={today}
+          />
+          {book && !book.pageCount && (
+            <PageCountField value={total} onChange={setTotal} />
+          )}
+          <div className="grid grid-cols-2 gap-3.5">
             <FormField
               label="Parei na página"
               hint={
@@ -128,7 +135,7 @@ export default function LogSessionModal({
                 type="number"
                 inputMode="numeric"
                 min={0}
-                max={book?.pageCount ?? undefined}
+                max={max}
                 required
                 value={page}
                 placeholder={String(book?.currentPage ?? 0)}
@@ -164,7 +171,12 @@ export default function LogSessionModal({
             >
               Cancelar
             </Button>
-            <Button type="submit" variant="yellow" loading={pending}>
+            <Button
+              type="submit"
+              variant="yellow"
+              loading={pending}
+              disabled={dateInvalid}
+            >
               Registrar
             </Button>
           </FormActions>
