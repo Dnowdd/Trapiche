@@ -108,6 +108,26 @@ const Header = () => {
 
                 <DropdownMenuItem
                   className={itemCls}
+                  onClick={() => router.push("/desenvolvedores")}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m16 18 6-6-6-6" />
+                    <path d="m8 6-6 6 6 6" />
+                  </svg>
+                  Desenvolvedores
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  className={itemCls}
                   onClick={() => router.push("/suporte")}
                 >
                   <svg

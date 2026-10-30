@@ -1,16 +1,12 @@
 const hits = new Map<string, number[]>();
 
-function memoryLimited(key: string, limit: number, windowMs: number) {
+function memoryCount(key: string, windowMs: number) {
   const now = Date.now();
   const recent = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
-  if (recent.length >= limit) {
-    hits.set(key, recent);
-    return true;
-  }
   recent.push(now);
   hits.set(key, recent);
   if (hits.size > 10_000) hits.clear();
-  return false;
+  return recent.length;
 }
 
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
@@ -34,24 +30,50 @@ async function upstash(commands: (string | number)[][]) {
   return data.map((d) => d.result);
 }
 
+export interface RateLimitResult {
+  limited: boolean;
+  limit: number;
+  remaining: number;
+  resetAt: number;
+}
+
+export async function consumeRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number,
+): Promise<RateLimitResult> {
+  const window = Math.floor(Date.now() / windowMs);
+  const resetAt = (window + 1) * windowMs;
+  let count: number;
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) {
+    count = memoryCount(key, windowMs);
+  } else {
+    const bucket = `rl:${key}:${window}`;
+    try {
+      const [n] = await upstash([
+        ["INCR", bucket],
+        ["PEXPIRE", bucket, windowMs],
+      ]);
+      count = Number(n);
+    } catch (err) {
+      console.error("[rate-limit] falling back to memory", err);
+      count = memoryCount(key, windowMs);
+    }
+  }
+  return {
+    limited: count > limit,
+    limit,
+    remaining: Math.max(0, limit - count),
+    resetAt,
+  };
+}
+
 export async function rateLimited(
   key: string,
   limit: number,
   windowMs: number,
 ) {
-  if (!UPSTASH_URL || !UPSTASH_TOKEN)
-    return memoryLimited(key, limit, windowMs);
-  const bucket = `rl:${key}:${Math.floor(Date.now() / windowMs)}`;
-  try {
-    const [count] = await upstash([
-      ["INCR", bucket],
-      ["PEXPIRE", bucket, windowMs],
-    ]);
-    return Number(count) > limit;
-  } catch (err) {
-    console.error("[rate-limit] falling back to memory", err);
-    return memoryLimited(key, limit, windowMs);
-  }
+  return (await consumeRateLimit(key, limit, windowMs)).limited;
 }
 
 interface AuthRateLimit {

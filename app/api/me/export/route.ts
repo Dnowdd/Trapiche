@@ -26,6 +26,7 @@ export async function GET() {
     reports,
     tickets,
     avatar,
+    apiKeys,
   ] = await Promise.all([
     db.user.findUniqueOrThrow({
       where: { id: userId },
@@ -36,6 +37,7 @@ export async function GET() {
         bio: true,
         city: true,
         createdAt: true,
+        developerSince: true,
       },
     }),
     db.userBook.findMany({
@@ -176,6 +178,17 @@ export async function GET() {
       where: { userId },
       select: { mimeType: true, data: true, updatedAt: true },
     }),
+    db.apiKey.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        name: true,
+        prefix: true,
+        createdAt: true,
+        lastUsedAt: true,
+        revokedAt: true,
+      },
+    }),
   ]);
 
   const dataUri = (mimeType: string, data: Uint8Array) =>
@@ -215,6 +228,7 @@ export async function GET() {
           })),
         })),
       })),
+      apiKeys,
       avatar: avatar
         ? {
             updatedAt: avatar.updatedAt,

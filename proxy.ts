@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
-const PUBLIC_PATHS = ["/auth", "/api/auth", "/api/cron", "/api/avatars/"];
+const PUBLIC_PATHS = [
+  "/auth",
+  "/api/auth",
+  "/api/cron",
+  "/api/avatars/",
+  "/api/v1/",
+];
 const PUBLIC_EXACT = [
   "/",
   "/termos",
