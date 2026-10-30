@@ -360,10 +360,7 @@ export default function DiarioTab({
               <div className="hidden sm:block font-mono text-[11px] text-(--ink-3) tracking-[0.04em] uppercase">
                 {e.date}
               </div>
-              <Link
-                href={`/book/${e.book.id}`}
-                className="[&_.cover-title]:text-[8px] [&_.cover-title]:leading-[1.05] [&_.cover-pub]:hidden [&_.cover-author]:hidden [&_.cover-top]:hidden"
-              >
+              <Link href={`/book/${e.book.id}`}>
                 <BookCover
                   book={e.book}
                   size="sm"

@@ -40,7 +40,7 @@ const Reviews = async () => {
           >
             <Link
               href={`/book/${r.book.id}`}
-              className="flex items-center gap-3 group [&_.cover-title]:text-[9px] [&_.cover-title]:leading-[1.05] [&_.cover-author]:hidden [&_.cover-pub]:hidden [&_.cover-top]:hidden"
+              className="flex items-center gap-3 group"
             >
               <BookCover
                 book={r.book}

@@ -54,7 +54,7 @@ export default function FavoritesEditor({ favorites }: { favorites: Book[] }) {
               {items.map((b, i) => (
                 <li
                   key={b.id}
-                  className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[10px] py-2 px-3 [&_.cover-title]:text-[6px] [&_.cover-pub]:hidden [&_.cover-author]:hidden [&_.cover-top]:hidden"
+                  className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[10px] py-2 px-3"
                 >
                   <span className="font-mono text-[11px] text-(--ink-4) w-6">
                     0{i + 1}

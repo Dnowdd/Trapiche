@@ -129,7 +129,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
       className="grid gap-8 md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] md:gap-10 lg:gap-14 items-start"
       data-screen-label="01 Book hero"
     >
-      <div className="w-50 mx-auto md:w-full [&_.cover-pub]:text-[11px] [&_.cover-title]:text-[26px] [&_.cover-author]:text-[12px]">
+      <div className="w-50 mx-auto md:w-full">
         <BookCover
           book={book.cover}
           size="lg"

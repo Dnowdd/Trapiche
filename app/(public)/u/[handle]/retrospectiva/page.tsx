@@ -127,7 +127,7 @@ function Highlights({ h }: { h: Retrospective["highlights"] }) {
           <Link
             key={label}
             href={`/book/${data!.book.id}`}
-            className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[16px] p-4 flex gap-3.5 transition-colors duration-150 hover:bg-(--yellow-soft) [&_.cover-title]:text-[10px] [&_.cover-title]:leading-[1.05] [&_.cover-pub]:hidden [&_.cover-author]:hidden [&_.cover-top]:hidden"
+            className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[16px] p-4 flex gap-3.5 transition-colors duration-150 hover:bg-(--yellow-soft)"
           >
             <BookCover
               book={data!.book}
@@ -235,7 +235,7 @@ function MonthGrid({ data, handle }: { data: Retrospective; handle: string }) {
                 </div>
               )}
               {m.covers.length > 0 && (
-                <div className="mt-3 flex -space-x-3 [&_.cover-title]:text-[6px] [&_.cover-pub]:hidden [&_.cover-author]:hidden [&_.cover-top]:hidden">
+                <div className="mt-3 flex -space-x-3">
                   {m.covers.map((c) => (
                     <BookCover
                       key={c.id}
