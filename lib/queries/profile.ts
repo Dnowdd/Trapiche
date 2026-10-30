@@ -19,6 +19,7 @@ import {
   WEEKDAYS_LONG,
 } from "../dates";
 import { initialsOf } from "./book";
+import { finishedCount } from "./stats";
 import { byLine } from "./lists";
 import type { Prisma, ShelfStatus } from "../generated/prisma/client";
 
@@ -89,16 +90,7 @@ export async function getProfile(handle: string, viewerId: string | null) {
       db.readingSession.count({ where: { userId } }),
       db.list.count({ where: listsWhereForProfile(userId, viewerId) }),
       db.userBook.count({ where: { userId, liked: true } }),
-      db.reading.count({
-        where: {
-          userId,
-          status: "FINISHED",
-          endedAt: {
-            gte: new Date(Date.UTC(year, 0, 1)),
-            lt: new Date(Date.UTC(year + 1, 0, 1)),
-          },
-        },
-      }),
+      finishedCount(userId, year),
     ]);
 
   const count = (s: ShelfStatus) =>

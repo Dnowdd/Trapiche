@@ -284,144 +284,177 @@ export default function InicioTab({
   if (page > 0) return <ActivityCard data={data} handle={handle} page={page} />;
 
   const showGoal = goal && (isOwner || goal.target != null || goal.done > 0);
+  const shelfTotal = Object.values(shelf).reduce((a, n) => a + n, 0);
+  const show = {
+    favorites: isOwner || data.favorites.length > 0,
+    reading: isOwner || data.readingNow.length > 0,
+    activity: isOwner || data.activity.length > 0,
+    shelf: shelfTotal > 0,
+  };
+
+  if (!isOwner && !Object.values(show).some(Boolean) && !showGoal)
+    return (
+      <div className="rounded-[18px] border border-dashed border-[rgba(67,62,18,0.2)] py-16 px-6 text-center">
+        <div className="text-[34px] leading-none" aria-hidden>
+          ⚓
+        </div>
+        <div className="mt-3 text-[17px] font-bold text-(--ink)">
+          @{handle} acabou de atracar
+        </div>
+        <p className="m-0 mt-1.5 text-[14px] text-(--ink-4) max-w-90 mx-auto">
+          Ainda não tem livros na estante. Volte daqui a pouco pra ver o que
+          está lendo.
+        </p>
+      </div>
+    );
+
+  const hasAside = showGoal || show.shelf;
 
   return (
-    <div className="grid gap-5.5 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
+    <div
+      className={`grid gap-5.5 items-start ${hasAside ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}
+    >
       <div className="flex flex-col gap-5.5 min-w-0">
-        <Card
-          eyebrow="Curadoria do leitor"
-          title={isOwner ? "Meus 5 livros favoritos" : "5 livros favoritos"}
-          action={
-            isOwner && data.favorites.length > 0 ? (
-              <FavoritesEditor favorites={data.favorites} />
-            ) : null
-          }
-        >
-          {data.favorites.length === 0 ? (
-            <div className="grid grid-cols-5 gap-3 sm:gap-5">
-              {Array.from({ length: 5 }, (_, i) => (
-                <div
-                  key={i}
-                  className="aspect-2/3 rounded border border-dashed border-[rgba(67,62,18,0.18)] flex items-center justify-center font-mono text-[11px] text-(--ink-5)"
-                >
-                  0{i + 1}
-                </div>
-              ))}
-              <p className="col-span-5 m-0 text-[13px] text-(--ink-4)">
+        {show.favorites && (
+          <Card
+            eyebrow="Curadoria do leitor"
+            title={isOwner ? "Meus 5 livros favoritos" : "5 livros favoritos"}
+            action={
+              isOwner && data.favorites.length > 0 ? (
+                <FavoritesEditor favorites={data.favorites} />
+              ) : null
+            }
+          >
+            {data.favorites.length === 0 ? (
+              <div className="grid grid-cols-5 gap-3 sm:gap-5">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-2/3 rounded border border-dashed border-[rgba(67,62,18,0.18)] flex items-center justify-center font-mono text-[11px] text-(--ink-5)"
+                  >
+                    0{i + 1}
+                  </div>
+                ))}
+                <p className="col-span-5 m-0 text-[13px] text-(--ink-4)">
+                  {isOwner
+                    ? "Abra um livro e clique em “Adicionar aos favoritos”. Cabem 5 aqui."
+                    : "Nenhum favorito escolhido ainda."}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-5">
+                {data.favorites.map((b, i) => (
+                  <Link
+                    href={`/book/${b.id}`}
+                    className="group flex flex-col gap-2 min-w-0"
+                    key={b.id}
+                  >
+                    <div className="transition-transform duration-150 group-hover:-translate-y-1">
+                      <BookCover
+                        book={b}
+                        size="md"
+                        style={{ width: "100%", aspectRatio: "2/3" }}
+                      />
+                    </div>
+                    <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
+                      № <strong className="text-(--ink-2)">0{i + 1}</strong>
+                    </div>
+                    <div className="text-[13px] font-semibold text-(--ink-2) tracking-[-0.005em] leading-tight line-clamp-2">
+                      {b.title}
+                    </div>
+                    <div className="text-[11px] text-(--ink-4) -mt-1 truncate">
+                      {b.author}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
+
+        {show.reading && (
+          <Card
+            eyebrow="Em andamento"
+            title="Lendo agora"
+            action={
+              <Link
+                href={`/u/${handle}?tab=estante&status=WANT`}
+                scroll={false}
+                className={linkCls}
+              >
+                Ver pilha →
+              </Link>
+            }
+          >
+            {data.readingNow.length === 0 ? (
+              <p className="m-0 text-[13px] text-(--ink-4)">
                 {isOwner
-                  ? "Abra um livro e clique em “Adicionar aos favoritos”. Cabem 5 aqui."
-                  : "Nenhum favorito escolhido ainda."}
+                  ? "Nenhuma leitura em andamento. Abra um livro e marque “Lendo”."
+                  : "Nenhuma leitura em andamento."}
               </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-5">
-              {data.favorites.map((b, i) => (
-                <Link
-                  href={`/book/${b.id}`}
-                  className="group flex flex-col gap-2 min-w-0"
-                  key={b.id}
-                >
-                  <div className="transition-transform duration-150 group-hover:-translate-y-1">
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                {data.readingNow.map((r) => (
+                  <Link
+                    href={`/book/${r.book.id}`}
+                    className="bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
+                    key={r.book.id}
+                  >
                     <BookCover
-                      book={b}
-                      size="md"
-                      style={{ width: "100%", aspectRatio: "2/3" }}
+                      book={r.book}
+                      size="sm"
+                      style={{ width: 64, height: 96, flexShrink: 0 }}
                     />
-                  </div>
-                  <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
-                    № <strong className="text-(--ink-2)">0{i + 1}</strong>
-                  </div>
-                  <div className="text-[13px] font-semibold text-(--ink-2) tracking-[-0.005em] leading-tight line-clamp-2">
-                    {b.title}
-                  </div>
-                  <div className="text-[11px] text-(--ink-4) -mt-1 truncate">
-                    {b.author}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </Card>
+                    <div className="flex-1 min-w-0 flex flex-col">
+                      <div className="text-[14px] font-bold text-(--ink-2) tracking-[-0.005em] leading-[1.2] line-clamp-2">
+                        {r.book.title}
+                      </div>
+                      <div className="text-[11px] text-(--ink-4) mt-0.5 truncate">
+                        {r.book.author}
+                      </div>
+                      <div className="mt-auto pt-2.5">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="text-[18px] font-extrabold tracking-[-0.02em] text-(--ink) tabular-nums">
+                            {r.progress}%
+                          </span>
+                          <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
+                            {r.page}/{r.total || "?"}
+                          </span>
+                        </div>
+                        <div className="mt-1 h-1.5 bg-[rgba(67,62,18,0.1)] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-(--ink-2) rounded-full"
+                            style={{ width: r.progress + "%" }}
+                          />
+                        </div>
+                        <div className="mt-1.5 font-mono text-[9.5px] text-(--ink-4) tracking-[0.04em] uppercase">
+                          {r.expected}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
 
-        <Card
-          eyebrow="Em andamento"
-          title="Lendo agora"
-          action={
-            <Link
-              href={`/u/${handle}?tab=estante&status=WANT`}
-              scroll={false}
-              className={linkCls}
-            >
-              Ver pilha →
-            </Link>
-          }
-        >
-          {data.readingNow.length === 0 ? (
-            <p className="m-0 text-[13px] text-(--ink-4)">
-              {isOwner
-                ? "Nenhuma leitura em andamento. Abra um livro e marque “Lendo”."
-                : "Nenhuma leitura em andamento."}
-            </p>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-              {data.readingNow.map((r) => (
-                <Link
-                  href={`/book/${r.book.id}`}
-                  className="bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
-                  key={r.book.id}
-                >
-                  <BookCover
-                    book={r.book}
-                    size="sm"
-                    style={{ width: 64, height: 96, flexShrink: 0 }}
-                  />
-                  <div className="flex-1 min-w-0 flex flex-col">
-                    <div className="text-[14px] font-bold text-(--ink-2) tracking-[-0.005em] leading-[1.2] line-clamp-2">
-                      {r.book.title}
-                    </div>
-                    <div className="text-[11px] text-(--ink-4) mt-0.5 truncate">
-                      {r.book.author}
-                    </div>
-                    <div className="mt-auto pt-2.5">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-[18px] font-extrabold tracking-[-0.02em] text-(--ink) tabular-nums">
-                          {r.progress}%
-                        </span>
-                        <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
-                          {r.page}/{r.total || "?"}
-                        </span>
-                      </div>
-                      <div className="mt-1 h-1.5 bg-[rgba(67,62,18,0.1)] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-(--ink-2) rounded-full"
-                          style={{ width: r.progress + "%" }}
-                        />
-                      </div>
-                      <div className="mt-1.5 font-mono text-[9.5px] text-(--ink-4) tracking-[0.04em] uppercase">
-                        {r.expected}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </Card>
-
-        <ActivityCard data={data} handle={handle} page={0} />
+        {show.activity && <ActivityCard data={data} handle={handle} page={0} />}
       </div>
 
-      <aside className="flex flex-col gap-5.5 lg:sticky lg:top-6">
-        {showGoal && (
-          <GoalCard
-            goal={goal}
-            isOwner={isOwner}
-            handle={handle}
-            autoOpen={openGoal}
-          />
-        )}
-        <ShelfCard shelf={shelf} handle={handle} />
-      </aside>
+      {hasAside && (
+        <aside className="flex flex-col gap-5.5 lg:sticky lg:top-6">
+          {showGoal && (
+            <GoalCard
+              goal={goal}
+              isOwner={isOwner}
+              handle={handle}
+              autoOpen={openGoal}
+            />
+          )}
+          {show.shelf && <ShelfCard shelf={shelf} handle={handle} />}
+        </aside>
+      )}
     </div>
   );
 }
