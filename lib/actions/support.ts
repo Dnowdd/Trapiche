@@ -7,10 +7,14 @@ import { sendSupportReply } from "../emails/send";
 import { appUrl } from "../emails/layout";
 import {
   markTicketRead,
+  messageInclude,
   newMessagesSince,
   toMessage,
 } from "../queries/support";
+import { imageType } from "../image-type";
 import {
+  ATTACHMENT_MAX_BYTES,
+  ATTACHMENTS_MAX,
   MESSAGE_MAX,
   OPEN_TICKETS_MAX,
   SUBJECT_MAX,
@@ -34,9 +38,37 @@ async function access(ticketId: string, userId: string) {
   return { ticket, owner, staff: admin && !owner };
 }
 
-function cleanBody(raw: unknown) {
+async function readAttachments(form?: FormData) {
+  const files = (form?.getAll("file") ?? []).filter(
+    (f): f is File => f instanceof File && f.size > 0,
+  );
+  if (files.length > ATTACHMENTS_MAX)
+    fail(`Dá pra anexar até ${ATTACHMENTS_MAX} imagens por mensagem.`);
+  const widths = form?.getAll("width") ?? [];
+  const heights = form?.getAll("height") ?? [];
+  return Promise.all(
+    files.map(async (file, i) => {
+      if (file.size > ATTACHMENT_MAX_BYTES)
+        fail("Uma das imagens ficou grande demais.");
+      const data = new Uint8Array(await file.arrayBuffer());
+      const mimeType = imageType(data);
+      if (!mimeType) fail("Anexe imagens JPG, PNG ou WebP.");
+      const dim = (v: FormDataEntryValue | undefined) =>
+        Math.min(4000, Math.max(1, Math.round(Number(v) || 1)));
+      return {
+        data,
+        mimeType,
+        size: data.length,
+        width: dim(widths[i]),
+        height: dim(heights[i]),
+      };
+    }),
+  );
+}
+
+function cleanBody(raw: unknown, allowEmpty = false) {
   const body = String(raw ?? "").trim();
-  if (!body) fail("Escreva uma mensagem.");
+  if (!body && !allowEmpty) fail("Escreva uma mensagem.");
   if (body.length > MESSAGE_MAX)
     fail(`A mensagem pode ter no máximo ${MESSAGE_MAX} caracteres.`);
   return body;
@@ -97,11 +129,14 @@ async function adminIds() {
   return admins.map((a) => a.id);
 }
 
-export async function openTicket(input: {
-  subject: string;
-  category: TicketCategoryId;
-  body: string;
-}) {
+export async function openTicket(
+  input: {
+    subject: string;
+    category: TicketCategoryId;
+    body: string;
+  },
+  files?: FormData,
+) {
   return withUser(async (userId) => {
     const subject = String(input.subject ?? "").trim();
     if (subject.length < 4) fail("Dê um assunto pro seu ticket.");
@@ -109,6 +144,7 @@ export async function openTicket(input: {
       fail(`O assunto pode ter no máximo ${SUBJECT_MAX} caracteres.`);
     if (!(input.category in TICKET_CATEGORIES)) fail("Escolha uma categoria.");
     const body = cleanBody(input.body);
+    const attachments = await readAttachments(files);
     if (rateLimited(`ticket:${userId}`, 5, 60 * 60_000))
       fail("Muitos tickets em pouco tempo. Tente de novo mais tarde.");
     const open = await db.supportTicket.count({
@@ -127,7 +163,14 @@ export async function openTicket(input: {
         category: input.category,
         lastMessageAt: now,
         userReadAt: now,
-        messages: { create: { authorId: userId, body, createdAt: now } },
+        messages: {
+          create: {
+            authorId: userId,
+            body,
+            createdAt: now,
+            attachments: { create: attachments },
+          },
+        },
       },
       select: { id: true },
     });
@@ -136,20 +179,30 @@ export async function openTicket(input: {
   });
 }
 
-export async function sendSupportMessage(ticketId: string, rawBody: string) {
+export async function sendSupportMessage(
+  ticketId: string,
+  rawBody: string,
+  files?: FormData,
+) {
   return withUser(async (userId) => {
     const { ticket, staff } = await access(ticketId, userId);
-    const body = cleanBody(rawBody);
+    const attachments = await readAttachments(files);
+    const body = cleanBody(rawBody, attachments.length > 0);
     if (rateLimited(`ticket-msg:${userId}`, 20, 60_000))
       fail("Calma! Muitas mensagens seguidas. Espere um pouquinho.");
 
     const now = new Date();
     const [message] = await db.$transaction([
       db.supportMessage.create({
-        data: { ticketId, authorId: userId, body, staff, createdAt: now },
-        include: {
-          author: { select: { name: true, handle: true, image: true } },
+        data: {
+          ticketId,
+          authorId: userId,
+          body,
+          staff,
+          createdAt: now,
+          attachments: { create: attachments },
         },
+        include: messageInclude,
       }),
       db.supportTicket.update({
         where: { id: ticketId },
@@ -164,7 +217,11 @@ export async function sendSupportMessage(ticketId: string, rawBody: string) {
 
     if (staff) {
       await replaceNotice([ticket.userId], userId, ticketId, "SUPPORT_REPLIED");
-      await emailReply(ticketId, body, now).catch(() => null);
+      await emailReply(
+        ticketId,
+        body || "Enviamos uma imagem na conversa.",
+        now,
+      ).catch(() => null);
     } else
       await replaceNotice(
         await adminIds(),

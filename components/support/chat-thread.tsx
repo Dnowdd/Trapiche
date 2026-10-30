@@ -14,6 +14,12 @@ import type { TicketMessage } from "@/lib/queries/support";
 import { MESSAGE_MAX, type TicketStatusId } from "@/lib/support";
 import { cn } from "@/lib/utils";
 import StatusBadge from "./status-badge";
+import {
+  AttachButton,
+  MessageImages,
+  PendingList,
+  useAttachments,
+} from "./attachments";
 
 const POLL_MS = 4000;
 
@@ -35,6 +41,7 @@ export default function ChatThread({
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const closing = useAction();
+  const files = useAttachments();
   const list = useRef<HTMLDivElement>(null);
   const latest = useRef(
     initialMessages.at(-1)?.at ?? new Date(0).toISOString(),
@@ -50,9 +57,25 @@ export default function ChatThread({
     });
   }, []);
 
+  const stick = useRef(true);
+
   useEffect(() => {
     const el = list.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (!el) return;
+    const toBottom = () => {
+      if (stick.current) el.scrollTop = el.scrollHeight;
+    };
+    const onScroll = () => {
+      stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    };
+    const observer = new ResizeObserver(toBottom);
+    for (const child of Array.from(el.children)) observer.observe(child);
+    el.addEventListener("scroll", onScroll);
+    toBottom();
+    return () => {
+      observer.disconnect();
+      el.removeEventListener("scroll", onScroll);
+    };
   }, [messages.length]);
 
   useEffect(() => {
@@ -75,13 +98,17 @@ export default function ChatThread({
 
   const send = async () => {
     const body = draft.trim();
-    if (!body || sending) return;
+    if ((!body && !files.items.length) || sending || files.busy) return;
     setSending(true);
-    const res = await sendSupportMessage(ticketId, body).catch(() => null);
+    const res = await sendSupportMessage(ticketId, body, files.toForm()).catch(
+      () => null,
+    );
     setSending(false);
     if (!res) return toast("Não deu pra enviar. Confira sua conexão.");
     if (!res.ok) return toast(res.error);
     setDraft("");
+    files.clear();
+    stick.current = true;
     merge([res.data!.message]);
     setStatus(res.data!.status as TicketStatusId);
   };
@@ -182,16 +209,19 @@ export default function ChatThread({
                     <span className="font-mono text-[10px]">{m.time}</span>
                   </div>
                 )}
-                <div
-                  className={cn(
-                    "inline-block text-left px-3.5 py-2.5 rounded-2xl text-[14px] leading-[1.5] whitespace-pre-wrap wrap-break-word",
-                    mine
-                      ? "bg-(--ink-2) text-(--cream) rounded-tr-md"
-                      : "bg-(--cream) border border-[rgba(67,62,18,0.1)] text-(--ink-2) rounded-tl-md",
-                  )}
-                >
-                  {m.body}
-                </div>
+                {m.body && (
+                  <div
+                    className={cn(
+                      "inline-block text-left px-3.5 py-2.5 rounded-2xl text-[14px] leading-[1.5] whitespace-pre-wrap wrap-break-word",
+                      mine
+                        ? "bg-(--ink-2) text-(--cream) rounded-tr-md"
+                        : "bg-(--cream) border border-[rgba(67,62,18,0.1)] text-(--ink-2) rounded-tl-md",
+                    )}
+                  >
+                    {m.body}
+                  </div>
+                )}
+                <MessageImages items={m.attachments} mine={mine} />
               </div>
             </div>
           );
@@ -210,7 +240,17 @@ export default function ChatThread({
             Esse ticket está fechado. Se mandar uma mensagem, ele é reaberto.
           </p>
         )}
+        <PendingList
+          items={files.items}
+          onRemove={files.remove}
+          busy={files.busy}
+        />
         <div className="flex gap-2 items-end">
+          <AttachButton
+            onPick={files.add}
+            disabled={files.busy}
+            count={files.items.length}
+          />
           <textarea
             value={draft}
             maxLength={MESSAGE_MAX}
@@ -218,6 +258,13 @@ export default function ChatThread({
             placeholder="Escreva uma mensagem…"
             aria-label="Mensagem"
             onChange={(e) => setDraft(e.target.value)}
+            onPaste={(e) => {
+              const pasted = Array.from(e.clipboardData.files);
+              if (pasted.length) {
+                e.preventDefault();
+                files.add(pasted);
+              }
+            }}
             onKeyDown={(e) => {
               if (
                 e.key === "Enter" &&
@@ -233,14 +280,14 @@ export default function ChatThread({
           <Button
             type="submit"
             loading={sending}
-            disabled={!draft.trim()}
+            disabled={(!draft.trim() && !files.items.length) || files.busy}
             className="h-11"
           >
             Enviar
           </Button>
         </div>
         <span className="text-[11px] text-(--ink-5)">
-          Enter envia · Shift+Enter quebra a linha
+          Enter envia · Shift+Enter quebra a linha · cole ou anexe até 3 imagens
         </span>
       </form>
     </div>

@@ -31,3 +31,8 @@ const timeFmt = new Intl.DateTimeFormat("pt-BR", {
 export function fmtMessageTime(d: Date) {
   return timeFmt.format(d).replace(".", "");
 }
+
+export const ATTACHMENTS_MAX = 3;
+export const ATTACHMENT_MAX_BYTES = 1200 * 1024;
+
+export const attachmentUrl = (id: string) => `/api/support/attachments/${id}`;

@@ -19,6 +19,7 @@ import {
   type TicketCategoryId,
 } from "@/lib/support";
 import { cn } from "@/lib/utils";
+import { AttachButton, PendingList, useAttachments } from "./attachments";
 
 export default function NewTicketForm() {
   const router = useRouter();
@@ -26,13 +27,14 @@ export default function NewTicketForm() {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const { pending, error, run } = useAction();
+  const files = useAttachments();
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         run(
-          () => openTicket({ subject, category, body }),
+          () => openTicket({ subject, category, body }, files.toForm()),
           (data) => router.replace(`/suporte/${data!.id}`),
         );
       }}
@@ -83,11 +85,26 @@ export default function NewTicketForm() {
           onChange={(e) => setBody(e.target.value)}
         />
       </FormField>
+      <div className="mb-2 flex items-center gap-3">
+        <AttachButton
+          onPick={files.add}
+          disabled={files.busy}
+          count={files.items.length}
+        />
+        <span className="text-[12px] text-(--ink-4)">
+          Um print ajuda muito. Até 3 imagens.
+        </span>
+      </div>
+      <PendingList
+        items={files.items}
+        onRemove={files.remove}
+        busy={files.busy}
+      />
       <FormActions>
         <Button type="button" variant="ghost" onClick={() => router.back()}>
           Cancelar
         </Button>
-        <Button type="submit" loading={pending}>
+        <Button type="submit" loading={pending} disabled={files.busy}>
           Abrir ticket
         </Button>
       </FormActions>

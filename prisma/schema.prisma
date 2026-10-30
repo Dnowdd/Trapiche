@@ -481,8 +481,24 @@ model SupportMessage {
   staff     Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  author User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  ticket      SupportTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author      User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  attachments SupportAttachment[]
 
   @@index([ticketId, createdAt])
+}
+
+model SupportAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  data      Bytes
+  mimeType  String
+  width     Int
+  height    Int
+  size      Int
+  createdAt DateTime @default(now())
+
+  message SupportMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
 }

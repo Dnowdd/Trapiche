@@ -12,34 +12,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/components/shared/toast";
 import { removeAvatar, uploadAvatar } from "@/lib/actions/profile";
 import { authClient } from "@/lib/auth-client";
-
-const SIZE = 400;
-
-async function toSquareWebp(file: File) {
-  const bitmap = await createImageBitmap(file);
-  const side = Math.min(bitmap.width, bitmap.height);
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = Math.min(SIZE, side);
-  const ctx = canvas.getContext("2d")!;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(
-    bitmap,
-    (bitmap.width - side) / 2,
-    (bitmap.height - side) / 2,
-    side,
-    side,
-    0,
-    0,
-    canvas.width,
-    canvas.height,
-  );
-  bitmap.close();
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/webp", 0.86),
-  );
-  if (!blob) throw new Error("encode");
-  return blob;
-}
+import { resizeImage } from "@/lib/client-image";
 
 const itemCls =
   "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)";
@@ -71,7 +44,11 @@ export default function AvatarEditor({
     }
     setBusy(true);
     try {
-      const blob = await toSquareWebp(file).catch(() => {
+      const { blob } = await resizeImage(file, {
+        max: 400,
+        square: true,
+        maxBytes: 500 * 1024,
+      }).catch(() => {
         throw new Error("Não deu pra ler essa imagem. Tente outra.");
       });
       const form = new FormData();

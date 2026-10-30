@@ -5,7 +5,12 @@ import {
   sendSupportMessage,
   setTicketClosed,
 } from "@/lib/actions/support";
-import { getMyTickets, getStaffTickets } from "@/lib/queries/support";
+import {
+  canSeeTicket,
+  getMyTickets,
+  getStaffTickets,
+  getTicket,
+} from "@/lib/queries/support";
 import { sentEmails, testDb, viewer } from "./setup";
 
 async function addUser(id: string, handle: string, isAdmin = false) {
@@ -108,5 +113,47 @@ describe("support tickets", () => {
       body: "   ",
     });
     expect(empty.ok).toBe(false);
+  });
+
+  it("stores image attachments and rejects anything else", async () => {
+    const id = await open();
+    const png = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2,
+    ]);
+    const form = (files: Blob[]) => {
+      const f = new FormData();
+      for (const b of files) {
+        f.append("file", b, "x");
+        f.append("width", "800");
+        f.append("height", "600");
+      }
+      return f;
+    };
+
+    const ok = await sendSupportMessage(id, "", form([new Blob([png])]));
+    expect(ok.ok).toBe(true);
+    const ticket = await getTicket(id);
+    const last = ticket!.messages.at(-1)!;
+    expect(last.body).toBe("");
+    expect(last.attachments).toHaveLength(1);
+    expect(last.attachments[0]).toMatchObject({ width: 800, height: 600 });
+
+    const fake = await sendSupportMessage(
+      id,
+      "olha",
+      form([new Blob(["<script>alert(1)</script>"])]),
+    );
+    expect(fake.ok).toBe(false);
+    const many = await sendSupportMessage(
+      id,
+      "olha",
+      form([1, 2, 3, 4].map(() => new Blob([png]))),
+    );
+    expect(many.ok).toBe(false);
+    expect((await sendSupportMessage(id, "  ")).ok).toBe(false);
+
+    expect(await canSeeTicket("user-test", "user-test")).toBe(true);
+    expect(await canSeeTicket("user-test", "user-admin")).toBe(true);
+    expect(await canSeeTicket("user-test", "user-other")).toBe(false);
   });
 });

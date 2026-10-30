@@ -1,10 +1,14 @@
 import { db } from "../db";
 import { fmtAgo } from "../dates";
-import { fmtMessageTime, type TicketStatusId } from "../support";
+import { attachmentUrl, fmtMessageTime, type TicketStatusId } from "../support";
 import { initialsOf } from "./book";
 
-const messageInclude = {
+export const messageInclude = {
   author: { select: { name: true, handle: true, image: true } },
+  attachments: {
+    orderBy: { createdAt: "asc" },
+    select: { id: true, width: true, height: true },
+  },
 } as const;
 
 type MessageRow = Awaited<
@@ -24,6 +28,12 @@ export function toMessage(m: MessageRow) {
     initials: initialsOf(m.author.name),
     at: m.createdAt.toISOString(),
     time: fmtMessageTime(m.createdAt),
+    attachments: m.attachments.map((a) => ({
+      id: a.id,
+      url: attachmentUrl(a.id),
+      width: a.width,
+      height: a.height,
+    })),
   };
 }
 
@@ -170,6 +180,15 @@ export async function newMessagesSince(ticketId: string, after: Date) {
     }),
   ]);
   return { messages: rows.map(toMessage), status: ticket?.status ?? null };
+}
+
+export async function canSeeTicket(ticketUserId: string, viewerId: string) {
+  if (ticketUserId === viewerId) return true;
+  const viewer = await db.user.findUnique({
+    where: { id: viewerId },
+    select: { isAdmin: true },
+  });
+  return viewer?.isAdmin ?? false;
 }
 
 export async function markTicketRead(
