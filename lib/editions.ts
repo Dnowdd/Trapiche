@@ -124,6 +124,14 @@ function titleTokens(title: string) {
     .filter((t) => t && !STOPWORDS.has(t) && !/^\d+a?ed$/.test(t));
 }
 
+export function sameTitle(a: string, b: string) {
+  const ta = new Set(titleTokens(a));
+  const tb = new Set(titleTokens(b));
+  if (!ta.size || !tb.size) return false;
+  const [small, big] = ta.size <= tb.size ? [ta, tb] : [tb, ta];
+  return [...small].every((t) => big.has(t));
+}
+
 export function authorSurname(author?: string) {
   if (!author) return "";
   const parts = normalize(cleanAuthor(author)).split(" ").filter(Boolean);

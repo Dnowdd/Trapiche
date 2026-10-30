@@ -1,5 +1,5 @@
 import { cachedJson, HttpError, markUnavailable } from "./api-cache";
-import { authorSurname, normalize, workKey } from "./editions";
+import { authorSurname, normalize, sameTitle, workKey } from "./editions";
 import type { GoogleBooksVolume } from "./types/book";
 
 const API_BASE = "https://openlibrary.org";
@@ -142,10 +142,11 @@ export async function getOpenLibraryBook(id: string) {
   );
 }
 
-async function workByIsbn(isbns: string[]) {
+async function workByIsbn(isbns: string[], title: string) {
   for (const isbn of isbns.slice(0, 3)) {
     const edition = await olFetch<OLEdition>(`/isbn/${isbn}.json`);
-    if (edition?.works?.[0]) return edition.works[0].key;
+    if (edition?.works?.[0] && sameTitle(edition.title, title))
+      return edition.works[0].key;
   }
   return null;
 }
@@ -183,7 +184,7 @@ export async function findOpenLibraryEditions({
   isbns: string[];
 }): Promise<OpenLibraryRow[]> {
   const workPath =
-    (await workByIsbn(isbns)) ?? (await workBySearch(title, author));
+    (await workByIsbn(isbns, title)) ?? (await workBySearch(title, author));
   if (!workPath) return [];
   const res = await olFetch<{ entries: OLEdition[] }>(
     `${workPath}/editions.json?limit=50`,
@@ -403,7 +404,9 @@ export async function searchOpenLibraryAuthors(query: string, limit = 3) {
   return [...best.values()].sort((a, b) => b.works - a.works).slice(0, limit);
 }
 
-export async function editionIdByIsbn(isbn: string) {
+export async function editionIdByIsbn(isbn: string, title: string) {
   const edition = await olFetch<OLEdition>(`/isbn/${isbn}.json`);
-  return edition?.key ? idOf(edition.key) : null;
+  return edition?.key && sameTitle(edition.title, title)
+    ? idOf(edition.key)
+    : null;
 }

@@ -395,7 +395,6 @@ async function viewerState(
     status: entry?.status ?? null,
     liked: entry?.liked ?? false,
     favorite: entry?.favoritePosition != null,
-    note: entry?.note ?? null,
     currentPage: entry?.currentPage ?? 0,
     timesRead: finished + (active ? 1 : 0),
     reading,
@@ -555,7 +554,7 @@ export async function openLibraryEquivalent(book: BookData) {
   ]);
   if (shelved || reviewed || listed) return null;
   for (const isbn of [...new Set(isbns)]) {
-    const id = await editionIdByIsbn(isbn).catch(() => null);
+    const id = await editionIdByIsbn(isbn, book.title).catch(() => null);
     if (id) return id;
   }
   return null;

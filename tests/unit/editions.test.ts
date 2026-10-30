@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { cleanAuthor, editionScore, groupWorks, workKey } from "@/lib/editions";
+import {
+  cleanAuthor,
+  editionScore,
+  groupWorks,
+  sameTitle,
+  workKey,
+} from "@/lib/editions";
 import { publisherCore, toIsbn13 } from "@/lib/open-library";
 import type { GoogleBooksVolume } from "@/lib/types/book";
 
@@ -116,5 +122,18 @@ describe("asIsbn", async () => {
     expect(asIsbn("6555871784")).toBe("9786555871784");
     expect(asIsbn("1984")).toBeNull();
     expect(asIsbn("12345678901234")).toBeNull();
+  });
+});
+
+describe("sameTitle", () => {
+  it("matches the same title with a subtitle or different casing", () => {
+    expect(sameTitle("Menino de engenho", "MENINO DE ENGENHO: romance")).toBe(
+      true,
+    );
+    expect(sameTitle("O Cortiço", "o cortico")).toBe(true);
+  });
+
+  it("rejects different books that share an ISBN", () => {
+    expect(sameTitle("Vida de droga", "Menino de engenho")).toBe(false);
   });
 });
