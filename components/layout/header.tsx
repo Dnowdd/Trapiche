@@ -4,6 +4,7 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import HeaderSearch from "./header-search";
+import Avatar from "@/components/shared/avatar";
 import NotificationBell from "@/components/notifications/notification-bell";
 import {
   DropdownMenu,
@@ -13,19 +14,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join("");
-}
+const itemCls =
+  "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)";
 
 const Header = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const user = session?.user;
+  const profileHref = user?.handle ? `/u/${user.handle}` : "/profile";
 
   const handleLogout = async () => {
     await signOut();
@@ -52,15 +48,18 @@ const Header = () => {
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2.5 cursor-pointer outline-none group/trigger">
-                <div className="w-9 h-9 rounded-full bg-(--cream-deep) flex items-center justify-center text-[13px] font-bold text-(--ink-2) border-[1.5px] border-(--ink-2) select-none transition-opacity duration-150 group-data-[popup-open]/trigger:opacity-70">
-                  {initials(user.name)}
-                </div>
+                <Avatar
+                  name={user.name}
+                  image={user.image}
+                  size={36}
+                  className="transition-opacity duration-150 group-data-[popup-open]/trigger:opacity-70"
+                />
                 <div className="hidden sm:flex flex-col items-start">
                   <div className="text-[13px] font-semibold text-(--ink-2) leading-[1.2]">
                     {user.name}
                   </div>
                   <div className="text-[10px] text-(--ink-4) font-mono">
-                    @{(user as { handle?: string }).handle ?? ""}
+                    @{user.handle}
                   </div>
                 </div>
               </DropdownMenuTrigger>
@@ -72,9 +71,7 @@ const Header = () => {
               >
                 {/* Identity header */}
                 <div className="px-3 py-2.5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-(--cream-deep) flex items-center justify-center text-[14px] font-bold text-(--ink-2) border-[1.5px] border-(--ink-2) select-none shrink-0">
-                    {initials(user.name)}
-                  </div>
+                  <Avatar name={user.name} image={user.image} size={40} />
                   <div className="min-w-0">
                     <div className="text-[13px] font-semibold text-(--ink-2) leading-[1.2] truncate">
                       {user.name}
@@ -88,8 +85,8 @@ const Header = () => {
                 <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
 
                 <DropdownMenuItem
-                  className="gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)"
-                  onClick={() => router.push("/profile")}
+                  className={itemCls}
+                  onClick={() => router.push(profileHref)}
                 >
                   <svg
                     width="14"
@@ -107,25 +104,70 @@ const Header = () => {
                   Meu perfil
                 </DropdownMenuItem>
 
-                {user.isAdmin && (
-                  <DropdownMenuItem
-                    className="gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)"
-                    onClick={() => router.push("/admin/denuncias")}
+                <DropdownMenuItem
+                  className={itemCls}
+                  onClick={() => router.push("/suporte")}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14" />
+                    <path d="M12 17h.01" />
+                  </svg>
+                  Suporte
+                </DropdownMenuItem>
+
+                {user.isAdmin && (
+                  <>
+                    <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
+                    <div className="px-3 pt-1.5 pb-1 font-mono text-[9.5px] uppercase tracking-[0.08em] text-(--ink-4)">
+                      Administração
+                    </div>
+                    <DropdownMenuItem
+                      className={itemCls}
+                      onClick={() => router.push("/admin/denuncias")}
                     >
-                      <path d="M4 22V4a1 1 0 0 1 1-1h13l-2 5 2 5H5" />
-                    </svg>
-                    Denúncias
-                  </DropdownMenuItem>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M4 22V4a1 1 0 0 1 1-1h13l-2 5 2 5H5" />
+                      </svg>
+                      Denúncias
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={itemCls}
+                      onClick={() => router.push("/admin/suporte")}
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                      Tickets de suporte
+                    </DropdownMenuItem>
+                  </>
                 )}
 
                 <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />

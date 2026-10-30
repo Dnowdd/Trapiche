@@ -8,6 +8,7 @@ interface Notice {
   reviewId?: string;
   commentId?: string;
   listId?: string;
+  ticketId?: string;
 }
 
 export async function notify(n: Notice) {

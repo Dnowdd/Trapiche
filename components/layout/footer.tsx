@@ -32,6 +32,12 @@ const Footer = () => {
           >
             Populares
           </Link>
+          <Link
+            href="/suporte"
+            className="hover:underline underline-offset-[3px]"
+          >
+            Suporte
+          </Link>
         </nav>
       </div>
       <div className="h-px bg-(--yellow-deep)" />

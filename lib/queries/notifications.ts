@@ -12,6 +12,7 @@ export async function getNotifications(userId: string, take = 30) {
         actor: { select: { name: true, handle: true } },
         review: { select: { book: { select: { id: true, title: true } } } },
         list: { select: { id: true, title: true } },
+        ticket: { select: { id: true, number: true } },
       },
     }),
     db.notification.count({ where: { userId, readAt: null } }),
@@ -29,16 +30,24 @@ export async function getNotifications(userId: string, take = 30) {
         REVIEW_COMMENTED: `comentou na sua resenha de ${target}`,
         LIST_FOLLOWED: `começou a seguir sua lista ${target}`,
         LIST_MEMBER_ADDED: `te adicionou na lista ${target}`,
+        SUPPORT_REPLIED: `respondeu seu ticket #${n.ticket?.number}`,
+        SUPPORT_MESSAGE: `escreveu no ticket #${n.ticket?.number}`,
       }[n.kind];
-      const href = book
-        ? `/book/${book.id}#avaliacoes`
-        : n.list
-          ? `/lists/${n.list.id}`
-          : `/u/${n.actor.handle}`;
+      const staffReply = n.kind === "SUPPORT_REPLIED";
+      const href = n.ticket
+        ? staffReply
+          ? `/suporte/${n.ticket.id}`
+          : `/admin/suporte/${n.ticket.id}`
+        : book
+          ? `/book/${book.id}#avaliacoes`
+          : n.list
+            ? `/lists/${n.list.id}`
+            : `/u/${n.actor.handle}`;
+      const actor = staffReply ? "Suporte do Trapiche" : n.actor.name;
       return {
         id: n.id,
-        actor: n.actor.name,
-        initials: initialsOf(n.actor.name),
+        actor,
+        initials: staffReply ? "TR" : initialsOf(n.actor.name),
         text,
         href,
         when: fmtAgo(n.createdAt),

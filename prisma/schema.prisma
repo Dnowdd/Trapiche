@@ -38,6 +38,8 @@ model User {
   reports         Report[]
   readingGoals    ReadingGoal[]
   avatar          UserAvatar?
+  supportTickets  SupportTicket[]
+  supportMessages SupportMessage[]
 }
 
 model Session {
@@ -365,6 +367,8 @@ enum NotificationKind {
   REVIEW_COMMENTED
   LIST_FOLLOWED
   LIST_MEMBER_ADDED
+  SUPPORT_REPLIED
+  SUPPORT_MESSAGE
 }
 
 model Notification {
@@ -375,6 +379,7 @@ model Notification {
   reviewId  String?
   commentId String?
   listId    String?
+  ticketId  String?
   readAt    DateTime?
   createdAt DateTime         @default(now())
 
@@ -383,6 +388,7 @@ model Notification {
   review  Review?        @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   comment ReviewComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
   list    List?          @relation(fields: [listId], references: [id], onDelete: Cascade)
+  ticket  SupportTicket? @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }
@@ -429,4 +435,54 @@ model UserAvatar {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum TicketStatus {
+  OPEN
+  ANSWERED
+  CLOSED
+}
+
+enum TicketCategory {
+  ACCOUNT
+  BUG
+  BOOK_DATA
+  SUGGESTION
+  OTHER
+}
+
+model SupportTicket {
+  id            String         @id @default(cuid())
+  number        Int            @unique @default(autoincrement())
+  userId        String
+  subject       String
+  category      TicketCategory
+  status        TicketStatus   @default(OPEN)
+  lastMessageAt DateTime       @default(now())
+  userReadAt    DateTime?
+  staffReadAt   DateTime?
+  closedAt      DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages      SupportMessage[]
+  notifications Notification[]
+
+  @@index([userId, lastMessageAt])
+  @@index([status, lastMessageAt])
+}
+
+model SupportMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  authorId  String
+  body      String
+  staff     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
 }
