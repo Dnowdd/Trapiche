@@ -17,13 +17,53 @@ import type { GoalData } from "@/lib/queries/stats";
 
 const books = (n: number) => `${n} ${n === 1 ? "livro" : "livros"}`;
 
-function paceText(g: GoalData) {
+function pace(
+  g: GoalData,
+): { text: string; tone: "good" | "bad" | "neutral" } | null {
   if (g.target == null || g.pace == null) return null;
-  if (g.done >= g.target) return "Meta batida. Tudo que vier agora é bônus.";
-  if (!g.current) return `Faltaram ${books(g.target - g.done)}.`;
-  if (g.pace > 0) return `${books(g.pace)} à frente do ritmo.`;
-  if (g.pace < 0) return `${books(-g.pace)} atrás do ritmo.`;
-  return "No ritmo certinho.";
+  if (g.done >= g.target)
+    return { text: "Meta batida! Agora é tudo bônus.", tone: "good" };
+  if (!g.current)
+    return { text: `Faltaram ${books(g.target - g.done)}.`, tone: "neutral" };
+  if (g.pace > 0)
+    return { text: `${books(g.pace)} à frente do ritmo`, tone: "good" };
+  if (g.pace < 0)
+    return { text: `${books(-g.pace)} atrás do ritmo`, tone: "bad" };
+  return { text: "No ritmo certinho", tone: "neutral" };
+}
+
+const TONE = {
+  good: "bg-[#e3eccb] text-[#3d5a1c]",
+  bad: "bg-[#f6dccb] text-[#8a3f1f]",
+  neutral: "bg-[rgba(67,62,18,0.07)] text-(--ink-3)",
+};
+
+function Ring({ pct }: { pct: number }) {
+  const r = 42;
+  const c = 2 * Math.PI * r;
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+      <circle
+        cx="50"
+        cy="50"
+        r={r}
+        fill="none"
+        strokeWidth="9"
+        className="stroke-[rgba(67,62,18,0.09)]"
+      />
+      <circle
+        cx="50"
+        cy="50"
+        r={r}
+        fill="none"
+        strokeWidth="9"
+        strokeLinecap="round"
+        strokeDasharray={c}
+        strokeDashoffset={c * (1 - Math.min(100, pct) / 100)}
+        className="stroke-(--ink-2) transition-[stroke-dashoffset] duration-700"
+      />
+    </svg>
+  );
 }
 
 export default function GoalCard({
@@ -36,72 +76,89 @@ export default function GoalCard({
   handle: string;
 }) {
   const [open, setOpen] = useState(false);
-  const retro = (
-    <Link
-      href={`/u/${handle}/retrospectiva?ano=${goal.year}`}
-      className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
-    >
-      Retrospectiva {goal.year} →
-    </Link>
-  );
+  const p = pace(goal);
 
   return (
-    <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7 mb-5.5">
-      <div className="flex items-start justify-between gap-4 mb-3">
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">
-            Meta de {goal.year}
-          </div>
-          <h3 className="m-0 text-[16px] font-bold tracking-[-0.005em] text-(--ink)">
-            {goal.target != null ? (
-              <>
-                {goal.done} de {books(goal.target)}
-              </>
-            ) : (
-              <>{books(goal.done)} lidos este ano</>
-            )}
-          </h3>
+    <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4)">
+          Meta de {goal.year}
         </div>
-        <div className="flex items-center gap-4">
-          {retro}
-          {isOwner && (
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink) cursor-pointer"
-            >
-              {goal.target != null ? "Editar meta" : "Definir meta"}
-            </button>
-          )}
-        </div>
+        {isOwner && goal.target != null && (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink) cursor-pointer"
+          >
+            Editar
+          </button>
+        )}
       </div>
-      {goal.target != null && (
-        <>
+
+      {goal.target != null ? (
+        <div className="flex items-center gap-5">
           <div
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={goal.target}
             aria-valuenow={goal.done}
             aria-label={`Meta de ${goal.year}`}
-            className="h-2.5 bg-[rgba(67,62,18,0.08)] rounded-full overflow-hidden"
+            className="relative w-24 h-24 shrink-0"
           >
-            <div
-              className="h-full rounded-full bg-(--ink-2) transition-[width] duration-500"
-              style={{ width: `${goal.pct}%` }}
-            />
+            <Ring pct={goal.pct} />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-[22px] font-extrabold tracking-[-0.03em] text-(--ink) leading-none tabular-nums">
+                {goal.pct}%
+              </span>
+            </div>
           </div>
-          <div className="mt-2 flex justify-between gap-3 font-mono text-[10px] text-(--ink-4) tracking-[0.04em] uppercase">
-            <span>{paceText(goal)}</span>
-            <span>{goal.pct}%</span>
+          <div className="min-w-0">
+            <div className="text-[30px] font-extrabold tracking-[-0.03em] text-(--ink) leading-none tabular-nums">
+              {goal.done}
+              <span className="text-[16px] font-semibold text-(--ink-4) tracking-[-0.01em]">
+                {" "}
+                / {goal.target}
+              </span>
+            </div>
+            <div className="mt-1 text-[12px] text-(--ink-4)">
+              {goal.target === 1 ? "livro" : "livros"} lidos
+            </div>
+            {p && (
+              <span
+                className={`mt-2.5 inline-block text-[11px] font-semibold py-1 px-2.5 rounded-full ${TONE[p.tone]}`}
+              >
+                {p.text}
+              </span>
+            )}
           </div>
-        </>
+        </div>
+      ) : (
+        <div>
+          <div className="text-[30px] font-extrabold tracking-[-0.03em] text-(--ink) leading-none tabular-nums">
+            {goal.done}
+          </div>
+          <div className="mt-1 text-[12px] text-(--ink-4)">
+            {goal.done === 1 ? "livro lido" : "livros lidos"} em {goal.year}
+          </div>
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="mt-4 w-full h-10 rounded-[10px] border border-dashed border-[rgba(67,62,18,0.3)] text-[13px] font-medium text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft) hover:border-solid"
+            >
+              Definir uma meta para {goal.year}
+            </button>
+          )}
+        </div>
       )}
-      {goal.target == null && isOwner && (
-        <p className="m-0 text-[13px] text-(--ink-4)">
-          Quantos livros você quer ler em {goal.year}? Defina uma meta e
-          acompanhe o ritmo por aqui.
-        </p>
-      )}
+
+      <Link
+        href={`/u/${handle}/retrospectiva?ano=${goal.year}`}
+        className="mt-5 pt-4 border-t border-(--rule) flex items-center justify-between text-[12px] font-medium text-(--ink-3) hover:text-(--ink)"
+      >
+        Retrospectiva de {goal.year}
+        <span aria-hidden>→</span>
+      </Link>
       {open && <GoalModal goal={goal} onOpenChange={setOpen} />}
     </div>
   );

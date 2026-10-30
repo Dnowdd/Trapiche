@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import BookCover from "@/components/shared/book-cover";
 import { fmtRating } from "@/components/shared/stars";
-import type { getInicio } from "@/lib/queries/profile";
+import type { getInicio, ProfileData } from "@/lib/queries/profile";
 import FavoritesEditor from "./favorites-editor";
 import Card from "./card";
 import SpoilerText from "@/components/shared/spoiler-text";
@@ -134,10 +134,7 @@ function ActivityRow({ a }: { a: ActivityItem }) {
         <ActivityIcon kind={a.kind} />
       </div>
       {a.book ? (
-        <Link
-          href={`/book/${a.book.id}`}
-          className="shrink-0 [&_.cover-title]:text-[7px] [&_.cover-title]:leading-[1.05] [&_.cover-pub]:hidden [&_.cover-author]:hidden [&_.cover-top]:hidden"
-        >
+        <Link href={`/book/${a.book.id}`} className="shrink-0">
           <BookCover
             book={a.book}
             size="sm"
@@ -170,174 +167,252 @@ function ActivityRow({ a }: { a: ActivityItem }) {
 const linkCls =
   "text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)";
 
+const SHELF_ROWS = [
+  { id: "READ", label: "Lidos" },
+  { id: "READING", label: "Lendo" },
+  { id: "WANT", label: "Quero ler" },
+  { id: "REREADING", label: "Relendo" },
+  { id: "ABANDONED", label: "Abandonados" },
+] as const;
+
+function ShelfCard({
+  shelf,
+  handle,
+}: {
+  shelf: ProfileData["shelf"];
+  handle: string;
+}) {
+  const max = Math.max(1, ...Object.values(shelf));
+  return (
+    <Card eyebrow="Na estante" title="Por status">
+      <div className="flex flex-col gap-1 -mx-2">
+        {SHELF_ROWS.map((r) => (
+          <Link
+            key={r.id}
+            href={`/u/${handle}?tab=estante&status=${r.id}`}
+            scroll={false}
+            className="group grid grid-cols-[92px_1fr_32px] items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-(--yellow-soft)"
+          >
+            <span className="text-[13px] text-(--ink-3) group-hover:text-(--ink-2)">
+              {r.label}
+            </span>
+            <span className="h-1.5 rounded-full bg-[rgba(67,62,18,0.07)] overflow-hidden">
+              <span
+                className="block h-full rounded-full bg-(--ink-2)"
+                style={{ width: `${(shelf[r.id] / max) * 100}%` }}
+              />
+            </span>
+            <span className="text-right text-[13px] font-semibold text-(--ink-2) tabular-nums">
+              {shelf[r.id]}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function ActivityCard({
+  data,
+  handle,
+  page,
+}: {
+  data: Data;
+  handle: string;
+  page: number;
+}) {
+  const full = page > 0;
+  return (
+    <Card
+      eyebrow={full ? "Tudo desde o começo" : "Últimas semanas"}
+      title={full ? "Histórico completo" : "Atividade recente"}
+      action={
+        full ? (
+          <Link href={`/u/${handle}`} scroll={false} className={linkCls}>
+            ← Voltar
+          </Link>
+        ) : data.hasMoreActivity ? (
+          <Link
+            href={`/u/${handle}?tab=inicio&historico=1`}
+            scroll={false}
+            className={linkCls}
+          >
+            Histórico completo →
+          </Link>
+        ) : null
+      }
+    >
+      {data.activity.length === 0 ? (
+        <p className="m-0 text-[13px] text-(--ink-4)">Nada por aqui ainda.</p>
+      ) : (
+        <div className="flex flex-col relative">
+          {data.activity.map((a) => (
+            <ActivityRow key={a.id} a={a} />
+          ))}
+        </div>
+      )}
+      {full && data.hasMoreActivity && (
+        <Link
+          href={`/u/${handle}?tab=inicio&historico=${page + 1}`}
+          scroll={false}
+          className="mt-4 self-start inline-flex h-9 items-center px-4 rounded-[10px] border border-[rgba(67,62,18,0.18)] text-[13px] font-medium text-(--ink-2) hover:bg-(--yellow-soft)"
+        >
+          Carregar mais
+        </Link>
+      )}
+    </Card>
+  );
+}
+
 export default function InicioTab({
   data,
   goal,
+  shelf,
   handle,
   isOwner,
   page,
 }: {
   data: Data;
   goal: GoalData | null;
+  shelf: ProfileData["shelf"];
   handle: string;
   isOwner: boolean;
   page: number;
 }) {
-  const full = page > 0;
+  if (page > 0) return <ActivityCard data={data} handle={handle} page={page} />;
+
+  const showGoal = goal && (isOwner || goal.target != null || goal.done > 0);
+
   return (
-    <>
-      {!full && (
-        <>
-          {goal && (isOwner || goal.target != null || goal.done > 0) && (
-            <GoalCard goal={goal} isOwner={isOwner} handle={handle} />
-          )}
-          <Card
-            eyebrow="Curadoria do leitor"
-            title={isOwner ? "Meus 5 livros favoritos" : "5 livros favoritos"}
-            action={
-              isOwner && data.favorites.length > 0 ? (
-                <FavoritesEditor favorites={data.favorites} />
-              ) : null
-            }
-          >
-            {data.favorites.length === 0 ? (
-              <p className="m-0 text-[13px] text-(--ink-4)">
+    <div className="grid gap-5.5 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
+      <div className="flex flex-col gap-5.5 min-w-0">
+        <Card
+          eyebrow="Curadoria do leitor"
+          title={isOwner ? "Meus 5 livros favoritos" : "5 livros favoritos"}
+          action={
+            isOwner && data.favorites.length > 0 ? (
+              <FavoritesEditor favorites={data.favorites} />
+            ) : null
+          }
+        >
+          {data.favorites.length === 0 ? (
+            <div className="grid grid-cols-5 gap-3 sm:gap-5">
+              {Array.from({ length: 5 }, (_, i) => (
+                <div
+                  key={i}
+                  className="aspect-2/3 rounded border border-dashed border-[rgba(67,62,18,0.18)] flex items-center justify-center font-mono text-[11px] text-(--ink-5)"
+                >
+                  0{i + 1}
+                </div>
+              ))}
+              <p className="col-span-5 m-0 text-[13px] text-(--ink-4)">
                 {isOwner
                   ? "Abra um livro e clique em “Adicionar aos favoritos”. Cabem 5 aqui."
                   : "Nenhum favorito escolhido ainda."}
               </p>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-5">
-                {data.favorites.map((b, i) => (
-                  <Link
-                    href={`/book/${b.id}`}
-                    className="flex flex-col gap-2 transition-transform duration-120 hover:-translate-y-0.5"
-                    key={b.id}
-                  >
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-5">
+              {data.favorites.map((b, i) => (
+                <Link
+                  href={`/book/${b.id}`}
+                  className="group flex flex-col gap-2 min-w-0"
+                  key={b.id}
+                >
+                  <div className="transition-transform duration-150 group-hover:-translate-y-1">
                     <BookCover
                       book={b}
                       size="md"
                       style={{ width: "100%", aspectRatio: "2/3" }}
                     />
-                    <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
-                      № <strong className="text-(--ink-2)">0{i + 1}</strong>
-                    </div>
-                    <div className="text-[13px] font-semibold text-(--ink-2) tracking-[-0.005em] leading-tight">
-                      {b.title}
-                    </div>
-                    <div className="text-[11px] text-(--ink-4)">{b.author}</div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </Card>
+                  </div>
+                  <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
+                    № <strong className="text-(--ink-2)">0{i + 1}</strong>
+                  </div>
+                  <div className="text-[13px] font-semibold text-(--ink-2) tracking-[-0.005em] leading-tight line-clamp-2">
+                    {b.title}
+                  </div>
+                  <div className="text-[11px] text-(--ink-4) -mt-1 truncate">
+                    {b.author}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </Card>
 
-          <Card
-            className="mt-5.5"
-            eyebrow="Em andamento"
-            title="Lendo agora"
-            action={
-              <Link
-                href={`/u/${handle}?tab=estante&status=WANT`}
-                scroll={false}
-                className={linkCls}
-              >
-                Ver pilha →
-              </Link>
-            }
-          >
-            {data.readingNow.length === 0 ? (
-              <p className="m-0 text-[13px] text-(--ink-4)">
-                {isOwner
-                  ? "Nenhuma leitura em andamento. Abra um livro e marque “Lendo”."
-                  : "Nenhuma leitura em andamento."}
-              </p>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4.5">
-                {data.readingNow.map((r) => (
-                  <Link
-                    href={`/book/${r.book.id}`}
-                    className="bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-[10px] p-4 flex gap-3.5 transition-colors duration-150 hover:bg-(--yellow-soft) [&_.cover-title]:text-[11px] [&_.cover-title]:leading-[1.05] [&_.cover-pub]:hidden [&_.cover-author]:hidden [&_.cover-top]:hidden"
-                    key={r.book.id}
-                  >
-                    <BookCover
-                      book={r.book}
-                      size="sm"
-                      style={{
-                        width: 70,
-                        height: 100,
-                        flexShrink: 0,
-                        padding: "8px 7px",
-                      }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[14px] font-bold text-(--ink-2) tracking-[-0.005em] leading-[1.2]">
-                        {r.book.title}
-                      </div>
-                      <div className="text-[11px] text-(--ink-4) mt-0.5">
-                        {r.book.author}
-                      </div>
-                      <div className="mt-2.5 h-1 bg-[rgba(67,62,18,0.1)] rounded-sm overflow-hidden">
-                        <div
-                          className="h-full bg-(--ink-2) rounded-sm"
-                          style={{ width: r.progress + "%" }}
-                        />
-                      </div>
-                      <div className="mt-1.5 flex justify-between gap-2 font-mono text-[9px] text-(--ink-4) tracking-[0.04em] uppercase [&_strong]:text-(--ink-2)">
-                        <span>
-                          <strong>{r.progress}%</strong> · {r.page}/
-                          {r.total || "?"}
-                        </span>
-                        <span>{r.expected}</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </Card>
-        </>
-      )}
-
-      <Card
-        className={full ? "" : "mt-5.5"}
-        eyebrow={full ? "Tudo desde o começo" : "Últimas semanas"}
-        title={full ? "Histórico completo" : "Atividade recente"}
-        action={
-          full ? (
-            <Link href={`/u/${handle}`} scroll={false} className={linkCls}>
-              ← Voltar
-            </Link>
-          ) : data.hasMoreActivity ? (
+        <Card
+          eyebrow="Em andamento"
+          title="Lendo agora"
+          action={
             <Link
-              href={`/u/${handle}?tab=inicio&historico=1`}
+              href={`/u/${handle}?tab=estante&status=WANT`}
               scroll={false}
               className={linkCls}
             >
-              Histórico completo →
+              Ver pilha →
             </Link>
-          ) : null
-        }
-      >
-        {data.activity.length === 0 ? (
-          <p className="m-0 text-[13px] text-(--ink-4)">Nada por aqui ainda.</p>
-        ) : (
-          <div className="flex flex-col relative">
-            {data.activity.map((a) => (
-              <ActivityRow key={a.id} a={a} />
-            ))}
-          </div>
-        )}
-        {full && data.hasMoreActivity && (
-          <Link
-            href={`/u/${handle}?tab=inicio&historico=${page + 1}`}
-            scroll={false}
-            className="mt-4 self-start inline-flex h-9 items-center px-4 rounded-[10px] border border-[rgba(67,62,18,0.18)] text-[13px] font-medium text-(--ink-2) hover:bg-(--yellow-soft)"
-          >
-            Carregar mais
-          </Link>
-        )}
-      </Card>
-    </>
+          }
+        >
+          {data.readingNow.length === 0 ? (
+            <p className="m-0 text-[13px] text-(--ink-4)">
+              {isOwner
+                ? "Nenhuma leitura em andamento. Abra um livro e marque “Lendo”."
+                : "Nenhuma leitura em andamento."}
+            </p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+              {data.readingNow.map((r) => (
+                <Link
+                  href={`/book/${r.book.id}`}
+                  className="bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
+                  key={r.book.id}
+                >
+                  <BookCover
+                    book={r.book}
+                    size="sm"
+                    style={{ width: 64, height: 96, flexShrink: 0 }}
+                  />
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    <div className="text-[14px] font-bold text-(--ink-2) tracking-[-0.005em] leading-[1.2] line-clamp-2">
+                      {r.book.title}
+                    </div>
+                    <div className="text-[11px] text-(--ink-4) mt-0.5 truncate">
+                      {r.book.author}
+                    </div>
+                    <div className="mt-auto pt-2.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-[18px] font-extrabold tracking-[-0.02em] text-(--ink) tabular-nums">
+                          {r.progress}%
+                        </span>
+                        <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
+                          {r.page}/{r.total || "?"}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-1.5 bg-[rgba(67,62,18,0.1)] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-(--ink-2) rounded-full"
+                          style={{ width: r.progress + "%" }}
+                        />
+                      </div>
+                      <div className="mt-1.5 font-mono text-[9.5px] text-(--ink-4) tracking-[0.04em] uppercase">
+                        {r.expected}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <ActivityCard data={data} handle={handle} page={0} />
+      </div>
+
+      <aside className="flex flex-col gap-5.5 lg:sticky lg:top-6">
+        {showGoal && <GoalCard goal={goal} isOwner={isOwner} handle={handle} />}
+        <ShelfCard shelf={shelf} handle={handle} />
+      </aside>
+    </div>
   );
 }

@@ -8,8 +8,6 @@ const LABELS: Record<Tab, string> = {
   avaliacoes: "Avaliações",
   listas: "Listas",
   curtidas: "Curtidas",
-  abandonos: "Abandonos",
-  releituras: "Releituras",
 };
 
 export default function ProfileTabs({

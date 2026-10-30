@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { notFound, redirect } from "next/navigation";
 import { getViewerId } from "@/lib/session";
 import {
-  getAbandonos,
   getAvaliacoes,
   getCurtidas,
   getDiario,
@@ -11,7 +11,6 @@ import {
   getListas,
   getProfile,
   getReadingNow,
-  getReleituras,
   TABS,
   type Tab,
 } from "@/lib/queries/profile";
@@ -25,8 +24,7 @@ import DiarioTab from "./_components/diario-tab";
 import AvaliacoesTab from "./_components/avaliacoes-tab";
 import ListasTab from "./_components/listas-tab";
 import CurtidasTab from "./_components/curtidas-tab";
-import AbandonosTab from "./_components/abandonos-tab";
-import ReleiturasTab from "./_components/releituras-tab";
+import { TabSkeleton } from "./_components/skeletons";
 
 interface Props {
   params: Promise<{ handle: string }>;
@@ -49,18 +47,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ProfilePage({ params, searchParams }: Props) {
-  const { handle } = await params;
-  const sp = await searchParams;
-  const viewerId = await getViewerId();
-  const profile = await getProfile(handle, viewerId);
-  if (!profile) notFound();
+const LEGACY_TABS: Record<string, string> = {
+  abandonos: "estante&status=ABANDONED",
+  releituras: "estante&status=REREADING",
+};
 
-  const tab: Tab = TABS.includes(sp.tab as Tab) ? (sp.tab as Tab) : "inicio";
+type SearchParams = Awaited<Props["searchParams"]>;
+
+async function TabContent({
+  tab,
+  sp,
+  handle,
+  profile,
+  viewerId,
+}: {
+  tab: Tab;
+  sp: SearchParams;
+  handle: string;
+  profile: NonNullable<Awaited<ReturnType<typeof getProfile>>>;
+  viewerId: string | null;
+}) {
   const uid = profile.user.id;
   const owner = profile.isOwner;
 
-  let content: React.ReactNode;
   switch (tab) {
     case "inicio": {
       const pages = Math.min(20, Math.max(0, Number(sp.historico) || 0));
@@ -69,29 +78,33 @@ export default async function ProfilePage({ params, searchParams }: Props) {
         getInicio(uid, viewerId, full ? pages * 30 : 8),
         full ? Promise.resolve(null) : getGoal(uid, today().getUTCFullYear()),
       ]);
-      content = (
+      return (
         <InicioTab
           data={data}
           goal={goal}
+          shelf={profile.shelf}
           handle={handle}
           isOwner={owner}
           page={pages}
         />
       );
-      break;
     }
     case "estante":
-      content = (
-        <EstanteTab items={await getEstante(uid)} initial={sp.status} />
+      return (
+        <EstanteTab
+          items={await getEstante(uid)}
+          initial={sp.status}
+          handle={handle}
+          isOwner={owner}
+        />
       );
-      break;
     case "diario": {
       const limit = Math.min(500, Math.max(20, Number(sp.entradas) || 20));
       const [data, reading] = await Promise.all([
         getDiario(uid, limit),
         owner ? getReadingNow(uid) : Promise.resolve([]),
       ]);
-      content = (
+      return (
         <DiarioTab
           data={data}
           isOwner={owner}
@@ -105,33 +118,33 @@ export default async function ProfilePage({ params, searchParams }: Props) {
           }))}
         />
       );
-      break;
     }
     case "avaliacoes":
-      content = (
+      return (
         <AvaliacoesTab
           items={await getAvaliacoes(uid, owner)}
           isOwner={owner}
         />
       );
-      break;
     case "listas":
-      content = (
+      return (
         <ListasTab items={await getListas(uid, viewerId)} isOwner={owner} />
       );
-      break;
     case "curtidas":
-      content = <CurtidasTab items={await getCurtidas(uid)} />;
-      break;
-    case "abandonos":
-      content = (
-        <AbandonosTab items={await getAbandonos(uid)} isOwner={owner} />
-      );
-      break;
-    case "releituras":
-      content = <ReleiturasTab items={await getReleituras(uid)} />;
-      break;
+      return <CurtidasTab items={await getCurtidas(uid)} />;
   }
+}
+
+export default async function ProfilePage({ params, searchParams }: Props) {
+  const { handle } = await params;
+  const sp = await searchParams;
+  if (sp.tab && LEGACY_TABS[sp.tab])
+    redirect(`/u/${handle}?tab=${LEGACY_TABS[sp.tab]}`);
+  const viewerId = await getViewerId();
+  const profile = await getProfile(handle, viewerId);
+  if (!profile) notFound();
+
+  const tab: Tab = TABS.includes(sp.tab as Tab) ? (sp.tab as Tab) : "inicio";
 
   return (
     <div
@@ -144,7 +157,18 @@ export default async function ProfilePage({ params, searchParams }: Props) {
         className="pt-7 md:pt-9 px-4 sm:px-8 lg:px-15 pb-12 md:pb-15"
         data-screen-label={`Tab: ${tab}`}
       >
-        {content}
+        <Suspense
+          key={JSON.stringify({ tab, ...sp })}
+          fallback={<TabSkeleton tab={tab} />}
+        >
+          <TabContent
+            tab={tab}
+            sp={sp}
+            handle={handle}
+            profile={profile}
+            viewerId={viewerId}
+          />
+        </Suspense>
       </div>
     </div>
   );

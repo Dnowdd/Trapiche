@@ -10,7 +10,6 @@ import {
   fmtDayWeek,
   fmtExpected,
   fmtJoined,
-  fmtMonthYear,
   longestStreak,
   readingDays,
   spanDays,
@@ -30,8 +29,6 @@ export const TABS = [
   "avaliacoes",
   "listas",
   "curtidas",
-  "abandonos",
-  "releituras",
 ] as const;
 export type Tab = (typeof TABS)[number];
 
@@ -64,15 +61,6 @@ function listsWhereForProfile(
   };
 }
 
-async function rereadBookIds(userId: string) {
-  const groups = await db.reading.groupBy({
-    by: ["bookId"],
-    where: { userId, status: { in: ["FINISHED", "ACTIVE"] } },
-    _count: { bookId: true },
-  });
-  return groups.filter((g) => g._count.bookId >= 2).map((g) => g.bookId);
-}
-
 export async function getProfile(handle: string, viewerId: string | null) {
   const user = await db.user.findUnique({
     where: { handle },
@@ -82,13 +70,15 @@ export async function getProfile(handle: string, viewerId: string | null) {
       handle: true,
       bio: true,
       city: true,
+      image: true,
       createdAt: true,
     },
   });
   if (!user) return null;
   const userId = user.id;
 
-  const [byStatus, reviews, sessions, lists, likes, rereads] =
+  const year = today().getUTCFullYear();
+  const [byStatus, reviews, sessions, lists, likes, readThisYear] =
     await Promise.all([
       db.userBook.groupBy({
         by: ["status"],
@@ -99,7 +89,16 @@ export async function getProfile(handle: string, viewerId: string | null) {
       db.readingSession.count({ where: { userId } }),
       db.list.count({ where: listsWhereForProfile(userId, viewerId) }),
       db.userBook.count({ where: { userId, liked: true } }),
-      rereadBookIds(userId),
+      db.reading.count({
+        where: {
+          userId,
+          status: "FINISHED",
+          endedAt: {
+            gte: new Date(Date.UTC(year, 0, 1)),
+            lt: new Date(Date.UTC(year + 1, 0, 1)),
+          },
+        },
+      }),
     ]);
 
   const count = (s: ShelfStatus) =>
@@ -117,23 +116,29 @@ export async function getProfile(handle: string, viewerId: string | null) {
     stats: [
       {
         value: count("READ"),
-        label: "concluídos",
+        label: "lidos",
         href: "estante&status=READ",
       },
       {
-        value: count("READING"),
+        value: readThisYear,
+        label: `em ${year}`,
+        href: "estante&status=READ",
+      },
+      {
+        value: count("READING") + count("REREADING"),
         label: "lendo",
         href: "estante&status=READING",
       },
-      { value: count("WANT"), label: "quero ler", href: "estante&status=WANT" },
-      {
-        value: count("REREADING"),
-        label: "relendo",
-        href: "estante&status=REREADING",
-      },
-      { value: count("ABANDONED"), label: "abandonei", href: "abandonos" },
       { value: reviews, label: "resenhas", href: "avaliacoes" },
+      { value: lists, label: lists === 1 ? "lista" : "listas", href: "listas" },
     ],
+    shelf: {
+      READ: count("READ"),
+      READING: count("READING"),
+      WANT: count("WANT"),
+      REREADING: count("REREADING"),
+      ABANDONED: count("ABANDONED"),
+    } satisfies Record<ShelfStatus, number>,
     counts: {
       inicio: null,
       estante: shelfTotal,
@@ -141,8 +146,6 @@ export async function getProfile(handle: string, viewerId: string | null) {
       avaliacoes: reviews,
       listas: lists,
       curtidas: likes,
-      abandonos: count("ABANDONED"),
-      releituras: rereads.length,
     } satisfies Record<Tab, number | null>,
   };
 }
@@ -245,20 +248,57 @@ export async function getInicio(
 }
 
 export async function getEstante(userId: string) {
-  const rows = await db.userBook.findMany({
-    where: { userId, status: { not: null } },
-    orderBy: { statusChangedAt: "desc" },
-    include: { book: { select: bookSummarySelect } },
+  const [rows, readings] = await Promise.all([
+    db.userBook.findMany({
+      where: { userId, status: { not: null } },
+      orderBy: { statusChangedAt: "desc" },
+      include: { book: { select: bookSummarySelect } },
+    }),
+    db.reading.findMany({
+      where: { userId, status: { in: ["FINISHED", "ACTIVE", "ABANDONED"] } },
+      orderBy: { number: "desc" },
+      select: {
+        bookId: true,
+        status: true,
+        startedAt: true,
+        endedAt: true,
+        endPage: true,
+      },
+    }),
+  ]);
+  return rows.map((r) => {
+    const mine = readings.filter((x) => x.bookId === r.bookId);
+    const reads = mine.filter((x) => x.status !== "ABANDONED").length;
+    const total = r.book.pageCount ?? 0;
+    let abandoned = null;
+    if (r.status === "ABANDONED") {
+      const reading = mine.find((x) => x.status === "ABANDONED");
+      const page = reading?.endPage ?? r.currentPage;
+      const ended = reading?.endedAt ?? today();
+      abandoned = {
+        percent: total ? Math.min(100, Math.round((page / total) * 100)) : 0,
+        page,
+        total,
+        at: fmtDay(ended),
+        spentDays: reading?.startedAt
+          ? readingDays(reading.startedAt, ended)
+          : 1,
+        reason: r.abandonReason,
+        again: r.wantsToReturn,
+      };
+    }
+    return {
+      book: toCover(r.book),
+      status: r.status!,
+      since: r.statusChangedAt ? fmtAgo(r.statusChangedAt) : null,
+      reads,
+      progress:
+        total && (r.status === "READING" || r.status === "REREADING")
+          ? Math.min(100, Math.round((r.currentPage / total) * 100))
+          : null,
+      abandoned,
+    };
   });
-  return rows.map((r) => ({
-    book: toCover(r.book),
-    status: r.status!,
-    since: r.statusChangedAt ? fmtAgo(r.statusChangedAt) : null,
-    progress:
-      r.book.pageCount && (r.status === "READING" || r.status === "REREADING")
-        ? Math.min(100, Math.round((r.currentPage / r.book.pageCount) * 100))
-        : null,
-  }));
 }
 
 export async function getDiario(userId: string, entriesLimit: number) {
@@ -484,76 +524,4 @@ export async function getCurtidas(userId: string) {
     when: r.likedAt ? fmtAgo(r.likedAt) : "",
     year: (r.likedAt ? dayOf(r.likedAt) : today()).getUTCFullYear(),
   }));
-}
-
-export async function getAbandonos(userId: string) {
-  const rows = await db.userBook.findMany({
-    where: { userId, status: "ABANDONED" },
-    orderBy: { statusChangedAt: "desc" },
-    include: { book: { select: bookSummarySelect } },
-  });
-  const readings = await db.reading.findMany({
-    where: {
-      userId,
-      status: "ABANDONED",
-      bookId: { in: rows.map((r) => r.bookId) },
-    },
-    orderBy: { endedAt: "desc" },
-  });
-  return rows.map((r) => {
-    const reading = readings.find((x) => x.bookId === r.bookId);
-    const page = reading?.endPage ?? r.currentPage;
-    const total = r.book.pageCount ?? 0;
-    const ended = reading?.endedAt ?? today();
-    return {
-      book: toCover(r.book),
-      percent: total ? Math.min(100, Math.round((page / total) * 100)) : 0,
-      page,
-      total,
-      abandonedAt: fmtDay(ended),
-      abandonedTs: ended.getTime(),
-      spentDays: reading?.startedAt ? readingDays(reading.startedAt, ended) : 1,
-      reason: r.abandonReason,
-      again: r.wantsToReturn,
-    };
-  });
-}
-
-export async function getReleituras(userId: string) {
-  const ids = await rereadBookIds(userId);
-  if (!ids.length) return [];
-  const [readings, entries] = await Promise.all([
-    db.reading.findMany({
-      where: {
-        userId,
-        bookId: { in: ids },
-        status: { in: ["FINISHED", "ACTIVE"] },
-      },
-      orderBy: { number: "asc" },
-    }),
-    db.userBook.findMany({
-      where: { userId, bookId: { in: ids } },
-      include: { book: { select: bookSummarySelect } },
-    }),
-  ]);
-  return entries
-    .map((e) => {
-      const rs = readings.filter((r) => r.bookId === e.bookId);
-      const last = rs[rs.length - 1];
-      const dateOf = (r: (typeof rs)[number]) =>
-        r.endedAt ?? r.startedAt ?? dayOf(r.createdAt);
-      const lastDate = dateOf(last);
-      return {
-        book: toCover(e.book),
-        times: rs.length,
-        dates: rs.map(
-          (r, i) =>
-            `${dateOf(r).getUTCFullYear()} · ${i + 1}ª${r.status === "ACTIVE" ? " (lendo)" : ""}`,
-        ),
-        last: fmtMonthYear(lastDate),
-        lastTs: lastDate.getTime(),
-        note: e.note,
-      };
-    })
-    .sort((a, b) => b.lastTs - a.lastTs);
 }

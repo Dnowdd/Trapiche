@@ -81,7 +81,7 @@ export default function EditProfileModal({ open, onOpenChange, user }: Props) {
           <TextInput
             value={city}
             maxLength={60}
-            placeholder="Salvador · BA"
+            placeholder="Ex.: Recife · PE"
             onChange={(e) => setCity(e.target.value)}
           />
         </FormField>

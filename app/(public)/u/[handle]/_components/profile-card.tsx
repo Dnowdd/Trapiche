@@ -3,8 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { shareLink } from "@/components/reading/share";
+import Avatar from "@/components/shared/avatar";
 import type { ProfileData } from "@/lib/queries/profile";
 import EditProfileModal from "./edit-profile-modal";
+import AvatarEditor from "./avatar-editor";
+
+const avatarCls = "max-sm:size-20! max-sm:text-[28px]!";
+
+const btn =
+  "h-9 inline-flex items-center gap-2 text-[12.5px] font-medium px-3.5 rounded-[10px] cursor-pointer transition-colors duration-150";
 
 export default function ProfileCard({ profile }: { profile: ProfileData }) {
   const [editing, setEditing] = useState(false);
@@ -12,20 +19,36 @@ export default function ProfileCard({ profile }: { profile: ProfileData }) {
 
   return (
     <section
-      className="pt-8 md:pt-10 px-4 sm:px-8 lg:px-15 pb-8 md:pb-9 grid gap-8 lg:grid-cols-2 lg:gap-10 items-center"
+      className="relative pt-8 md:pt-11 px-4 sm:px-8 lg:px-15 pb-7 md:pb-8"
       data-screen-label="01 Perfil"
     >
-      <div>
-        <div className="flex gap-4 sm:gap-6 items-center">
-          <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full bg-(--yellow) border-[1.5px] border-(--ink-2) flex items-center justify-center text-[28px] sm:text-[42px] font-extrabold text-(--ink-2) tracking-[-0.02em] shrink-0">
-            {u.initials}
-          </div>
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-28 md:h-32 bg-linear-to-b from-(--yellow-soft) to-transparent pointer-events-none"
+      />
+      <div className="relative flex flex-col md:flex-row md:items-end gap-6 md:gap-10 justify-between">
+        <div className="flex gap-5 sm:gap-7 items-start sm:items-center min-w-0">
+          {profile.isOwner ? (
+            <AvatarEditor
+              name={u.name}
+              image={u.image}
+              size={112}
+              className={avatarCls}
+            />
+          ) : (
+            <Avatar
+              name={u.name}
+              image={u.image}
+              size={112}
+              className={avatarCls}
+            />
+          )}
           <div className="min-w-0">
-            <h1 className="m-0 text-[26px] sm:text-[36px] font-extrabold tracking-[-0.025em] text-(--ink) leading-none">
+            <h1 className="m-0 text-[28px] sm:text-[38px] font-extrabold tracking-[-0.03em] text-(--ink) leading-[1.02] wrap-break-word">
               {u.name}
             </h1>
-            <div className="mt-1.5 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] flex gap-3.5 items-center flex-wrap">
-              <span>@{u.handle}</span>
+            <div className="mt-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] flex gap-x-2.5 gap-y-1 items-center flex-wrap">
+              <span className="text-(--ink-2) font-semibold">@{u.handle}</span>
               {u.city && (
                 <>
                   <span className="text-(--ink-5)">·</span>
@@ -33,64 +56,81 @@ export default function ProfileCard({ profile }: { profile: ProfileData }) {
                 </>
               )}
               <span className="text-(--ink-5)">·</span>
-              <span>desde {u.joined}</span>
+              <span>no Trapiche desde {u.joined}</span>
             </div>
-            <div className="mt-3.5 flex flex-wrap gap-2.5">
-              {profile.isOwner && (
+            {u.bio ? (
+              <p className="m-0 mt-3 text-[14px] text-(--ink-3) leading-[1.55] max-w-130 whitespace-pre-line">
+                {u.bio}
+              </p>
+            ) : (
+              profile.isOwner && (
                 <button
-                  className="text-[12px] font-medium border border-(--yellow-deep) text-(--ink-2) py-1.75 px-3.5 rounded-md bg-(--yellow) cursor-pointer transition-colors duration-150 hover:bg-(--yellow-soft)"
+                  type="button"
                   onClick={() => setEditing(true)}
+                  className="mt-3 text-[13px] text-(--ink-4) hover:text-(--ink-2) cursor-pointer border-b border-dashed border-(--ink-5) pb-px"
                 >
-                  Editar perfil
+                  + Escrever uma bio
                 </button>
-              )}
-              <button
-                className="text-[12px] font-medium border border-(--ink-3) text-(--ink-2) py-1.75 px-3.5 rounded-md bg-transparent cursor-pointer transition-colors duration-150 hover:bg-(--yellow-soft)"
-                onClick={() =>
-                  shareLink(`/u/${u.handle}`, `${u.name} no Trapiche`)
-                }
-              >
-                Compartilhar
-              </button>
-              <Link
-                href={`/u/${u.handle}/retrospectiva`}
-                className="text-[12px] font-medium border border-(--ink-3) text-(--ink-2) py-1.75 px-3.5 rounded-md bg-transparent transition-colors duration-150 hover:bg-(--yellow-soft)"
-              >
-                Retrospectiva
-              </Link>
-            </div>
+              )
+            )}
           </div>
         </div>
-        {u.bio ? (
-          <p className="mt-2.5 text-[13px] text-(--ink-3) leading-[1.55] max-w-115 whitespace-pre-line">
-            {u.bio}
-          </p>
-        ) : (
-          profile.isOwner && (
-            <p className="mt-2.5 text-[13px] text-(--ink-4) leading-[1.55] max-w-115">
-              Conte um pouco sobre você e o que você gosta de ler em “Editar
-              perfil”.
-            </p>
-          )
-        )}
+        <div className="flex flex-wrap gap-2 shrink-0">
+          {profile.isOwner && (
+            <button
+              className={`${btn} bg-(--ink-2) text-(--cream) hover:bg-(--ink)`}
+              onClick={() => setEditing(true)}
+            >
+              Editar perfil
+            </button>
+          )}
+          <Link
+            href={`/u/${u.handle}/retrospectiva`}
+            className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+          >
+            Retrospectiva
+          </Link>
+          <button
+            aria-label="Compartilhar perfil"
+            className={`${btn} px-2.5 border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+            onClick={() => shareLink(`/u/${u.handle}`, `${u.name} no Trapiche`)}
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" />
+              <path d="M16 6l-4-4-4 4" />
+              <path d="M12 2v13" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <div className="grid grid-cols-3 border-t lg:border-t-0 lg:border-l border-[rgba(67,62,18,0.1)] pt-2 lg:pt-0 lg:pl-10">
-        {profile.stats.map((s) => (
+
+      <div className="relative mt-7 grid grid-cols-3 sm:grid-cols-5 rounded-2xl border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
+        {profile.stats.map((s, i) => (
           <Link
             href={`/u/${u.handle}?tab=${s.href}`}
             scroll={false}
-            className="py-3 px-2.5 sm:py-3.5 sm:px-4 border-r border-b border-[rgba(67,62,18,0.08)] nth-[3n]:border-r-0 nth-last-[-n+3]:border-b-0 transition-colors duration-150 hover:bg-(--yellow-soft)"
+            className={`py-3.5 px-4 sm:py-4 sm:px-5 border-[rgba(67,62,18,0.08)] transition-colors duration-150 hover:bg-(--yellow-soft) ${i > 0 ? "sm:border-l" : ""} ${i % 3 !== 0 ? "max-sm:border-l" : ""} ${i >= 3 ? "max-sm:border-t" : ""}`}
             key={s.label}
           >
-            <div className="text-[22px] sm:text-[28px] font-bold tracking-[-0.02em] text-(--ink) leading-none">
+            <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.03em] text-(--ink) leading-none tabular-nums">
               {s.value}
             </div>
-            <div className="mt-1 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.06em] text-(--ink-4) leading-tight">
+            <div className="mt-1.5 font-mono text-[9.5px] sm:text-[10px] uppercase tracking-[0.08em] text-(--ink-4) leading-tight">
               {s.label}
             </div>
           </Link>
         ))}
       </div>
+
       {editing && (
         <EditProfileModal
           open
