@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { usePathname, useRouter } from "next/navigation";
 import { loginHref } from "@/lib/links";
@@ -18,16 +19,29 @@ import {
 const itemCls =
   "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)";
 
-const Header = () => {
-  const { data: session, isPending } = useSession();
+export interface HeaderUser {
+  name: string;
+  email: string;
+  handle: string;
+  image?: string | null;
+  isAdmin?: boolean | null;
+}
+
+const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
+  const { data: session } = useSession();
+  const [signedOut, setSignedOut] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const user = session?.user;
+  const user: HeaderUser | null = signedOut
+    ? null
+    : (session?.user ?? initialUser);
   const profileHref = user?.handle ? `/u/${user.handle}` : "/profile";
 
   const handleLogout = async () => {
     await signOut();
+    setSignedOut(true);
     router.push("/auth");
+    router.refresh();
   };
 
   return (
@@ -239,8 +253,6 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </>
-        ) : isPending ? (
-          <div className="w-9 h-9 rounded-full bg-(--cream-deep) animate-pulse" />
         ) : (
           <div className="flex items-center gap-2">
             <Link

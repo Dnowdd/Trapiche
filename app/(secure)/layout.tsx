@@ -1,5 +1,5 @@
 import Footer from "@/components/layout/footer";
-import Header from "@/components/layout/header";
+import SiteHeader from "@/components/layout/site-header";
 import { requireSession } from "@/lib/session";
 import React from "react";
 
@@ -10,7 +10,7 @@ const SecureLayout = async ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <Header />
+      <SiteHeader />
       <main className="flex-1">{children}</main>
       <Footer />
     </>
