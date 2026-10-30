@@ -1,5 +1,6 @@
 "use client";
 
+import { loginHref } from "@/lib/links";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -62,7 +63,7 @@ export default function ReviewsSection({ data }: { data: BookPageData }) {
   const { rating, reviews, viewer: v } = data;
   const review = v?.review;
   const loggedIn = v != null;
-  const write = () => (v ? setOpen(true) : router.push("/auth"));
+  const write = () => (v ? setOpen(true) : router.push(loginHref()));
   const empty = rating.count === 0 && reviews.items.length === 0 && !review;
 
   const stats = [

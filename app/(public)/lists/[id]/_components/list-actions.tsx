@@ -1,5 +1,6 @@
 "use client";
 
+import { loginHref } from "@/lib/links";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/shared/form";
@@ -33,7 +34,7 @@ export default function ListActions({ list }: { list: ListPageData }) {
           onClick={() =>
             v.loggedIn
               ? run(() => toggleListFollow(list.id), undefined, toast)
-              : router.push("/auth")
+              : router.push(loginHref())
           }
         >
           {v.following ? "Seguindo ✓" : "Seguir lista"}

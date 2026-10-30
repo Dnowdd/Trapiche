@@ -32,7 +32,10 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!getSessionCookie(request) && !isPublic(pathname)) {
-    return NextResponse.redirect(new URL("/auth", request.url));
+    const url = new URL("/auth", request.url);
+    if (!pathname.startsWith("/api/"))
+      url.searchParams.set("next", pathname + request.nextUrl.search);
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

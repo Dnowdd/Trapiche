@@ -36,7 +36,7 @@ import {
 } from "@/lib/actions/shelf";
 import type { BookPageData } from "@/lib/queries/book";
 import { categoryLabels } from "@/lib/categories";
-import { authorHref, publisherHref } from "@/lib/links";
+import { authorHref, publisherHref, loginHref } from "@/lib/links";
 import Stars from "@/components/shared/stars";
 import Synopsis from "./synopsis";
 
@@ -78,14 +78,14 @@ export default function BookHero({ data, today }: BookHeroProps) {
 
   const guard = (fn: () => void) => () => {
     if (!loggedIn) {
-      router.push("/auth");
+      router.push(loginHref());
       return;
     }
     fn();
   };
 
   const chooseStatus = (s: Status | null) => {
-    if (!viewer) return router.push("/auth");
+    if (!viewer) return router.push(loginHref());
     if (
       s === null &&
       !window.confirm(

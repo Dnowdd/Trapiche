@@ -1,9 +1,10 @@
 "use client";
 
+import { loginHref } from "@/lib/links";
 import Stars from "@/components/shared/stars";
 import { Flag, Heart, MessageCircle } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, TextArea } from "@/components/shared/form";
 import { toast } from "@/components/shared/toast";
@@ -28,6 +29,7 @@ export default function ReviewCard({
   loggedIn: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [text, setText] = useState("");
@@ -56,7 +58,7 @@ export default function ReviewCard({
   };
 
   const report = (target: { reviewId: string } | { commentId: string }) =>
-    loggedIn ? setReporting(target) : router.push("/auth");
+    loggedIn ? setReporting(target) : router.push(loginHref());
 
   const remove = (id: string) =>
     comment.run(() => deleteReviewComment(id), load, toast);
@@ -104,7 +106,7 @@ export default function ReviewCard({
           onClick={() =>
             loggedIn
               ? like.run(() => toggleReviewLike(r.id), undefined, toast)
-              : router.push("/auth")
+              : router.push(loginHref())
           }
           className="inline-flex items-center gap-1 cursor-pointer hover:text-(--ink-2) aria-pressed:text-(--ink) disabled:cursor-default"
         >
@@ -221,7 +223,7 @@ export default function ReviewCard({
             </form>
           ) : (
             <Link
-              href="/auth"
+              href={loginHref(pathname)}
               className="text-[12px] text-(--ink-3) border-b border-(--ink-4)"
             >
               Entre para comentar

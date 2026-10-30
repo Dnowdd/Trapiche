@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { safeNext } from "@/lib/links";
 import Poster from "./poster";
 import LoginForm from "./login-form";
 import RegisterForm from "./register-form";
@@ -27,6 +28,7 @@ interface AuthContentProps {
 export default function AuthContent({ books }: AuthContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const next = safeNext(searchParams.get("next"));
 
   const [mode, setMode] = useState<AuthMode>(() => {
     if (searchParams.get("token")) return "reset";
@@ -82,7 +84,7 @@ export default function AuthContent({ books }: AuthContentProps) {
     try {
       const { error } = await authClient.sendVerificationEmail({
         email,
-        callbackURL: "/",
+        callbackURL: next ?? "/",
       });
       if (error) {
         setError(
@@ -114,6 +116,7 @@ export default function AuthContent({ books }: AuthContentProps) {
           password: pw,
           name,
           handle,
+          callbackURL: next ?? "/",
         } as Parameters<typeof authClient.signUp.email>[0]);
         if (error) {
           setError(authErrorMessage(error, "Não foi possível criar a conta."));
@@ -121,7 +124,7 @@ export default function AuthContent({ books }: AuthContentProps) {
         }
         // token presente → SKIP_EMAIL_VERIFICATION=true, sessão criada direto
         if (data?.token) {
-          router.push("/");
+          router.push(next ?? "/");
           return;
         }
         setSentContext("verify");
@@ -137,7 +140,7 @@ export default function AuthContent({ books }: AuthContentProps) {
           setError(authErrorMessage(error, "Não foi possível entrar."));
           return;
         }
-        router.push("/");
+        router.push(next ?? "/");
       } else if (mode === "forgot") {
         const { error } = await authClient.requestPasswordReset({
           email,

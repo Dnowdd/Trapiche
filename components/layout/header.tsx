@@ -1,7 +1,8 @@
 "use client";
 
 import { useSession, signOut } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { loginHref } from "@/lib/links";
 import Link from "next/link";
 import HeaderSearch from "./header-search";
 import Avatar from "@/components/shared/avatar";
@@ -20,6 +21,7 @@ const itemCls =
 const Header = () => {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
   const user = session?.user;
   const profileHref = user?.handle ? `/u/${user.handle}` : "/profile";
 
@@ -201,13 +203,13 @@ const Header = () => {
         ) : (
           <div className="flex items-center gap-2">
             <Link
-              href="/auth"
+              href={loginHref(pathname)}
               className="h-9 px-4 rounded-lg text-[13px] font-medium text-(--ink-3) hover:text-(--ink-2) transition-colors duration-150 flex items-center"
             >
               Entrar
             </Link>
             <Link
-              href="/auth?mode=register"
+              href={loginHref(pathname, "register")}
               className="h-9 px-4 rounded-lg bg-(--ink-2) text-(--cream) text-[13px] font-semibold flex items-center transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(67,62,18,0.4)]"
             >
               Criar conta
