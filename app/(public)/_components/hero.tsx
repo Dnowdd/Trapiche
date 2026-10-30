@@ -1,7 +1,6 @@
 "use client";
 
 import { type CSSProperties } from "react";
-import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import BookCover from "@/components/shared/book-cover";
 import type { Book } from "@/lib/types/book";
@@ -47,12 +46,11 @@ const BOOK_POSITIONS: CSSProperties[] = [
 
 interface HeroProps {
   books: Book[];
+  handle: string | null;
 }
 
-const Hero = ({ books }: HeroProps) => {
-  const { data: session } = useSession();
+const Hero = ({ books, handle }: HeroProps) => {
   const router = useRouter();
-  const user = session?.user;
 
   const picked = books.slice(0, 3);
 
@@ -84,7 +82,7 @@ const Hero = ({ books }: HeroProps) => {
           <button
             className="bg-(--yellow) text-(--ink) py-3 px-5.5 rounded-lg text-[14px] font-semibold inline-flex items-center gap-2 border border-(--yellow-deep) transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(67,62,18,0.4)]"
             onClick={() => {
-              if (user) {
+              if (handle) {
                 document.getElementById("header-search")?.focus();
               } else {
                 router.push("/auth?mode=register");
@@ -109,10 +107,10 @@ const Hero = ({ books }: HeroProps) => {
             Atracar meus livros
           </button>
 
-          {user ? (
+          {handle ? (
             <button
               className="text-[14px] text-(--ink-3) font-medium inline-flex items-center gap-1.5 hover:text-(--ink-2)"
-              onClick={() => router.push("/profile")}
+              onClick={() => router.push(`/u/${handle}`)}
             >
               Meu perfil
               <svg
