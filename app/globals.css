@@ -205,3 +205,13 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes nudge {
+  0% {
+    box-shadow: 0 0 0 0 rgba(67, 62, 18, 0.45);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 12px rgba(67, 62, 18, 0);
+  }
+}

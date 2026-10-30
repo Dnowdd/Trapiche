@@ -271,6 +271,7 @@ export default function InicioTab({
   handle,
   isOwner,
   page,
+  openGoal = false,
 }: {
   data: Data;
   goal: GoalData | null;
@@ -278,6 +279,7 @@ export default function InicioTab({
   handle: string;
   isOwner: boolean;
   page: number;
+  openGoal?: boolean;
 }) {
   if (page > 0) return <ActivityCard data={data} handle={handle} page={page} />;
 
@@ -410,7 +412,14 @@ export default function InicioTab({
       </div>
 
       <aside className="flex flex-col gap-5.5 lg:sticky lg:top-6">
-        {showGoal && <GoalCard goal={goal} isOwner={isOwner} handle={handle} />}
+        {showGoal && (
+          <GoalCard
+            goal={goal}
+            isOwner={isOwner}
+            handle={handle}
+            autoOpen={openGoal}
+          />
+        )}
         <ShelfCard shelf={shelf} handle={handle} />
       </aside>
     </div>

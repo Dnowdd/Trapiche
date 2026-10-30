@@ -33,6 +33,8 @@ interface Props {
     status?: string;
     historico?: string;
     entradas?: string;
+    editar?: string;
+    meta?: string;
   }>;
 }
 
@@ -86,6 +88,7 @@ async function TabContent({
           handle={handle}
           isOwner={owner}
           page={pages}
+          openGoal={owner && sp.meta === "1"}
         />
       );
     }
@@ -151,7 +154,10 @@ export default async function ProfilePage({ params, searchParams }: Props) {
       data-responsive
       className="bg-(--cream) rounded-[22px] md:rounded-[30px] border-8 md:border-15 border-(--yellow) mx-2 md:mx-3.75 overflow-hidden"
     >
-      <ProfileCard profile={profile} />
+      <ProfileCard
+        profile={profile}
+        autoEdit={profile.isOwner && sp.editar === "1"}
+      />
       <ProfileTabs handle={handle} active={tab} counts={profile.counts} />
       <div
         className="pt-7 md:pt-9 px-4 sm:px-8 lg:px-15 pb-12 md:pb-15"

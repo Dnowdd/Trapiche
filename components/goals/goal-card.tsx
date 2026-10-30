@@ -70,12 +70,14 @@ export default function GoalCard({
   goal,
   isOwner,
   handle,
+  autoOpen = false,
 }: {
   goal: GoalData;
   isOwner: boolean;
   handle: string;
+  autoOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen && isOwner);
   const p = pace(goal);
 
   return (

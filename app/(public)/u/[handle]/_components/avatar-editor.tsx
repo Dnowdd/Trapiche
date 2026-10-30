@@ -91,7 +91,11 @@ export default function AvatarEditor({
         <DropdownMenuTrigger
           disabled={busy}
           aria-label="Alterar foto"
-          className="absolute -bottom-0.5 -right-0.5 w-9 h-9 rounded-full bg-(--ink-2) text-(--yellow) border-[3px] border-(--cream) flex items-center justify-center cursor-pointer transition-transform duration-150 hover:scale-105 disabled:cursor-wait"
+          className={cn(
+            "absolute -bottom-0.5 -right-0.5 w-9 h-9 rounded-full bg-(--ink-2) text-(--yellow) border-[3px] border-(--cream) flex items-center justify-center cursor-pointer transition-transform duration-150 hover:scale-105 disabled:cursor-wait",
+            !image &&
+              "shadow-[0_0_0_0_rgba(67,62,18,0.45)] animate-[nudge_2s_ease-out_infinite]",
+          )}
         >
           {busy ? (
             <span className="w-3.5 h-3.5 rounded-full border-2 border-(--yellow) border-t-transparent animate-spin" />

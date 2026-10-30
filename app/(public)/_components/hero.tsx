@@ -46,10 +46,9 @@ const BOOK_POSITIONS: CSSProperties[] = [
 
 interface HeroProps {
   books: Book[];
-  handle: string | null;
 }
 
-const Hero = ({ books, handle }: HeroProps) => {
+const Hero = ({ books }: HeroProps) => {
   const router = useRouter();
 
   const picked = books.slice(0, 3);
@@ -81,13 +80,7 @@ const Hero = ({ books, handle }: HeroProps) => {
         <div className="flex flex-wrap items-center gap-3.5">
           <button
             className="bg-(--yellow) text-(--ink) py-3 px-5.5 rounded-lg text-[14px] font-semibold inline-flex items-center gap-2 border border-(--yellow-deep) transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(67,62,18,0.4)]"
-            onClick={() => {
-              if (handle) {
-                document.getElementById("header-search")?.focus();
-              } else {
-                router.push("/auth?mode=register");
-              }
-            }}
+            onClick={() => router.push("/auth?mode=register")}
           >
             <svg
               width="14"
@@ -107,47 +100,25 @@ const Hero = ({ books, handle }: HeroProps) => {
             Atracar meus livros
           </button>
 
-          {handle ? (
-            <button
-              className="text-[14px] text-(--ink-3) font-medium inline-flex items-center gap-1.5 hover:text-(--ink-2)"
-              onClick={() => router.push(`/u/${handle}`)}
+          <a
+            className="text-[14px] text-(--ink-3) font-medium inline-flex items-center gap-1.5 hover:text-(--ink-2)"
+            href="#como-funciona"
+          >
+            Como funciona
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              Meu perfil
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14"></path>
-                <path d="m12 5 7 7-7 7"></path>
-              </svg>
-            </button>
-          ) : (
-            <a
-              className="text-[14px] text-(--ink-3) font-medium inline-flex items-center gap-1.5 hover:text-(--ink-2)"
-              href="#como-funciona"
-            >
-              Como funciona
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14"></path>
-                <path d="m12 5 7 7-7 7"></path>
-              </svg>
-            </a>
-          )}
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
         </div>
       </div>
 

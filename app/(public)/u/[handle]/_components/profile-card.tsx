@@ -13,8 +13,14 @@ const avatarCls = "max-sm:size-20! max-sm:text-[28px]!";
 const btn =
   "h-9 inline-flex items-center gap-2 text-[12.5px] font-medium px-3.5 rounded-[10px] cursor-pointer transition-colors duration-150";
 
-export default function ProfileCard({ profile }: { profile: ProfileData }) {
-  const [editing, setEditing] = useState(false);
+export default function ProfileCard({
+  profile,
+  autoEdit = false,
+}: {
+  profile: ProfileData;
+  autoEdit?: boolean;
+}) {
+  const [editing, setEditing] = useState(autoEdit);
   const u = profile.user;
 
   return (
