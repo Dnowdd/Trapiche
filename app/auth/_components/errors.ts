@@ -15,6 +15,8 @@ const MESSAGES: Record<string, string> = {
   EMAIL_ALREADY_VERIFIED: "Esse e-mail já foi confirmado. Você já pode entrar.",
   VALIDATION_ERROR: "Confira os campos e tente de novo.",
   MISSING_FIELD: "Preencha todos os campos.",
+  CREDENTIAL_ACCOUNT_NOT_FOUND: "Sua conta não tem senha cadastrada.",
+  EMAIL_IS_THE_SAME: "Esse já é o seu e-mail.",
 };
 
 export function authErrorMessage(

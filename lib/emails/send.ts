@@ -9,20 +9,28 @@ import {
   verificationEmail,
 } from "./templates";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let client: Resend | null = null;
 
 function from() {
   return process.env.RESEND_FROM_EMAIL ?? "Trapiche <onboarding@resend.dev>";
 }
 
-function send(to: string, content: EmailContent) {
-  return resend.emails.send({
+async function send(to: string, content: EmailContent) {
+  if (!process.env.RESEND_API_KEY) {
+    console.info(
+      `[email skipped: no RESEND_API_KEY] ${content.subject} → ${to}`,
+    );
+    return;
+  }
+  client ??= new Resend(process.env.RESEND_API_KEY);
+  const { error } = await client.emails.send({
     from: from(),
     to,
     subject: content.subject,
     html: renderEmail(content),
     text: renderText(content),
   });
+  if (error) console.error(`[email failed] ${content.subject} → ${to}`, error);
 }
 
 type Who = { to: string; name: string };
