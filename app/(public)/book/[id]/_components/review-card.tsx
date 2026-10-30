@@ -4,7 +4,7 @@ import Avatar from "@/components/shared/avatar";
 import { loginHref } from "@/lib/links";
 import Stars from "@/components/shared/stars";
 import { Flag, Heart, MessageCircle } from "lucide-react";
-import { useState } from "react";
+import { useOptimistic, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, TextArea } from "@/components/shared/form";
@@ -38,6 +38,13 @@ export default function ReviewCard({
     { reviewId: string } | { commentId: string } | null
   >(null);
   const like = useAction();
+  const [liked, patchLike] = useOptimistic(
+    { on: r.liked, count: r.likes },
+    (state, on: boolean) => ({
+      on,
+      count: state.count + (on === state.on ? 0 : on ? 1 : -1),
+    }),
+  );
   const comment = useAction();
 
   const load = async () => setComments(await getReviewComments(r.id));
@@ -103,21 +110,28 @@ export default function ReviewCard({
       <div className="pt-3 border-t border-(--rule) flex items-center gap-4.5 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] [&_strong]:text-(--ink-2) [&_strong]:font-['Inter',sans-serif]">
         <button
           type="button"
-          aria-pressed={r.liked}
+          aria-pressed={liked.on}
           disabled={like.pending || r.mine}
-          title={r.mine ? "Sua resenha" : r.liked ? "Descurtir" : "Curtir"}
+          title={r.mine ? "Sua resenha" : liked.on ? "Descurtir" : "Curtir"}
           onClick={() =>
             loggedIn
-              ? like.run(() => toggleReviewLike(r.id), undefined, toast)
+              ? like.run(
+                  () => {
+                    patchLike(!liked.on);
+                    return toggleReviewLike(r.id);
+                  },
+                  undefined,
+                  toast,
+                )
               : router.push(loginHref())
           }
           className="inline-flex items-center gap-1 cursor-pointer hover:text-(--ink-2) aria-pressed:text-(--ink) disabled:cursor-default"
         >
           <Heart
             className="w-3.5 h-3.5"
-            fill={r.liked ? "currentColor" : "none"}
+            fill={liked.on ? "currentColor" : "none"}
           />{" "}
-          <strong>{r.likes}</strong>
+          <strong>{liked.count}</strong>
         </button>
         <button
           type="button"

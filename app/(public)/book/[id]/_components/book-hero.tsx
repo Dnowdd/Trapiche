@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useOptimistic, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -42,6 +42,12 @@ import Synopsis from "./synopsis";
 
 type Status = "READING" | "WANT" | "READ" | "ABANDONED" | "REREADING";
 
+interface ViewerState {
+  liked: boolean;
+  favorite: boolean;
+  status: Status | null;
+}
+
 const STATUSES: { id: Status; label: string }[] = [
   { id: "WANT", label: "Quero ler" },
   { id: "READING", label: "Lendo" },
@@ -75,6 +81,14 @@ export default function BookHero({ data, today }: BookHeroProps) {
     null | "finish" | "abandon" | "review" | "lists"
   >(null);
   const { pending, run } = useAction();
+  const [opt, patch] = useOptimistic<ViewerState, Partial<ViewerState>>(
+    {
+      liked: viewer?.liked ?? false,
+      favorite: viewer?.favorite ?? false,
+      status: viewer?.status ?? null,
+    },
+    (state, change: Partial<ViewerState>) => ({ ...state, ...change }),
+  );
 
   const guard = (fn: () => void) => () => {
     if (!loggedIn) {
@@ -96,7 +110,10 @@ export default function BookHero({ data, today }: BookHeroProps) {
     if (s === "READ") return setModal("finish");
     if (s === "ABANDONED") return setModal("abandon");
     run(
-      () => setShelfStatus(book.id, s),
+      () => {
+        patch({ status: s });
+        return setShelfStatus(book.id, s);
+      },
       s === null ? () => toast("Livro removido da sua estante.") : undefined,
       toast,
     );
@@ -119,7 +136,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
 
   const showGoogle = rating.count === 0 && book.googleRating != null;
   const average = showGoogle ? book.googleRating! : rating.average;
-  const current = STATUSES.find((s) => s.id === viewer?.status);
+  const current = STATUSES.find((s) => s.id === opt.status);
   const canReread = viewer
     ? viewer.timesRead > (viewer.reading ? 1 : 0)
     : false;
@@ -248,40 +265,50 @@ export default function BookHero({ data, today }: BookHeroProps) {
 
           <button
             type="button"
-            className={`${iconButton} ${iconButtonState(viewer?.liked ?? false)}`}
+            className={`${iconButton} ${iconButtonState(opt.liked)}`}
             disabled={pending}
-            aria-pressed={viewer?.liked ?? false}
-            aria-label={viewer?.liked ? "Descurtir" : "Curtir"}
-            title={viewer?.liked ? "Curtido" : "Curtir"}
+            aria-pressed={opt.liked}
+            aria-label={opt.liked ? "Descurtir" : "Curtir"}
+            title={opt.liked ? "Curtido" : "Curtir"}
             onClick={guard(() =>
-              run(() => toggleBookLike(book.id), undefined, toast),
+              run(
+                () => {
+                  patch({ liked: !opt.liked });
+                  return toggleBookLike(book.id);
+                },
+                undefined,
+                toast,
+              ),
             )}
           >
             <Heart
               className="w-4 h-4"
-              fill={viewer?.liked ? "currentColor" : "none"}
+              fill={opt.liked ? "currentColor" : "none"}
             />
           </button>
           <button
             type="button"
-            className={`${iconButton} ${iconButtonState(viewer?.favorite ?? false)}`}
+            className={`${iconButton} ${iconButtonState(opt.favorite)}`}
             disabled={pending}
-            aria-pressed={viewer?.favorite ?? false}
+            aria-pressed={opt.favorite}
             aria-label={
-              viewer?.favorite
-                ? "Remover dos favoritos"
-                : "Adicionar aos favoritos"
+              opt.favorite ? "Remover dos favoritos" : "Adicionar aos favoritos"
             }
-            title={
-              viewer?.favorite ? "Nos favoritos" : "Adicionar aos favoritos"
-            }
+            title={opt.favorite ? "Nos favoritos" : "Adicionar aos favoritos"}
             onClick={guard(() =>
-              run(() => toggleFavorite(book.id), undefined, toast),
+              run(
+                () => {
+                  patch({ favorite: !opt.favorite });
+                  return toggleFavorite(book.id);
+                },
+                undefined,
+                toast,
+              ),
             )}
           >
             <Star
               className="w-4 h-4"
-              fill={viewer?.favorite ? "currentColor" : "none"}
+              fill={opt.favorite ? "currentColor" : "none"}
             />
           </button>
           <button
