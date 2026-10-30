@@ -1,6 +1,7 @@
 import { db } from "../db";
 import { bookSummarySelect, toCover } from "../books";
 import { fmtAgo, today } from "../dates";
+import { getFeaturedBooks } from "@/app/catalog";
 import { getHomePopular } from "./home";
 import { getReadingNow } from "./profile";
 import { getGoal } from "./stats";
@@ -10,6 +11,16 @@ const greetingFmt = new Intl.DateTimeFormat("pt-BR", {
   hour: "numeric",
   hourCycle: "h23",
 });
+
+const PICKS = 12;
+
+const normTitle = (title: string) =>
+  title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 
 export function greeting(now = new Date()) {
   const hour = Number(greetingFmt.format(now));
@@ -38,7 +49,10 @@ export async function getDashboard(userId: string) {
       db.userBook.count({ where: { userId, status: { not: null } } }),
       db.userBook.findMany({
         where: { userId, status: { not: null } },
-        select: { bookId: true, book: { select: { workId: true } } },
+        select: {
+          bookId: true,
+          book: { select: { workId: true, title: true } },
+        },
       }),
       getHomePopular(18),
     ]);
@@ -46,6 +60,20 @@ export async function getDashboard(userId: string) {
   const onShelf = new Set(
     shelfIds.flatMap((s) => [s.bookId, s.book.workId].filter(Boolean)),
   );
+  const shelfTitles = new Set(shelfIds.map((s) => normTitle(s.book.title)));
+  const seen = new Set<string>();
+  const picks = [...popular.map((p) => p.book), ...(await getFeaturedBooks(80))]
+    .filter((b) => {
+      const title = normTitle(b.title);
+      if (seen.has(title)) return false;
+      seen.add(title);
+      return (
+        !onShelf.has(b.id) &&
+        !(b.googleId && onShelf.has(b.googleId)) &&
+        !shelfTitles.has(title)
+      );
+    })
+    .slice(0, PICKS);
   const steps = {
     photo: user.image != null,
     books: shelfCount >= 3,
@@ -64,10 +92,7 @@ export async function getDashboard(userId: string) {
     shelfCount,
     steps,
     onboarding: Object.values(steps).some((done) => !done),
-    picks: popular
-      .filter((p) => !onShelf.has(p.book.id))
-      .slice(0, 6)
-      .map((p) => p.book),
+    picks,
   };
 }
 
