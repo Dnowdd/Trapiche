@@ -5,6 +5,7 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { usePathname, useRouter } from "next/navigation";
 import { loginHref } from "@/lib/links";
 import Link from "next/link";
+import { ShipWheel } from "lucide-react";
 import HeaderSearch from "./header-search";
 import Avatar from "@/components/shared/avatar";
 import NotificationBell from "@/components/notifications/notification-bell";
@@ -27,7 +28,13 @@ export interface HeaderUser {
   isAdmin?: boolean | null;
 }
 
-const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
+const Header = ({
+  initialUser,
+  assistant = false,
+}: {
+  initialUser: HeaderUser | null;
+  assistant?: boolean;
+}) => {
   const { data: session } = useSession();
   const [signedOut, setSignedOut] = useState(false);
   const router = useRouter();
@@ -119,6 +126,16 @@ const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
                   </svg>
                   Meu perfil
                 </DropdownMenuItem>
+
+                {assistant && (
+                  <DropdownMenuItem
+                    className={itemCls}
+                    onClick={() => router.push("/assistente")}
+                  >
+                    <ShipWheel size={14} strokeWidth={2} aria-hidden />
+                    Prático, o assistente
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuItem
                   className={itemCls}
