@@ -153,18 +153,19 @@ export async function runTool(
     case "search_books": {
       const query = String(args.query ?? "").trim();
       if (query.length < 2) return fail("Busca curta demais.");
-      const { works, google } = await smartSearch(query, 8);
+      const { works, google } = await smartSearch(query, 6);
       const index = await shelfIndex(userId);
       const volumes = [
         ...works.map((w) => ({ v: w.main, editions: w.editions.length })),
         ...google.map((v) => ({ v, editions: 1 })),
-      ].slice(0, 8);
+      ].slice(0, 6);
       return {
         results: volumes.map(({ v, editions }) => ({
           id: v.id,
           title: v.volumeInfo.title,
           authors: cleanAuthors(v.volumeInfo.authors ?? []).slice(0, 3),
           year: v.volumeInfo.publishedDate?.slice(0, 4) ?? null,
+          pages: v.volumeInfo.pageCount ?? null,
           editions,
           ...(ctx.shareData
             ? {
@@ -175,6 +176,62 @@ export async function runTool(
               }
             : {}),
         })),
+      };
+    }
+    case "discover_books": {
+      const max = typeof args.max_pages === "number" ? args.max_pages : null;
+      const min = typeof args.min_pages === "number" ? args.min_pages : null;
+      const language = typeof args.language === "string" ? args.language : null;
+      const subject =
+        typeof args.subject === "string"
+          ? args.subject.trim().toLowerCase()
+          : "";
+      const rows = await db.book.findMany({
+        where: {
+          ...(max || min
+            ? { pageCount: { ...(max ? { lte: max } : {}), gte: min ?? 1 } }
+            : {}),
+          ...(language ? { language: { startsWith: language } } : {}),
+        },
+        orderBy: { shelf: { _count: "desc" } },
+        take: 400,
+        select: {
+          id: true,
+          title: true,
+          authors: true,
+          pageCount: true,
+          publishedDate: true,
+          categories: true,
+          description: true,
+          workId: true,
+        },
+      });
+      const seen = new Set<string>();
+      const picked = rows.filter((b) => {
+        const key = b.workId ?? b.id;
+        if (seen.has(key)) return false;
+        if (
+          subject &&
+          !`${b.categories.join(" ")} ${b.description ?? ""}`
+            .toLowerCase()
+            .includes(subject)
+        )
+          return false;
+        seen.add(key);
+        return true;
+      });
+      return {
+        books: picked.slice(0, 15).map((b) => ({
+          id: b.id,
+          title: b.title,
+          authors: cleanAuthors(b.authors).slice(0, 2),
+          pages: b.pageCount,
+          year: b.publishedDate?.slice(0, 4) ?? null,
+          categories: b.categories.slice(0, 3),
+        })),
+        note: picked.length
+          ? "Livros do catálogo do Trapiche. Você também pode sugerir outros e buscá-los por título."
+          : "Nada no catálogo com esses filtros. Sugira títulos pelo seu conhecimento e busque cada um com search_books.",
       };
     }
     case "get_book": {
@@ -456,7 +513,13 @@ export async function runTool(
         books: cards,
       });
       return {
-        shown: cards.map((c) => c.title),
+        shown: cards.map((c) => ({
+          id: c.id,
+          title: c.title,
+          author: c.author,
+          pages: c.pages,
+          year: c.year,
+        })),
         missing: ids.length - cards.length,
       };
     }

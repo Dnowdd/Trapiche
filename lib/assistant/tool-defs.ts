@@ -37,10 +37,28 @@ function tool(
 export const TOOLS: FunctionTool[] = [
   tool(
     "search_books",
-    "Busca livros no catálogo do Trapiche (Open Library e Google Books). Use para achar o id de um livro antes de mostrar, recomendar ou propor ações. Retorna até 8 obras.",
+    "Acha um livro pelo título, autor ou ISBN e devolve o id, autores, ano e páginas. Não funciona com temas ou descrições ('romances curtos', 'livros de terror'): para isso, escolha títulos concretos pelo seu conhecimento e busque cada um pelo nome, chamando esta ferramenta várias vezes em paralelo. Retorna até 6 resultados.",
     obj({
       query: str(
-        "Título, autor, ISBN ou tema. Ex.: 'torto arado', 'clarice lispector'.",
+        "Título e, se ajudar, o sobrenome do autor. Ex.: 'torto arado itamar vieira', 'a hora da estrela', 'clarice lispector'.",
+      ),
+    }),
+  ),
+  tool(
+    "discover_books",
+    "Lista livros que já estão no catálogo do Trapiche filtrando por número de páginas, idioma e assunto, dos mais lidos aqui para os menos. Bom para pedidos como 'livros curtos' ou 'algo em inglês'. Combine com suas próprias sugestões buscadas por título.",
+    obj({
+      max_pages: nullable(int("Máximo de páginas, ou null.")),
+      min_pages: nullable(int("Mínimo de páginas, ou null.")),
+      language: nullable({
+        type: "string",
+        enum: ["pt", "en", "es", "fr"],
+        description: "Idioma da edição, ou null.",
+      }),
+      subject: nullable(
+        str(
+          "Palavra do assunto ou gênero, ex.: 'fantasia', 'poesia', 'romance'. Ou null.",
+        ),
       ),
     }),
   ),
@@ -222,6 +240,7 @@ export const TOOLS: FunctionTool[] = [
 
 export const TOOL_STATUS: Record<string, string> = {
   search_books: "Procurando livros…",
+  discover_books: "Garimpando o catálogo…",
   get_book: "Abrindo o livro…",
   get_my_shelf: "Olhando sua estante…",
   get_reading_now: "Vendo o que você está lendo…",
