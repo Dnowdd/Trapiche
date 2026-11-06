@@ -3,7 +3,7 @@
 import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { ensureBook } from "../books";
-import { fail, withUser } from "./result";
+import { fail, throttle, withUser } from "./result";
 import { notify, unnotify } from "../notifications";
 import type { ListVisibility } from "../generated/prisma/client";
 
@@ -49,6 +49,7 @@ export async function createList(input: {
   visibility: string;
 }) {
   return withUser(async (userId) => {
+    await throttle(userId, "list", 20, 3_600_000);
     const data = parseListInput(input);
     const list = await db.$transaction(async (tx) => {
       const list = await tx.list.create({
@@ -99,6 +100,7 @@ export async function deleteList(listId: string) {
 
 export async function addBookToList(listId: string, bookId: string) {
   return withUser(async (userId) => {
+    await throttle(userId, "list-item", 200, 3_600_000);
     const { list, member } = await membership(listId, userId);
     if (!member) fail("Você não pode editar essa lista.");
     await ensureBook(bookId);

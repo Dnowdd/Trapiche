@@ -5,7 +5,7 @@ import { db } from "../db";
 import { ensureBook } from "../books";
 import { editionIds } from "../works";
 import { notify, unnotify } from "../notifications";
-import { fail, withUser } from "./result";
+import { fail, throttle, withUser } from "./result";
 import { getViewerId } from "../session";
 import { fmtAgo } from "../dates";
 import { initialsOf } from "../queries/book";
@@ -13,6 +13,7 @@ import { parseReview, upsertReview, type ReviewInput } from "../reviews";
 
 export async function saveReview(bookId: string, input: ReviewInput) {
   return withUser(async (userId) => {
+    await throttle(userId, "review", 60, 3_600_000);
     const review = parseReview(input);
     await ensureBook(bookId);
     const ids = await editionIds(bookId);
@@ -33,6 +34,7 @@ export async function deleteReview(bookId: string) {
 
 export async function toggleReviewLike(reviewId: string) {
   return withUser(async (userId) => {
+    await throttle(userId, "like", 300, 3_600_000);
     const review = await db.review.findUnique({
       where: { id: reviewId },
       select: { userId: true },
@@ -62,6 +64,7 @@ export async function toggleReviewLike(reviewId: string) {
 
 export async function addReviewComment(reviewId: string, text: string) {
   return withUser(async (userId) => {
+    await throttle(userId, "comment", 30, 3_600_000);
     const value = typeof text === "string" ? text.trim() : "";
     if (!value) fail("Escreva um comentário.");
     if (value.length > 1000)

@@ -1,5 +1,6 @@
 import { getViewerId } from "../session";
 import { ActionError } from "../action-error";
+import { rateLimited } from "../rate-limit";
 
 export { ActionError };
 
@@ -24,4 +25,16 @@ export async function withUser<T>(
     console.error(err);
     return { ok: false, error: "Algo deu errado. Tente de novo." };
   }
+}
+
+export async function throttle(
+  userId: string,
+  action: string,
+  max: number,
+  windowMs: number,
+) {
+  if (await rateLimited(`action:${action}:${userId}`, max, windowMs))
+    fail(
+      "Você está indo rápido demais. Espere alguns minutos e tente de novo.",
+    );
 }

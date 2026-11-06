@@ -2,7 +2,7 @@
 
 import { revalidate } from "../revalidate";
 import { db } from "../db";
-import { fail, withUser } from "./result";
+import { fail, throttle, withUser } from "./result";
 import { REPORT_REASONS, type ReportReason } from "../report-reasons";
 
 export async function reportContent(input: {
@@ -13,6 +13,7 @@ export async function reportContent(input: {
   details?: string;
 }) {
   return withUser(async (userId) => {
+    await throttle(userId, "report", 20, 3_600_000);
     if (!(input.reason in REPORT_REASONS)) fail("Escolha um motivo.");
     const targets = [input.reviewId, input.commentId, input.quoteId].filter(
       Boolean,

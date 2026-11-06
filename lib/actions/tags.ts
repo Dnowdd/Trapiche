@@ -3,7 +3,7 @@
 import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { ensureBook } from "../books";
-import { fail, withUser } from "./result";
+import { fail, throttle, withUser } from "./result";
 import { MAX_TAGS, MAX_TAGS_PER_BOOK, parseTagName, TAG_COLORS } from "../tags";
 
 function parseColor(color: unknown) {
@@ -18,6 +18,7 @@ export async function createTag(input: {
   private?: boolean;
 }) {
   return withUser(async (userId) => {
+    await throttle(userId, "tag", 40, 3_600_000);
     const name = parseTagName(input.name);
     if ((await db.tag.count({ where: { userId } })) >= MAX_TAGS)
       fail(`Você pode ter até ${MAX_TAGS} tags.`);
