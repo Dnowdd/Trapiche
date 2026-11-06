@@ -1,5 +1,6 @@
 "use client";
 
+import IsbnScanner from "@/components/search/isbn-scanner";
 import { useCallback, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -241,6 +242,7 @@ export default function HeaderSearch() {
           autoComplete="off"
           spellCheck={false}
         />
+        {!query && <IsbnScanner />}
 
         {query && (
           <button
