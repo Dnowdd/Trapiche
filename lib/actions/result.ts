@@ -1,9 +1,10 @@
 import { getViewerId } from "../session";
+import { ActionError } from "../action-error";
+
+export { ActionError };
 
 export type ActionResult<T = void> =
   { ok: true; data?: T } | { ok: false; error: string };
-
-export class ActionError extends Error {}
 
 export function fail(message: string): never {
   throw new ActionError(message);
