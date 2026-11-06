@@ -23,6 +23,7 @@ export const GET = apiRoute(async ({ userId, params }) => {
   const liked = boolParam(params, "liked");
   const favorite = boolParam(params, "favorite");
   const q = params.get("q")?.trim();
+  const tag = params.get("tag")?.trim();
   if (q && q.length > 100) throw badParam("q", "no máximo 100 caracteres.");
   const sort = params.get("sort") ?? "updated";
   if (!(sort in SORTS))
@@ -35,6 +36,7 @@ export const GET = apiRoute(async ({ userId, params }) => {
     userId,
     status: status ? { in: status } : { not: null },
     ...(liked != null ? { liked } : {}),
+    ...(tag ? { tags: { some: { tagId: tag } } } : {}),
     ...(favorite != null
       ? { favoritePosition: favorite ? { not: null } : null }
       : {}),
@@ -63,6 +65,9 @@ export const GET = apiRoute(async ({ userId, params }) => {
         favoritePosition: true,
         currentPage: true,
         book: { select: apiBookSelect },
+        tags: {
+          select: { tag: { select: { id: true, name: true, color: true } } },
+        },
       },
     }),
     db.userBook.count({ where }),
@@ -76,6 +81,7 @@ export const GET = apiRoute(async ({ userId, params }) => {
       liked: r.liked,
       favoritePosition: r.favoritePosition,
       currentPage: r.currentPage,
+      tags: r.tags.map((t) => t.tag),
       book: apiBook(r.book),
     })),
     total,

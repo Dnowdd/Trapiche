@@ -25,7 +25,8 @@ const ENDPOINTS: {
   {
     path: "/me",
     title: "Sua conta",
-    description: "Nome, @, bio e quantos livros você tem em cada status.",
+    description:
+      "Nome, @, bio, foto, privacidade do perfil, notificações por e-mail e quantos livros você tem em cada status.",
     params: [],
     paginated: false,
   },
@@ -41,7 +42,26 @@ const ENDPOINTS: {
       ["q", "Busca no título (ou autor exato)."],
       ["liked", "true ou false."],
       ["favorite", "true ou false."],
+      ["tag", "Id de uma tag sua (veja /tags)."],
       ["sort", "updated (padrão), added ou title."],
+    ],
+    paginated: true,
+  },
+  {
+    path: "/tags",
+    title: "Tags",
+    description:
+      "Suas prateleiras personalizadas, com a cor, se são privadas e quantos livros têm.",
+    params: [],
+    paginated: false,
+  },
+  {
+    path: "/quotes",
+    title: "Citações",
+    description: "Os trechos que você guardou, com página, nota e livro.",
+    params: [
+      ["book", "Só as citações de um livro (id do livro)."],
+      ["private", "true ou false."],
     ],
     paginated: true,
   },
