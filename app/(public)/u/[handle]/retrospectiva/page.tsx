@@ -13,6 +13,8 @@ import {
   type Retrospective,
 } from "@/lib/queries/stats";
 import ShareButton, { StoryButton } from "./_components/share-button";
+import RetroCharts from "./_components/retro-charts";
+import { getRetroStats } from "@/lib/queries/retro-stats";
 
 interface Props {
   params: Promise<{ handle: string }>;
@@ -361,7 +363,10 @@ export default async function RetrospectivePage({
   if (!user || !period) notFound();
   const owner = viewerId === user.id;
   if (!profileAccess(user, owner, viewerId != null).sections.diary) notFound();
-  const data = await getRetrospective(user.id, period.year, period.month);
+  const [data, stats] = await Promise.all([
+    getRetrospective(user.id, period.year, period.month),
+    getRetroStats(user.id, period.year, period.month),
+  ]);
   const first = user.name.split(" ")[0];
   const t = data.totals;
   const empty = t.books === 0 && t.pages === 0 && t.minutes === 0;
@@ -504,6 +509,8 @@ export default async function RetrospectivePage({
                 </div>
               </Section>
             )}
+
+            <RetroCharts stats={stats} />
 
             {(t.reviews > 0 || t.abandoned > 0) && (
               <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.06em] text-(--ink-3)">

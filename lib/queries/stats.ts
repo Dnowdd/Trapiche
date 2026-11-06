@@ -13,7 +13,7 @@ import {
   toISODay,
 } from "../dates";
 
-function rangeOf(year: number, month?: number) {
+export function rangeOf(year: number, month?: number) {
   const from = new Date(Date.UTC(year, month ? month - 1 : 0, 1));
   const to = month
     ? new Date(Date.UTC(year, month, 1))
@@ -21,7 +21,7 @@ function rangeOf(year: number, month?: number) {
   return { from, to };
 }
 
-function finishedWhere(userId: string, year: number, month?: number) {
+export function finishedWhere(userId: string, year: number, month?: number) {
   const { from, to } = rangeOf(year, month);
   return {
     userId,
