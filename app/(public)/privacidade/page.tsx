@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <LegalPage
       eyebrow="Trapiche"
       title="Política de Privacidade"
-      updated="7 de novembro de 2026"
+      updated="8 de novembro de 2026"
     >
       <p>
         Esta página explica, em linguagem simples, quais dados o Trapiche
@@ -54,6 +54,12 @@ export default function PrivacyPage() {
           Goodreads, do Skoob ou uma planilha, guardamos as linhas do arquivo
           (título, autor, ISBN, estante, nota, resenha, data e prateleiras) para
           processar a importação e mostrar o que não foi encontrado.
+        </li>
+        <li>
+          <strong>Empréstimos:</strong> quando você anota que emprestou um
+          livro, guardamos o nome que você digitar, as datas e a nota. Esses
+          dados ficam só com você: ninguém mais vê, nem a pessoa citada. Use só
+          o necessário para lembrar (um primeiro nome basta).
         </li>
         <li>
           <strong>Suporte:</strong> os tickets, as mensagens e as imagens que
@@ -146,6 +152,12 @@ export default function PrivacyPage() {
           <strong>Open Library:</strong> fornece capas e dados dos livros. As
           buscas saem do nosso servidor, sem seus dados pessoais.
         </li>
+        <li>
+          <strong>Lojas (Amazon, Estante Virtual, Google Play):</strong> os
+          links de “Onde encontrar” só levam você até a busca da loja. Não
+          enviamos seus dados a elas; o que acontece lá segue a política de cada
+          loja.
+        </li>
       </ul>
       <p>
         Alguns desses fornecedores processam dados fora do Brasil,
@@ -170,7 +182,9 @@ export default function PrivacyPage() {
         <li>
           <strong>Acessar e levar seus dados:</strong> em “Editar perfil →
           Conta”, baixe um arquivo JSON com tudo o que está ligado a você,
-          inclusive suporte, citações, tags, importações e a sua foto.
+          inclusive suporte, citações, tags, importações, empréstimos, desafios
+          e a sua foto. Também dá para baixar a estante em CSV, no formato do
+          Goodreads, para levar para outro app.
         </li>
         <li>
           <strong>Corrigir:</strong> edite perfil, leituras, resenhas e listas

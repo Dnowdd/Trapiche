@@ -33,6 +33,8 @@ export async function GET() {
     imports,
     accounts,
     authSessions,
+    loans,
+    challenges,
   ] = await Promise.all([
     db.user.findUniqueOrThrow({
       where: { id: userId },
@@ -263,6 +265,31 @@ export async function GET() {
         userAgent: true,
       },
     }),
+    db.loan.findMany({
+      where: { userId },
+      orderBy: { lentAt: "asc" },
+      select: {
+        person: true,
+        lentAt: true,
+        dueAt: true,
+        returnedAt: true,
+        note: true,
+        book,
+      },
+    }),
+    db.challenge.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        title: true,
+        kind: true,
+        value: true,
+        target: true,
+        startsAt: true,
+        endsAt: true,
+        createdAt: true,
+      },
+    }),
   ]);
 
   const dataUri = (mimeType: string, data: Uint8Array) =>
@@ -317,6 +344,8 @@ export async function GET() {
         linkedAt: a.createdAt,
       })),
       loginSessions: authSessions,
+      loans,
+      challenges,
       avatar: avatar
         ? {
             updatedAt: avatar.updatedAt,
