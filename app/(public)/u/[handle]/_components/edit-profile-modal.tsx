@@ -76,7 +76,7 @@ export default function EditProfileModal({
     >
       <div
         role="tablist"
-        className="flex gap-1 p-1 mb-5 rounded-[12px] bg-[rgba(67,62,18,0.06)] overflow-x-auto [scrollbar-width:none]"
+        className="flex gap-1 p-1 mb-5 rounded-[12px] bg-[rgba(var(--ink-rgb),0.06)] overflow-x-auto [scrollbar-width:none]"
       >
         {(
           [
@@ -95,7 +95,7 @@ export default function EditProfileModal({
             className={cn(
               "flex-1 h-9 px-3 whitespace-nowrap rounded-[9px] text-[13px] font-semibold cursor-pointer transition-colors duration-120",
               tab === id
-                ? "bg-(--cream) text-(--ink) shadow-[0_1px_2px_rgba(67,62,18,0.12)]"
+                ? "bg-(--cream) text-(--ink) shadow-[0_1px_2px_rgba(var(--shadow-rgb),0.12)]"
                 : "text-(--ink-4) hover:text-(--ink-2)",
             )}
           >
@@ -176,14 +176,20 @@ export default function EditProfileModal({
           <div className="flex flex-col sm:flex-row gap-2.5">
             <a
               href="/api/me/export"
-              className="h-9 px-3.5 rounded-[10px] border border-[rgba(67,62,18,0.2)] text-[12px] font-medium text-(--ink-2) inline-flex items-center justify-center hover:bg-(--yellow-soft)"
+              className="h-9 px-3.5 rounded-[10px] border border-[rgba(var(--ink-rgb),0.2)] text-[12px] font-medium text-(--ink-2) inline-flex items-center justify-center hover:bg-(--yellow-soft)"
             >
               Baixar meus dados (JSON)
+            </a>
+            <a
+              href="/api/me/export.csv"
+              className="h-9 px-3.5 rounded-[10px] border border-[rgba(var(--ink-rgb),0.2)] text-[12px] font-medium text-(--ink-2) inline-flex items-center justify-center hover:bg-(--yellow-soft)"
+            >
+              Estante em CSV (Goodreads)
             </a>
             <button
               type="button"
               disabled={removing.pending}
-              className="h-9 px-3.5 rounded-[10px] border border-[rgba(154,74,42,0.35)] text-[12px] font-medium text-[#9a4a2a] cursor-pointer hover:bg-[rgba(154,74,42,0.06)] disabled:cursor-wait"
+              className="h-9 px-3.5 rounded-[10px] border border-[rgba(154,74,42,0.35)] text-[12px] font-medium text-(--danger) cursor-pointer hover:bg-[rgba(154,74,42,0.06)] disabled:cursor-wait"
               onClick={() => {
                 const typed = window.prompt(
                   `Isso apaga sua conta, sua estante, suas leituras, resenhas e listas. Não dá pra desfazer.\n\nDigite @${user.handle} para confirmar:`,
