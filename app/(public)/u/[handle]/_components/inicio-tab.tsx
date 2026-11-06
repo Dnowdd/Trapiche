@@ -7,6 +7,8 @@ import FavoritesEditor from "./favorites-editor";
 import Card from "./card";
 import SpoilerText from "@/components/shared/spoiler-text";
 import GoalCard from "@/components/goals/goal-card";
+import ChallengesCard from "@/components/goals/challenges-card";
+import type { ChallengeItem } from "@/lib/queries/challenges";
 import type { GoalData } from "@/lib/queries/stats";
 
 type Data = Awaited<ReturnType<typeof getInicio>>;
@@ -272,8 +274,12 @@ export default function InicioTab({
   isOwner,
   page,
   sections,
+  challenges = [],
+  tags = [],
   openGoal = false,
 }: {
+  challenges?: ChallengeItem[];
+  tags?: { id: string; name: string }[];
   data: Data;
   goal: GoalData | null;
   sections: ProfileData["access"]["sections"];
@@ -311,7 +317,8 @@ export default function InicioTab({
       </div>
     );
 
-  const hasAside = showGoal || show.shelf;
+  const showChallenges = sections.goal && (isOwner || challenges.length > 0);
+  const hasAside = showGoal || show.shelf || showChallenges;
 
   return (
     <div
@@ -456,6 +463,9 @@ export default function InicioTab({
               handle={handle}
               autoOpen={openGoal}
             />
+          )}
+          {showChallenges && (
+            <ChallengesCard items={challenges} isOwner={isOwner} tags={tags} />
           )}
           {show.shelf && <ShelfCard shelf={shelf} handle={handle} />}
         </aside>

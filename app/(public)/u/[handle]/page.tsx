@@ -28,6 +28,7 @@ import CurtidasTab from "./_components/curtidas-tab";
 import CitacoesTab from "./_components/citacoes-tab";
 import { getProfileQuotes } from "@/lib/queries/quotes";
 import { getUserTags } from "@/lib/queries/tags";
+import { getChallenges } from "@/lib/queries/challenges";
 import { TabSkeleton } from "./_components/skeletons";
 import PrivateProfile from "./_components/private-profile";
 import VisitorPreviewBar from "./_components/visitor-preview-bar";
@@ -43,6 +44,7 @@ interface Props {
     meta?: string;
     visitante?: string;
     tag?: string;
+    sortear?: string;
   }>;
 }
 
@@ -108,17 +110,21 @@ async function TabContent({
     case "inicio": {
       const pages = Math.min(20, Math.max(0, Number(sp.historico) || 0));
       const full = pages > 0;
-      const [data, goal] = await Promise.all([
+      const [data, goal, challenges, tags] = await Promise.all([
         getInicio(uid, viewerId, full ? pages * 30 : 8, sections),
         full || !sections.goal
           ? Promise.resolve(null)
           : getGoal(uid, today().getUTCFullYear()),
+        full || !sections.goal ? Promise.resolve([]) : getChallenges(uid),
+        owner ? getUserTags(uid, true) : Promise.resolve([]),
       ]);
       return (
         <InicioTab
           data={data}
           goal={goal}
           sections={sections}
+          challenges={challenges}
+          tags={tags}
           shelf={profile.shelf!}
           handle={handle}
           isOwner={owner}
@@ -133,6 +139,7 @@ async function TabContent({
           items={await getEstante(uid, owner)}
           tags={await getUserTags(uid, owner)}
           initialTag={sp.tag}
+          autoPick={profile.isOwner && sp.sortear === "1"}
           initial={sp.status}
           handle={handle}
           isOwner={owner}
