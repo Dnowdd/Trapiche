@@ -11,6 +11,7 @@ import type { getEstante } from "@/lib/queries/profile";
 import type { getUserTags } from "@/lib/queries/tags";
 import TagChip from "@/components/tags/tag-chip";
 import ManageTags from "@/components/tags/manage-tags";
+import PilePicker from "@/components/reading/pile-picker";
 import { cn } from "@/lib/utils";
 import { normalize } from "@/lib/editions";
 import { Search, X } from "lucide-react";
@@ -109,13 +110,15 @@ function BackToPile({ bookId }: { bookId: string }) {
 }
 
 function CoverTile({ it, withStatus }: { it: Item; withStatus?: boolean }) {
-  const badge = withStatus
-    ? STATUS_SHORT[it.status]
-    : it.status === "REREADING"
-      ? `${Math.max(2, it.reads)}ª leitura`
-      : it.status === "READ" && it.reads > 1
-        ? `lido ${it.reads}×`
-        : null;
+  const badge = it.lentTo
+    ? `com ${it.lentTo.split(" ")[0]}`
+    : withStatus
+      ? STATUS_SHORT[it.status]
+      : it.status === "REREADING"
+        ? `${Math.max(2, it.reads)}ª leitura`
+        : it.status === "READ" && it.reads > 1
+          ? `lido ${it.reads}×`
+          : null;
   return (
     <Link
       href={`/book/${it.book.id}`}
@@ -235,11 +238,13 @@ export default function EstanteTab({
   initialTag,
   handle,
   isOwner,
+  autoPick = false,
 }: {
   items: Item[];
   tags: Tags;
   initial?: string;
   initialTag?: string;
+  autoPick?: boolean;
   handle: string;
   isOwner: boolean;
 }) {
@@ -405,6 +410,17 @@ export default function EstanteTab({
             count: countOf(f.id),
           }))}
         />
+      )}
+      {isOwner && !searching && !activeTag && filter === "WANT" && (
+        <div className="-mt-2 mb-5">
+          <PilePicker
+            items={items
+              .filter((i) => i.status === "WANT")
+              .map((i) => ({ book: i.book, tags: i.tags }))}
+            tags={tags}
+            autoOpen={autoPick}
+          />
+        </div>
       )}
       {shown.length === 0 ? (
         <div className="rounded-[18px] border border-dashed border-[rgba(var(--ink-rgb),0.18)] py-14 px-6 text-center text-[14px] text-(--ink-4)">
