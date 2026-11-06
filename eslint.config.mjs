@@ -13,7 +13,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "test-results/**",
+    "playwright-report/**",
   ]),
+  {
+    files: ["lib/og.tsx", "**/opengraph-image.tsx"],
+    rules: { "@next/next/no-img-element": "off" },
+  },
 ]);
 
 export default eslintConfig;

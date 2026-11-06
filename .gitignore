@@ -47,3 +47,9 @@ next-env.d.ts
 # cache do gerador de livros (scripts/build-books.mjs)
 /scripts/data/.cache/
 /scripts/data/build-report.json
+# changelog local para o agente do app mobile
+/MOBILE_CHANGES.md
+
+# playwright
+/test-results/
+/playwright-report/

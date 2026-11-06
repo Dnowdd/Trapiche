@@ -4,6 +4,9 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   serverExternalPackages: ["@better-auth/kysely-adapter", "kysely"],
+  outputFileTracingIncludes: {
+    "/**/*": ["./assets/fonts/**/*"],
+  },
   experimental: {
     serverActions: { bodySizeLimit: "4mb" },
   },
@@ -23,6 +26,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "covers.openlibrary.org",
         pathname: "/a/**",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
       },
     ],
   },
