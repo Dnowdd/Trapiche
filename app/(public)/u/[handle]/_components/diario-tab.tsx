@@ -1,5 +1,6 @@
 "use client";
 
+import { Turtle, Zap } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import BookCover from "@/components/shared/book-cover";
@@ -146,14 +147,26 @@ function DiaryStats({ data }: { data: Data }) {
               {data.fastest.title}
             </div>
             <div className="text-[12px] text-(--ink-4) leading-[1.4] mt-auto [&_strong]:text-(--ink-2)">
-              ⚡ Mais rápido:{" "}
+              <Zap
+                size={12}
+                strokeWidth={2.4}
+                className="inline -mt-0.5 mr-1"
+                aria-hidden
+              />
+              Mais rápido:{" "}
               <strong>
                 {data.fastest.days} {data.fastest.days === 1 ? "dia" : "dias"}
               </strong>
               {data.slowest && (
                 <>
                   <br />
-                  🐢 Mais lento:{" "}
+                  <Turtle
+                    size={12}
+                    strokeWidth={2.4}
+                    className="inline -mt-0.5 mr-1"
+                    aria-hidden
+                  />
+                  Mais lento:{" "}
                   <strong>
                     {data.slowest.title} ({data.slowest.days}d)
                   </strong>
@@ -279,6 +292,7 @@ function Heatmap({ data }: { data: Data }) {
                       key={di}
                       className={`${cellBase} ${levelClass[levelFor(d.minutes)]}`}
                       title={label}
+                      role="img"
                       aria-label={label}
                     />
                   );

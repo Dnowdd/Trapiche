@@ -418,18 +418,22 @@ export default function InicioTab({
                       <div className="mt-auto pt-2.5">
                         <div className="flex items-baseline justify-between gap-2">
                           <span className="text-[18px] font-extrabold tracking-[-0.02em] text-(--ink) tabular-nums">
-                            {r.progress}%
+                            {r.total ? `${r.progress}%` : `p. ${r.page}`}
                           </span>
                           <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
-                            {r.page}/{r.total || "?"}
+                            {r.total
+                              ? `${r.page}/${r.total}`
+                              : "sem nº de páginas"}
                           </span>
                         </div>
-                        <div className="mt-1 h-1.5 bg-[rgba(67,62,18,0.1)] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-(--ink-2) rounded-full"
-                            style={{ width: r.progress + "%" }}
-                          />
-                        </div>
+                        {r.total > 0 && (
+                          <div className="mt-1 h-1.5 bg-[rgba(67,62,18,0.1)] rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-(--ink-2) rounded-full"
+                              style={{ width: r.progress + "%" }}
+                            />
+                          </div>
+                        )}
                         <div className="mt-1.5 font-mono text-[9.5px] text-(--ink-4) tracking-[0.04em] uppercase">
                           {r.expected}
                         </div>

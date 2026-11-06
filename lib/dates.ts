@@ -96,7 +96,7 @@ export function fmtMonthYear(d: Date) {
 
 export function fmtJoined(ts: Date) {
   const d = dayOf(ts);
-  return `${MONTHS_LONG[d.getUTCMonth()]}/${d.getUTCFullYear()}`;
+  return `${MONTHS_LONG[d.getUTCMonth()].toLowerCase()} de ${d.getUTCFullYear()}`;
 }
 
 export function fmtExpected(target: Date) {
