@@ -27,18 +27,10 @@ export default function PraticoHome() {
       aria-labelledby="pratico-home-title"
       className="relative overflow-hidden rounded-[18px] bg-[#2b2710] p-5 sm:p-6 text-[#fff8d5] ring-1 ring-[rgba(255,248,213,0.08)]"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full border border-[rgba(255,231,103,0.12)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-6 -top-6 size-44 rounded-full border border-[rgba(255,231,103,0.18)]"
-      />
       <ShipWheel
         aria-hidden
-        strokeWidth={1.2}
-        className="pointer-events-none absolute -right-4 -top-4 size-36 text-[rgba(255,231,103,0.14)]"
+        strokeWidth={1.4}
+        className="pointer-events-none absolute -right-6 -top-6 size-40 text-[#3f3a1a]"
       />
 
       <div className="relative">
