@@ -53,6 +53,11 @@ _Atualizado em 6/11/2026._
 - Imagem da retrospectiva no formato de stories (1080×1920), com compartilhamento nativo no celular.
 - Exportação da estante em CSV no formato do Goodreads.
 - Modo escuro (sistema, claro ou escuro), sem piscar ao carregar, sem violações de acessibilidade.
+- “Onde encontrar” no livro: Amazon (com tag de afiliado opcional), Estante Virtual e Google Play Livros.
+- Desafios pessoais além da meta anual (por tag, autor, idioma, formato, livros longos ou curtos), com progresso automático, no painel e no perfil.
+- “Não sei o que ler”: sorteio da pilha com filtros de tamanho, tag e autor, e botão para começar a ler.
+- Empréstimos: com quem, desde quando, prazo, devolução; lembrete por notificação quando atrasa; selo na estante e card no painel.
+- Retrospectiva com páginas por mês, distribuição e média das notas, idiomas, formatos e décadas de publicação.
 
 ### Qualidade de dados
 
@@ -80,7 +85,7 @@ _Atualizado em 6/11/2026._
 - [ ] Google OAuth: criar o client no Google Cloud com o redirect `https://<domínio>/api/auth/callback/google` e setar as duas variáveis.
 - [x] Aplicar a migration `20261106120000_privacy_quotes_tags_series_imports` no Neon.
 - [x] Aplicar `20261107120000_api_key_write_scope` e `20261108120000_book_curation` no Neon.
-- [ ] Aplicar `20261109120000_reading_formats` no Neon (o código já lê essas colunas).
+- [x] Aplicar `20261109120000_reading_formats` e `20261110120000_challenges_loans` no Neon.
 - [ ] Vercel: ativar Web Analytics e Speed Insights no painel do projeto.
 - [ ] Logo, favicon definitivo e ícones (hoje há uma marca provisória “T” em `lib/og-mark.tsx` e `lib/og.tsx`).
 
