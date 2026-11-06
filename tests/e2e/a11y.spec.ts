@@ -52,7 +52,7 @@ for (const scheme of ["light", "dark"] as const)
     }) => {
       await signUp(page);
       await page.goto(`/book/${BOOK}`, { waitUntil: "networkidle" });
-      await page.getByRole("button", { name: /Pergunte ao Prático/ }).click();
+      await page.getByRole("button", { name: /Abrir o Prático/ }).click();
       const panel = page.getByRole("dialog", { name: /Prático/ });
       await expect(panel.getByText(/Oi, Leitora/)).toBeVisible();
       expect(await audit(page), "empty panel").toEqual([]);
