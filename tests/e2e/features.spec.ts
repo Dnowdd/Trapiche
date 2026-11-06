@@ -168,3 +168,55 @@ test("search the shelf and export it as csv", async ({ page }) => {
   expect(csv.headers()["content-type"]).toContain("text/csv");
   expect(await csv.text()).toContain("to-read");
 });
+
+test("lend a book and get it back", async ({ page }) => {
+  await signUp(page);
+  await page.goto(`/book/${BOOK}`);
+  await page.getByRole("button", { name: "Quero ler", exact: true }).click();
+  await page.getByRole("button", { name: /^Emprestei/ }).click();
+  await page.getByPlaceholder("Ana, minha irmã").fill("Bia");
+  await page.getByRole("button", { name: "Salvar" }).click();
+  await expect(page.getByText("Anotado: está com Bia.")).toBeVisible();
+  await expect(page.locator("#emprestimo")).toContainText("Com Bia desde");
+  await page.goto("/");
+  await expect(page.getByText("Fora da sua estante")).toBeVisible();
+  await page.goto(`/book/${BOOK}`);
+  await page.getByRole("button", { name: "Devolvido" }).click();
+  await expect(
+    page.getByText("Que bom, o livro voltou pra casa."),
+  ).toBeVisible();
+});
+
+test("create a challenge from a preset", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Novo" }).click();
+  await page.getByRole("button", { name: "Encarar os calhamaços" }).click();
+  await page.getByRole("button", { name: "Criar desafio" }).click();
+  await expect(page.getByText("Desafio criado. Boa sorte!")).toBeVisible();
+  const card = page.locator("section", { hasText: "Seus desafios" }).last();
+  await expect(card).toContainText("Encarar os calhamaços");
+  await expect(card).toContainText("0/3");
+});
+
+test("draw the next book from the pile and start it", async ({ page }) => {
+  const user = await signUp(page);
+  await page.goto(`/book/${BOOK}`);
+  await page.getByRole("button", { name: "Quero ler", exact: true }).click();
+  await expect(page.getByText("Suas tags")).toBeVisible();
+  await page.goto(`/u/${user.handle}?tab=estante&status=WANT&sortear=1`);
+  await page.getByRole("button", { name: "Sortear", exact: true }).click();
+  await page.getByRole("button", { name: "Começar a ler" }).click();
+  await expect(page).toHaveURL(new RegExp(`/book/${BOOK}`));
+  await expect(page.getByText("Você está aqui agora")).toBeVisible();
+});
+
+test("book page links to stores", async ({ page }) => {
+  await page.goto(`/book/${BOOK}`);
+  const amazon = page.getByRole("link", { name: /Amazon/ });
+  await expect(amazon).toHaveAttribute("href", /amazon\.com\.br\/s\?k=/);
+  await expect(amazon).toHaveAttribute("target", "_blank");
+  await expect(
+    page.getByRole("link", { name: /Estante Virtual/ }),
+  ).toBeVisible();
+});
