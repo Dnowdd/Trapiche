@@ -74,7 +74,7 @@ const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
                   <div className="text-[13px] font-semibold text-(--ink-2) leading-[1.2]">
                     {user.name}
                   </div>
-                  <div className="text-[10px] text-(--ink-4) font-mono">
+                  <div className="text-[10px] text-(--ink-3) font-mono">
                     @{user.handle}
                   </div>
                 </div>

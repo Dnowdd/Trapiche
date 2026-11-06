@@ -105,7 +105,7 @@ export default async function SeriesPage({ params }: Props) {
           </div>
           {viewerId && (
             <div className="rounded-[16px] bg-(--ink-2) text-(--cream) p-5">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--yellow) opacity-80">
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--yellow)">
                 Seu progresso
               </div>
               <div className="mt-1 text-[26px] font-extrabold tracking-[-0.02em]">

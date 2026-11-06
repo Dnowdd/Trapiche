@@ -90,7 +90,7 @@ function BigStat({
         {label}
       </div>
       {hint && (
-        <div className="text-[11px] text-(--cream-deep) opacity-60">{hint}</div>
+        <div className="text-[11px] text-(--cream-deep) opacity-85">{hint}</div>
       )}
     </div>
   );
@@ -267,7 +267,10 @@ function MonthGrid({ data, handle }: { data: Retrospective; handle: string }) {
           const cls =
             "rounded-[14px] border border-[rgba(67,62,18,0.08)] p-4 flex flex-col";
           return future ? (
-            <div key={m.month} className={`${cls} opacity-45`}>
+            <div
+              key={m.month}
+              className={`${cls} border-dashed border-[rgba(67,62,18,0.2)] bg-transparent`}
+            >
               {body}
             </div>
           ) : (

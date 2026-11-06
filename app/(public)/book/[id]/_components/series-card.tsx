@@ -148,10 +148,13 @@ export default function SeriesCard({ series }: { series: BookSeries }) {
       />
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--yellow) opacity-80">
+          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--yellow)">
             {series.current
-              ? `Livro ${fmtPos(series.current.position)} de ${series.total}`
-              : `Série · ${series.total} livros`}
+              ? series.current.position <= series.total &&
+                Number.isInteger(series.current.position)
+                ? `Livro ${fmtPos(series.current.position)} de ${series.total}`
+                : `Livro ${fmtPos(series.current.position)} da série`
+              : `Série · ${series.total} ${series.total === 1 ? "livro" : "livros"}`}
           </div>
           <Link
             href={`/serie/${series.slug}`}
