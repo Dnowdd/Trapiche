@@ -42,3 +42,12 @@ test("book page has rich metadata, a working OG image and quotes", async ({
   expect(image.headers()["content-type"]).toBe("image/png");
   expect((await image.body()).length).toBeGreaterThan(20_000);
 });
+
+test("visitors see a 404 for unknown pages and a login for private ones", async ({
+  page,
+}) => {
+  const res = await page.goto("/esta-pagina-nao-existe");
+  expect(res?.status()).toBe(404);
+  await page.goto("/importar");
+  await expect(page).toHaveURL(/\/auth\?next=%2Fimportar/);
+});

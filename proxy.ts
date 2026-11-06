@@ -1,54 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
-const PUBLIC_PATHS = [
-  "/auth",
-  "/api/auth",
-  "/api/cron",
-  "/api/avatars/",
-  "/api/v1/",
-  "/api/email/",
-  "/api/books/isbn/",
+const PRIVATE_PREFIXES = [
+  "/admin",
+  "/desenvolvedores",
+  "/importar",
+  "/notificacoes",
+  "/suporte",
+  "/profile",
+  "/api/me",
+  "/api/support",
 ];
-const PUBLIC_EXACT = [
-  "/",
-  "/termos",
-  "/privacidade",
-  "/search",
-  "/sitemap.xml",
-  "/robots.txt",
-  "/manifest.webmanifest",
-  "/emails/cancelado",
-  "/api/books",
-  "/api/books/search",
-];
-const IMAGE = "(?:\\/(?:opengraph|twitter)-image[^/]*)?";
-const PUBLIC_PATTERNS = [
-  `^(?:\\/(?:opengraph|twitter)-image[^/]*|\\/(?:icon|apple-icon)[^/]*)$`,
-  `^\\/book\\/[^/]+(?:\\/resenhas|\\/citacoes)?${IMAGE}$`,
-  `^\\/lists\\/[^/]+${IMAGE}$`,
-  `^\\/u\\/[^/]+(?:\\/retrospectiva)?${IMAGE}$`,
-  `^\\/author\\/[^/]+${IMAGE}$`,
-  `^\\/publisher\\/[^/]+${IMAGE}$`,
-  `^\\/serie\\/[^/]+${IMAGE}$`,
-  `^\\/citacao\\/[^/]+${IMAGE}$`,
-].map((source) => new RegExp(source));
 
-function isPublic(pathname: string) {
-  return (
-    PUBLIC_EXACT.includes(pathname) ||
-    PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
-    PUBLIC_PATTERNS.some((re) => re.test(pathname))
+function isPrivate(pathname: string) {
+  return PRIVATE_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 }
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!getSessionCookie(request) && !isPublic(pathname)) {
+  if (isPrivate(pathname) && !getSessionCookie(request)) {
+    if (pathname.startsWith("/api/"))
+      return NextResponse.json(
+        { error: "Entre na sua conta." },
+        { status: 401 },
+      );
     const url = new URL("/auth", request.url);
-    if (!pathname.startsWith("/api/"))
-      url.searchParams.set("next", pathname + request.nextUrl.search);
+    url.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
 
