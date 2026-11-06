@@ -3,11 +3,13 @@ import { getSessionCookie } from "better-auth/cookies";
 
 const PRIVATE_PREFIXES = [
   "/admin",
+  "/assistente",
   "/desenvolvedores",
   "/importar",
   "/notificacoes",
   "/suporte",
   "/profile",
+  "/api/assistant",
   "/api/me",
   "/api/support",
 ];
