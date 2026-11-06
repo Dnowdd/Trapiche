@@ -13,45 +13,133 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Trapiche"
       title="Termos de uso"
-      updated="29 de outubro de 2026"
+      updated="7 de novembro de 2026"
     >
       <p>
-        O Trapiche é um diário de leituras: você registra o que lê, escreve
-        resenhas e monta listas. Ao criar uma conta, você concorda com estes
-        termos.
+        O Trapiche é um diário de leituras: você registra o que lê, guarda
+        citações, escreve resenhas e monta listas. Ao criar uma conta ou usar o
+        site, você concorda com estes termos. Eles valem junto com a{" "}
+        <Link href="/privacidade">Política de Privacidade</Link>.
+      </p>
+
+      <h2>Quem pode usar</h2>
+      <p>
+        Você precisa ter pelo menos 13 anos. Se tiver menos de 18, use com o
+        conhecimento de quem é responsável por você. O Trapiche é gratuito e
+        pode mudar, ganhar ou perder funções com o tempo.
       </p>
 
       <h2>Sua conta</h2>
-      <p>
-        Você é responsável pelo que publica e por manter sua senha em segurança.
-        Use um nome de usuário que não se passe por outra pessoa.
-      </p>
+      <ul>
+        <li>
+          Você é responsável pelo que acontece na sua conta e por manter a senha
+          (ou o acesso ao Google) em segurança.
+        </li>
+        <li>
+          Use um nome e um @ que não se passem por outra pessoa, autor ou
+          editora.
+        </li>
+        <li>Uma pessoa, uma conta. Contas automatizadas não são permitidas.</li>
+      </ul>
 
       <h2>O que você publica</h2>
       <p>
-        Resenhas, notas, listas e anotações continuam sendo suas. Ao torná-las
-        públicas, você permite que o Trapiche as exiba no site. Não publique
-        conteúdo ilegal, discurso de ódio, assédio ou spoilers sem aviso.
-        Podemos remover conteúdo que desrespeite essas regras.
+        Resenhas, comentários, citações, listas, tags e anotações continuam
+        sendo seus. Ao torná-los públicos, você permite que o Trapiche os exiba,
+        inclusive em imagens de compartilhamento e em buscadores, enquanto
+        estiverem publicados. Você pode apagar ou tornar privado a qualquer
+        momento.
       </p>
+      <p>Não é permitido publicar:</p>
+      <ul>
+        <li>conteúdo ilegal, discurso de ódio, assédio ou ameaças;</li>
+        <li>spoilers sem marcar a resenha como spoiler;</li>
+        <li>spam, propaganda ou links para pirataria;</li>
+        <li>dados pessoais de outras pessoas.</li>
+      </ul>
+      <p>
+        Qualquer pessoa pode denunciar um conteúdo. A moderação pode ocultar
+        conteúdo que desrespeite estas regras e, em casos graves ou repetidos,
+        suspender a conta.
+      </p>
+
+      <h2>Citações e direitos autorais</h2>
+      <p>
+        A lei brasileira permite citar trechos curtos de obras, indicando o
+        autor e a origem (Lei 9.610/1998, art. 46, III). Por isso:
+      </p>
+      <ul>
+        <li>
+          guarde trechos curtos, do tamanho de uma citação, nunca capítulos ou
+          páginas inteiras;
+        </li>
+        <li>
+          o Trapiche sempre mostra o livro e o autor junto de cada citação;
+        </li>
+        <li>
+          se você é autor ou editora e acha que um conteúdo viola seus direitos,
+          fale com a gente pelo e-mail abaixo. Removemos o que for indevido.
+        </li>
+      </ul>
 
       <h2>Dados dos livros</h2>
       <p>
-        Capas, títulos e informações das edições vêm do Google Books e da Open
-        Library e podem ter erros. Os direitos sobre capas e textos pertencem
-        aos autores e editoras.
+        Capas, títulos e informações das edições vêm da Open Library e do Google
+        Books e podem ter erros. Use o link “Dados errados?” na página do livro
+        para avisar. Os direitos sobre capas, textos e marcas pertencem aos
+        autores e editoras.
       </p>
 
-      <h2>Privacidade</h2>
+      <h2>Importação</h2>
       <p>
-        Como tratamos seus dados está descrito na{" "}
-        <Link href="/privacidade">Política de Privacidade</Link>.
+        Ao importar um arquivo do Goodreads, do Skoob ou de outra planilha, você
+        confirma que os dados são seus. O Trapiche usa o arquivo só para montar
+        a sua estante.
+      </p>
+
+      <h2>API e chaves de desenvolvedor</h2>
+      <ul>
+        <li>
+          As chaves são pessoais. Não compartilhe nem publique. Chaves com
+          permissão de escrita alteram sua conta como se fossem você.
+        </li>
+        <li>
+          Respeite os limites de requisições, não revenda os dados e cite a
+          fonte dos livros (Open Library ou Google Books) e o Trapiche ao
+          exibi-los.
+        </li>
+        <li>
+          Podemos revogar chaves usadas de forma abusiva ou que prejudiquem o
+          serviço.
+        </li>
+      </ul>
+
+      <h2>Garantias e responsabilidade</h2>
+      <p>
+        O Trapiche é oferecido como está. Fazemos o possível para manter o site
+        no ar e seus dados seguros, mas podem acontecer falhas. Baixe uma cópia
+        dos seus dados quando quiser em “Editar perfil → Conta”. Não nos
+        responsabilizamos por conteúdo publicado por outras pessoas.
+      </p>
+
+      <h2>Encerramento</h2>
+      <p>
+        Você pode excluir sua conta a qualquer momento. Podemos encerrar contas
+        que violem estes termos, avisando por e-mail quando possível.
+      </p>
+
+      <h2>Mudanças nestes termos</h2>
+      <p>
+        Se os termos mudarem de forma importante, avisamos no site ou por e-mail
+        antes de valerem. A data no topo mostra a última atualização.
       </p>
 
       <h2>Contato</h2>
       <p>
-        Dúvidas ou pedidos:{" "}
+        Dúvidas, pedidos ou avisos de direitos autorais: pelo{" "}
+        <Link href="/suporte">suporte</Link> ou por{" "}
         <a href="mailto:david.queiroz@dnowdd.com">david.queiroz@dnowdd.com</a>.
+        Estes termos seguem as leis do Brasil.
       </p>
     </LegalPage>
   );
