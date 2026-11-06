@@ -18,7 +18,7 @@ _Atualizado em 6/11/2026._
 - **Citações:** guardar trechos com página e nota, públicos ou só para você. Aparecem no livro, na aba “Citações” do perfil, em `/book/[id]/citacoes` e numa página própria `/citacao/[id]`, feita para compartilhar. Podem ser denunciadas.
 - **Tags:** prateleiras personalizadas com cor, públicas ou privadas. Marca na página do livro, filtra e gerencia na estante.
 - **Séries:** obras ordenadas numa série, com “Livro 2 de 7”, progresso e próximo livro. Detectadas automaticamente pelo Open Library quando a edição informa; admins criam e editam na página do livro. Página `/serie/[slug]`.
-- **Leitor de código de barras:** botão na busca abre a câmera e vai direto ao livro pelo ISBN (só em navegadores com `BarcodeDetector`, como Chrome no Android).
+- **Leitor de código de barras:** botão na busca abre a câmera e vai direto ao livro pelo ISBN. Usa o `BarcodeDetector` nativo quando existe e cai para o ZXing (carregado sob demanda) no iPhone e nos outros navegadores.
 - **Importação:** `/importar` aceita export do Goodreads, planilha do Skoob ou qualquer CSV. Mostra prévia, processa em lotes com progresso ao vivo, traz status, datas, notas, resenhas e transforma prateleiras em tags. Lista o que não achou, com atalho para a busca.
 - Diário, meta anual, retrospectiva anual e mensal, listas (públicas, privadas e compartilhadas), notificações, suporte com anexos, moderação.
 
@@ -40,13 +40,15 @@ _Atualizado em 6/11/2026._
 - Imagens OG geradas para home, livro, autor, série, lista, perfil, retrospectiva e citação, com fontes próprias (Fraunces, Inter, JetBrains Mono).
 - Sitemap com livros, resenhas, autores, séries, listas, citações e só os perfis indexáveis. Robots, manifest e ícones.
 
-### API v1 (chaves de desenvolvedor, só leitura)
+### API v1 (chaves de desenvolvedor)
 
-- `/me`, `/shelf` (filtro `tag`), `/readings`, `/lists`, `/lists/{id}`, `/lists/{id}/items`, `/tags`, `/quotes`.
+- Leitura: `/me`, `/shelf` (filtro `tag`), `/shelf/{bookId}`, `/readings`, `/lists`, `/lists/{id}`, `/lists/{id}/items`, `/tags`, `/quotes`, `/reviews/{bookId}`, `/goals/{year}`.
+- Escrita, só com chaves criadas com “Permitir escrita”: perfil, privacidade e e-mails (`PATCH /me`), status, término, abandono, sessões, progresso, curtida, favorito e tags de cada livro, resenhas, citações, tags, listas e itens, meta anual. As rotas chamam as mesmas actions do site (mesmas regras e validações).
 
 ### Qualidade
 
-- Testes unitários, de integração (Postgres local) e E2E com Playwright (cadastro, estante com tag e citação, perfil privado, importação, SEO), em desktop e mobile.
+- Testes unitários, de integração (Postgres local) e E2E com Playwright (cadastro, estante, tags, citações, séries, perfil privado, e-mails, chave de API, importação completa, scanner com câmera simulada e SEO), em desktop e mobile.
+- CI no GitHub Actions (`.github/workflows/ci.yml`): typecheck, lint, Prettier e testes unitários; integração e build com Postgres; E2E com Playwright.
 
 ## Antes de abrir para o público
 
@@ -60,5 +62,3 @@ _Atualizado em 6/11/2026._
 
 - Biblioteca própria de livros (catálogo do Trapiche, cadastro de livros por usuários, capas próprias).
 - Outros tipos de conteúdo (mangá, HQ, artigos).
-- Escrita pela API v1 (hoje só leitura) para o app mobile.
-- Leitor de código de barras no iOS (Safari ainda sem `BarcodeDetector`; exigiria uma lib como ZXing).
