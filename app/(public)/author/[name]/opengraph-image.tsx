@@ -1,4 +1,4 @@
-import { getAuthorPage } from "@/lib/queries/people";
+import { getAuthorCard } from "@/lib/queries/people";
 import {
   C,
   clipText,
@@ -25,9 +25,9 @@ export default async function Image({
   params: Promise<{ name: string }>;
 }) {
   const name = decodeURIComponent((await params).name);
-  const data = await getAuthorPage(name).catch(() => null);
+  const data = await getAuthorCard(name).catch(() => null);
   const display = data?.name ?? name;
-  const works = [...(data?.works ?? []), ...(data?.googleWorks ?? [])];
+  const works = data?.works ?? [];
   const books = works.filter((w) => w.cover.coverUrl).slice(0, 5);
   const [photo, covers] = await Promise.all([
     remoteImage(data?.profile?.photoUrl, 300),

@@ -139,3 +139,24 @@ export async function getPublisherPage(name: string) {
   const canonical = google[0]?.volumeInfo.publisher ?? name;
   return { name: canonical, works: shown, googleWorks };
 }
+
+export async function getAuthorCard(name: string) {
+  const key = squash(name);
+  const [openLibrary, profile] = await Promise.all([
+    searchOpenLibraryPt(`author:"${name}"`, 30).catch(() => []),
+    getAuthorProfile(name).catch(() => null),
+  ]);
+  const own = openLibrary.filter(
+    (v) => v.volumeInfo.authors?.some((a) => squash(a) === key) ?? false,
+  );
+  const works = groupWorks(own, "").map(({ main }) => {
+    const row = volumeToRow(main);
+    return { cover: toCover(row) };
+  });
+  const canonical = own[0]?.volumeInfo.authors?.find((a) => squash(a) === key);
+  return {
+    name: canonical ? cleanAuthor(canonical) : name,
+    profile,
+    works,
+  };
+}
