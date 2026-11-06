@@ -337,7 +337,7 @@ function shelfDate(
 }
 
 export async function getEstante(userId: string, isOwner: boolean) {
-  const [rows, readings, reviews] = await Promise.all([
+  const [rows, readings, reviews, loans] = await Promise.all([
     db.userBook.findMany({
       where: { userId, status: { not: null } },
       orderBy: { statusChangedAt: "desc" },
@@ -366,7 +366,14 @@ export async function getEstante(userId: string, isOwner: boolean) {
       where: { userId, ...(isOwner ? {} : { hiddenAt: null }) },
       select: { bookId: true, rating: true },
     }),
+    isOwner
+      ? db.loan.findMany({
+          where: { userId, returnedAt: null },
+          select: { bookId: true, person: true },
+        })
+      : Promise.resolve([]),
   ]);
+  const lentTo = new Map(loans.map((l) => [l.bookId, l.person]));
   const ratings = new Map(reviews.map((r) => [r.bookId, r.rating]));
   return rows.map((r) => {
     const mine = readings.filter((x) => x.bookId === r.bookId);
@@ -398,6 +405,7 @@ export async function getEstante(userId: string, isOwner: boolean) {
       changedAt: (r.statusChangedAt ?? r.createdAt).getTime(),
       finishedAt: lastFinish ?? null,
       rating: ratings.get(r.bookId) ?? null,
+      lentTo: lentTo.get(r.bookId) ?? null,
       date: shelfDate(r.status!, mine),
       reads,
       progress:

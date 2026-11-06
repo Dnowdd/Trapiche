@@ -20,6 +20,9 @@ import { getBookSeries } from "@/lib/queries/series";
 import SeriesCard from "./_components/series-card";
 import BookTags from "@/components/tags/book-tags";
 import BookEditor from "./_components/book-editor";
+import WhereToBuy from "./_components/where-to-buy";
+import LoanControl from "@/components/loans/loan-control";
+import { getBookLoans } from "@/lib/queries/loans";
 import { isAdmin } from "@/lib/queries/reports";
 import { getBookTags } from "@/lib/queries/tags";
 import {
@@ -85,12 +88,13 @@ export default async function BookDetailPage({ params }: Props) {
   const book = await loadBook(id);
   const equivalent = book ? await openLibraryEquivalent(book) : null;
   if (equivalent) redirect(`/book/${equivalent}`);
-  const [data, quotes, series, tags, admin] = await Promise.all([
+  const [data, quotes, series, tags, admin, loans] = await Promise.all([
     getBookPage(id, viewerId),
     getBookQuotes(id, viewerId),
     getBookSeries(id, viewerId),
     getBookTags(id, viewerId),
     viewerId ? isAdmin(viewerId) : Promise.resolve(false),
+    getBookLoans(id, viewerId),
   ]);
   if (!data) notFound();
   const today = todayISO();
@@ -165,8 +169,16 @@ export default async function BookDetailPage({ params }: Props) {
 
         <BookHero data={data} today={today} />
         {tags?.onShelf && (
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col gap-3">
             <BookTags data={tags} />
+            {loans && (
+              <LoanControl
+                bookId={data.book.id}
+                title={data.book.title}
+                loans={loans}
+                today={today}
+              />
+            )}
           </div>
         )}
 
@@ -192,6 +204,7 @@ export default async function BookDetailPage({ params }: Props) {
                 languageLabel={data.languageLabel}
               />
             </Suspense>
+            <WhereToBuy book={data.book} />
             <TechDetails
               book={data.book}
               language={data.languageLabel}

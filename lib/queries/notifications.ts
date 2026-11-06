@@ -13,6 +13,12 @@ export async function getNotifications(userId: string, take = 30) {
         review: { select: { book: { select: { id: true, title: true } } } },
         list: { select: { id: true, title: true } },
         ticket: { select: { id: true, number: true } },
+        loan: {
+          select: {
+            person: true,
+            book: { select: { id: true, title: true } },
+          },
+        },
       },
     }),
     db.notification.count({ where: { userId, readAt: null } }),
@@ -32,23 +38,32 @@ export async function getNotifications(userId: string, take = 30) {
         LIST_MEMBER_ADDED: `te adicionou na lista ${target}`,
         SUPPORT_REPLIED: `respondeu seu ticket #${n.ticket?.number}`,
         SUPPORT_MESSAGE: `escreveu no ticket #${n.ticket?.number}`,
+        LOAN_DUE: `${n.loan?.book.title} está com ${n.loan?.person} e passou da data de devolução`,
       }[n.kind];
       const staffReply = n.kind === "SUPPORT_REPLIED";
-      const href = n.ticket
-        ? staffReply
-          ? `/suporte/${n.ticket.id}`
-          : `/admin/suporte/${n.ticket.id}`
-        : book
-          ? `/book/${book.id}#avaliacoes`
-          : n.list
-            ? `/lists/${n.list.id}`
-            : `/u/${n.actor.handle}`;
-      const actor = staffReply ? "Suporte do Trapiche" : n.actor.name;
+      const loanReminder = n.kind === "LOAN_DUE";
+      const href = n.loan
+        ? `/book/${n.loan.book.id}#emprestimo`
+        : n.ticket
+          ? staffReply
+            ? `/suporte/${n.ticket.id}`
+            : `/admin/suporte/${n.ticket.id}`
+          : book
+            ? `/book/${book.id}#avaliacoes`
+            : n.list
+              ? `/lists/${n.list.id}`
+              : `/u/${n.actor.handle}`;
+      const system = staffReply || loanReminder;
+      const actor = loanReminder
+        ? "Lembrete"
+        : staffReply
+          ? "Suporte do Trapiche"
+          : n.actor.name;
       return {
         id: n.id,
         actor,
-        initials: staffReply ? "TR" : initialsOf(n.actor.name),
-        image: staffReply ? null : n.actor.image,
+        initials: system ? "TR" : initialsOf(n.actor.name),
+        image: system ? null : n.actor.image,
         text,
         href,
         when: fmtAgo(n.createdAt),
