@@ -1,4 +1,6 @@
-import { apiRoute } from "@/lib/api/http";
+import { act, apiRoute } from "@/lib/api/http";
+import { bool, str } from "@/lib/api/write";
+import { createTag } from "@/lib/actions/tags";
 import { iso } from "@/lib/api/serialize";
 import { db } from "@/lib/db";
 
@@ -28,3 +30,18 @@ export const GET = apiRoute(async ({ userId }) => {
     })),
   };
 });
+
+export const POST = apiRoute(
+  async ({ userId, body }) => {
+    const b = await body();
+    const tag = await act(userId, () =>
+      createTag({
+        name: str(b, "name", true)!,
+        color: str(b, "color"),
+        private: bool(b, "private"),
+      }),
+    );
+    return { data: tag };
+  },
+  { write: true, status: 201 },
+);

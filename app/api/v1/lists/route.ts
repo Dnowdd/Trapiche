@@ -1,5 +1,13 @@
 import { db } from "@/lib/db";
-import { apiRoute, enumParam, pageParams, paginated } from "@/lib/api/http";
+import {
+  act,
+  apiRoute,
+  enumParam,
+  pageParams,
+  paginated,
+} from "@/lib/api/http";
+import { oneOf, str } from "@/lib/api/write";
+import { createList } from "@/lib/actions/lists";
 import { apiList, apiListSelect } from "@/lib/api/lists";
 import type { Prisma } from "@/lib/generated/prisma/client";
 
@@ -24,3 +32,22 @@ export const GET = apiRoute(async ({ userId, params }) => {
   ]);
   return paginated(rows.map(apiList), total, page);
 });
+
+export const POST = apiRoute(
+  async ({ userId, body }) => {
+    const b = await body();
+    const created = await act(userId, () =>
+      createList({
+        title: str(b, "title", true)!,
+        note: str(b, "note"),
+        visibility: oneOf(b, "visibility", VISIBILITY) ?? "PUBLIC",
+      }),
+    );
+    const list = await db.list.findUniqueOrThrow({
+      where: { id: created!.id },
+      select: apiListSelect,
+    });
+    return { data: apiList(list) };
+  },
+  { write: true, status: 201 },
+);

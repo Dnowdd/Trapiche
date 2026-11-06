@@ -15,8 +15,8 @@ export default async function DevelopersPage() {
   return (
     <SupportShell eyebrow="API · beta" title="Desenvolvedores">
       <p className="m-0 -mt-2 mb-6 text-[14px] text-(--ink-3) max-w-150 leading-[1.55]">
-        Leia sua estante, suas leituras e suas listas do Trapiche a partir do
-        seu código. Só leitura, com chave de API.
+        Leia e atualize sua estante, suas leituras, resenhas, citações, tags e
+        listas do Trapiche a partir do seu código ou app, com uma chave de API.
       </p>
       {data.enabled ? <ApiKeys keys={data.keys} /> : <EnableDeveloper />}
       <ApiDocs />

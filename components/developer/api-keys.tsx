@@ -12,6 +12,7 @@ import {
 import { toast } from "@/components/shared/toast";
 import { useAction } from "@/components/reading/use-action";
 import { createApiKey, revokeApiKey } from "@/lib/actions/developer";
+import Switch from "@/components/shared/switch";
 import type { DeveloperData } from "@/lib/queries/developer";
 import { MAX_ACTIVE_KEYS } from "@/lib/api/limits";
 import CopyButton from "./copy-button";
@@ -45,12 +46,14 @@ function Revoke({ id, name }: { id: string; name: string }) {
 function CreateKey({ disabled }: { disabled: boolean }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [canWrite, setCanWrite] = useState(false);
   const [key, setKey] = useState<string | null>(null);
   const { pending, error, run } = useAction();
   const close = () => {
     setOpen(false);
     setKey(null);
     setName("");
+    setCanWrite(false);
   };
   return (
     <>
@@ -86,7 +89,7 @@ function CreateKey({ disabled }: { disabled: boolean }) {
               onSubmit={(e) => {
                 e.preventDefault();
                 run(
-                  () => createApiKey(name),
+                  () => createApiKey(name, canWrite),
                   (data) => setKey(data!.key),
                 );
               }}
@@ -104,6 +107,14 @@ function CreateKey({ disabled }: { disabled: boolean }) {
                   onChange={(e) => setName(e.target.value)}
                 />
               </FormField>
+              <div className="border-t border-(--rule)">
+                <Switch
+                  label="Permitir escrita"
+                  description="A chave poderá mudar sua estante, registrar leituras, escrever resenhas, citações, tags, listas e editar o perfil. Use só em apps em que você confia."
+                  checked={canWrite}
+                  onChange={setCanWrite}
+                />
+              </div>
               <FormActions>
                 <Button type="button" variant="ghost" onClick={close}>
                   Cancelar
@@ -150,9 +161,15 @@ export default function ApiKeys({ keys }: { keys: DeveloperData["keys"] }) {
                 <span className="text-[14px] font-semibold text-(--ink) truncate">
                   {k.name}
                 </span>
-                {k.revoked && (
+                {k.revoked ? (
                   <span className="font-mono text-[9px] uppercase tracking-[0.06em] bg-[rgba(67,62,18,0.08)] text-(--ink-4) px-1.5 py-px rounded">
                     revogada
+                  </span>
+                ) : (
+                  <span
+                    className={`font-mono text-[9px] uppercase tracking-[0.06em] px-1.5 py-px rounded ${k.canWrite ? "bg-(--ink-2) text-(--yellow)" : "bg-[rgba(67,62,18,0.08)] text-(--ink-4)"}`}
+                  >
+                    {k.canWrite ? "leitura e escrita" : "só leitura"}
                   </span>
                 )}
               </div>

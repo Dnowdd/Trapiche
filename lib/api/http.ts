@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "../db";
 import { consumeRateLimit, type RateLimitResult } from "../rate-limit";
 import { hashKey, looksLikeKey } from "./keys";
+import { runAs } from "../actor";
+import type { ActionResult } from "../actions/result";
 
 import {
   DEFAULT_PER_PAGE,
@@ -27,6 +29,46 @@ export interface ApiContext {
   userId: string;
   keyId: string;
   params: URLSearchParams;
+  body: () => Promise<Record<string, unknown>>;
+}
+
+const MAX_BODY_BYTES = 64 * 1024;
+
+async function readBody(req: Request) {
+  const text = await req.text();
+  if (text.length > MAX_BODY_BYTES)
+    throw new ApiError(
+      413,
+      "payload_too_large",
+      "Corpo da requisição grande demais.",
+    );
+  if (!text.trim()) return {};
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed))
+      return parsed as Record<string, unknown>;
+  } catch {
+    throw new ApiError(400, "invalid_json", "Envie um JSON válido.");
+  }
+  throw new ApiError(
+    400,
+    "invalid_json",
+    "O corpo precisa ser um objeto JSON.",
+  );
+}
+
+export async function act<T>(
+  userId: string,
+  fn: () => Promise<ActionResult<T>>,
+): Promise<T | undefined> {
+  const result = await runAs(userId, fn);
+  if (!result.ok)
+    throw new ApiError(
+      result.error === "Sem permissão." ? 403 : 422,
+      result.error === "Sem permissão." ? "forbidden" : "invalid_request",
+      result.error,
+    );
+  return result.data;
 }
 
 function readKey(req: Request) {
@@ -70,6 +112,7 @@ async function authenticate(req: Request) {
       userId: true,
       revokedAt: true,
       lastUsedAt: true,
+      canWrite: true,
       user: { select: { developerSince: true } },
     },
   });
@@ -88,11 +131,18 @@ async function authenticate(req: Request) {
 
 export function apiRoute<P>(
   handler: (ctx: ApiContext, params: P) => Promise<unknown>,
+  options: { write?: boolean; status?: number } = {},
 ) {
   return async (req: Request, route: { params: Promise<P> }) => {
     let rate: RateLimitResult | null = null;
     try {
       const key = await authenticate(req);
+      if (options.write && !key.canWrite)
+        throw new ApiError(
+          403,
+          "insufficient_scope",
+          "Essa chave é só de leitura. Crie uma chave com permissão de escrita.",
+        );
       const [minute, day] = await Promise.all([
         consumeRateLimit(`api:m:${key.id}`, RATE_PER_MINUTE, 60_000),
         consumeRateLimit(`api:d:${key.id}`, RATE_PER_DAY, 86_400_000),
@@ -119,10 +169,12 @@ export function apiRoute<P>(
           userId: key.userId,
           keyId: key.id,
           params: new URL(req.url).searchParams,
+          body: () => readBody(req),
         },
         await route.params,
       );
-      return NextResponse.json(body, {
+      return NextResponse.json(body ?? { ok: true }, {
+        status: options.status ?? 200,
         headers: { "Cache-Control": "no-store", ...rateHeaders(rate) },
       });
     } catch (err) {

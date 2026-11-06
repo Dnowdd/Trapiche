@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { fail, withUser } from "./result";
 import { generateKey, MAX_ACTIVE_KEYS } from "../api/keys";
@@ -11,11 +11,11 @@ export async function becomeDeveloper() {
       where: { id: userId, developerSince: null },
       data: { developerSince: new Date() },
     });
-    refresh();
+    revalidate();
   });
 }
 
-export async function createApiKey(rawName: string) {
+export async function createApiKey(rawName: string, canWrite = false) {
   return withUser(async (userId) => {
     const name = String(rawName ?? "").trim();
     if (!name) fail("Dê um nome pra chave.");
@@ -32,8 +32,10 @@ export async function createApiKey(rawName: string) {
     if (active >= MAX_ACTIVE_KEYS)
       fail(`Você já tem ${MAX_ACTIVE_KEYS} chaves ativas. Revogue uma antes.`);
     const { key, prefix, hash } = generateKey();
-    await db.apiKey.create({ data: { userId, name, prefix, hash } });
-    refresh();
+    await db.apiKey.create({
+      data: { userId, name, prefix, hash, canWrite: canWrite === true },
+    });
+    revalidate();
     return { key };
   });
 }
@@ -45,6 +47,6 @@ export async function revokeApiKey(id: string) {
       data: { revokedAt: new Date() },
     });
     if (!count) fail("Chave não encontrada.");
-    refresh();
+    revalidate();
   });
 }

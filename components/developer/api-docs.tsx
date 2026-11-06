@@ -100,6 +100,106 @@ const ENDPOINTS: {
   },
 ];
 
+const WRITES: { method: string; path: string; body: string }[] = [
+  {
+    method: "PATCH",
+    path: "/me",
+    body: "name, handle, bio, city, privacy { … }, notifications { monthlyDigest, inactivityReminder }. Mande só o que muda.",
+  },
+  {
+    method: "GET",
+    path: "/shelf/{bookId}",
+    body: "O livro na sua estante (status, progresso, tags).",
+  },
+  {
+    method: "PUT",
+    path: "/shelf/{bookId}",
+    body: "status: WANT, READING ou REREADING; startedAt opcional (AAAA, AAAA-MM ou AAAA-MM-DD).",
+  },
+  {
+    method: "DELETE",
+    path: "/shelf/{bookId}",
+    body: "Tira o livro da estante e apaga as leituras dele.",
+  },
+  {
+    method: "POST",
+    path: "/shelf/{bookId}/finish",
+    body: "startedAt, finishedAt, rating (0,5 a 5), review, spoiler. Tudo opcional.",
+  },
+  {
+    method: "POST",
+    path: "/shelf/{bookId}/abandon",
+    body: "page (obrigatório), reason, wantsToReturn.",
+  },
+  {
+    method: "POST",
+    path: "/shelf/{bookId}/sessions",
+    body: "date (AAAA-MM-DD), pageEnd, minutes; note e pageCount opcionais.",
+  },
+  {
+    method: "PUT",
+    path: "/shelf/{bookId}/progress",
+    body: "currentPage; startedAt e pageCount opcionais.",
+  },
+  {
+    method: "PUT",
+    path: "/shelf/{bookId}/like",
+    body: "liked: true ou false.",
+  },
+  {
+    method: "PUT",
+    path: "/shelf/{bookId}/favorite",
+    body: "favorite: true ou false (até 5 favoritos).",
+  },
+  {
+    method: "PUT",
+    path: "/shelf/{bookId}/tags",
+    body: "tagIds: lista com os ids das tags do livro.",
+  },
+  {
+    method: "GET · PUT · DELETE",
+    path: "/reviews/{bookId}",
+    body: "rating (0,5 a 5), text, spoiler.",
+  },
+  {
+    method: "POST",
+    path: "/quotes",
+    body: "bookId, text; page, note e private opcionais.",
+  },
+  {
+    method: "GET · PATCH · DELETE",
+    path: "/quotes/{id}",
+    body: "text, page, note, private.",
+  },
+  { method: "POST", path: "/tags", body: "name; color e private opcionais." },
+  {
+    method: "PATCH · DELETE",
+    path: "/tags/{id}",
+    body: "name, color, private.",
+  },
+  {
+    method: "POST",
+    path: "/lists",
+    body: "title; note e visibility (PUBLIC, PRIVATE, SHARED) opcionais.",
+  },
+  {
+    method: "PATCH · DELETE",
+    path: "/lists/{id}",
+    body: "title, note, visibility. Só quem criou.",
+  },
+  { method: "POST", path: "/lists/{id}/items", body: "bookId." },
+  {
+    method: "DELETE",
+    path: "/lists/{id}/items/{bookId}",
+    body: "Tira o livro da lista.",
+  },
+  {
+    method: "GET · PUT",
+    path: "/goals/{year}",
+    body: "target: número de livros, ou null para apagar a meta.",
+  },
+];
+
 const EXAMPLE = `{
   "data": [
     {
@@ -155,9 +255,8 @@ export default function ApiDocs() {
     <section>
       <h2 className={h2}>Como usar</h2>
       <p className={p}>
-        Todas as rotas são <code className={inline}>GET</code> e ficam em{" "}
-        <code className={inline}>{base}</code>. Mande a chave no cabeçalho{" "}
-        <code className={inline}>Authorization</code>:
+        As rotas ficam em <code className={inline}>{base}</code>. Mande a chave
+        no cabeçalho <code className={inline}>Authorization</code>:
       </p>
       <Code copy>{`curl "${base}/shelf?status=READ&per_page=10" \\
   -H "Authorization: Bearer trp_live_SUA_CHAVE"`}</Code>
@@ -213,6 +312,37 @@ export default function ApiDocs() {
         ))}
       </div>
 
+      <h2 className={h2}>Escrita</h2>
+      <p className={p}>
+        Rotas que mudam dados só aceitam chaves criadas com{" "}
+        <strong>Permitir escrita</strong>. Envie JSON no corpo com{" "}
+        <code className={inline}>Content-Type: application/json</code>. As
+        regras são as mesmas do site, e os erros de validação voltam com{" "}
+        <code className={inline}>422</code> e a mensagem em português. Use{" "}
+        <code className={inline}>GET /api/books/search?q=</code> para achar o{" "}
+        <code className={inline}>bookId</code>.
+      </p>
+      <Code copy>{`curl -X PUT "${base}/shelf/OL7353617M" \\
+  -H "Authorization: Bearer trp_live_SUA_CHAVE" \\
+  -H "Content-Type: application/json" \\
+  -d '{"status":"READING"}'`}</Code>
+      <div className="mt-3 rounded-[14px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) divide-y divide-(--rule)">
+        {WRITES.map((w) => (
+          <div
+            key={`${w.method} ${w.path}`}
+            className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3 px-4 py-3"
+          >
+            <span className="shrink-0 sm:w-36 font-mono text-[10.5px] font-bold text-(--ink-2)">
+              {w.method}
+            </span>
+            <code className="shrink-0 sm:w-64 font-mono text-[12.5px] font-semibold text-(--ink) break-all">
+              {w.path}
+            </code>
+            <span className="text-[12.5px] text-(--ink-3)">{w.body}</span>
+          </div>
+        ))}
+      </div>
+
       <h2 className={h2}>Limites</h2>
       <p className={p}>
         Cada chave pode fazer {RATE_PER_MINUTE} requisições por minuto e{" "}
@@ -229,9 +359,12 @@ export default function ApiDocs() {
       <Code>{`{ "error": { "code": "invalid_parameter", "message": "per_page: use de 1 a ${MAX_PER_PAGE}." } }`}</Code>
       <dl className="m-0 mt-3 grid gap-1.5 text-[12.5px]">
         {[
-          ["400", "invalid_parameter"],
+          ["400", "invalid_parameter, invalid_json"],
           ["401", "missing_api_key, invalid_api_key"],
+          ["403", "insufficient_scope, forbidden"],
           ["404", "not_found"],
+          ["413", "payload_too_large"],
+          ["422", "invalid_request"],
           ["429", "rate_limited"],
         ].map(([status, codes]) => (
           <div key={status} className="flex gap-3">

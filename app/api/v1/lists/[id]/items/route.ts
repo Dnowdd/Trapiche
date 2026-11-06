@@ -1,3 +1,6 @@
+import { act } from "@/lib/api/http";
+import { str } from "@/lib/api/write";
+import { addBookToList } from "@/lib/actions/lists";
 import { db } from "@/lib/db";
 import { ApiError, apiRoute, pageParams, paginated } from "@/lib/api/http";
 import { visibleTo } from "@/lib/api/lists";
@@ -35,4 +38,13 @@ export const GET = apiRoute<{ id: string }>(
       page,
     );
   },
+);
+
+export const POST = apiRoute<{ id: string }>(
+  async ({ userId, body }, { id }) => {
+    const bookId = str(await body(), "bookId", true)!;
+    await act(userId, () => addBookToList(id, bookId));
+    return { ok: true };
+  },
+  { write: true, status: 201 },
 );

@@ -14,14 +14,19 @@ export default function EnableDeveloper() {
         Ative o acesso de desenvolvedor
       </h2>
       <p className="m-0 mt-2 text-[14px] text-(--ink-3) leading-[1.55] max-w-150">
-        Com uma chave de API você lê os seus dados do Trapiche (estante,
-        leituras e listas) a partir do seu próprio código. A API é{" "}
-        <strong className="text-(--ink-2)">só de leitura</strong> e está em
-        beta.
+        Com uma chave de API você lê e, se quiser, altera seus dados do Trapiche
+        (estante, leituras, resenhas, citações, tags e listas) a partir do seu
+        próprio código ou app. Cada chave é{" "}
+        <strong className="text-(--ink-2)">só de leitura</strong>, a menos que
+        você permita escrita ao criá-la. A API está em beta.
       </p>
       <ul className="m-0 mt-4 pl-5 text-[13px] text-(--ink-3) leading-[1.7]">
         <li>Use a chave só no servidor e nunca a publique.</li>
         <li>A chave dá acesso aos seus dados e às listas que você pode ver.</li>
+        <li>
+          Chaves com escrita mudam sua conta como se fossem você. Revogue na
+          hora se uma vazar.
+        </li>
         <li>Respeite os limites de requisições e não revenda os dados.</li>
         <li>
           Ao exibir livros, cite a fonte (Open Library ou Google Books) e o

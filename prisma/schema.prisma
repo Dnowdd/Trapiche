@@ -542,6 +542,7 @@ model ApiKey {
   name       String
   prefix     String
   hash       String    @unique
+  canWrite   Boolean   @default(false)
   lastUsedAt DateTime?
   revokedAt  DateTime?
   createdAt  DateTime  @default(now())

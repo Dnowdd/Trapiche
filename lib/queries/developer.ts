@@ -21,6 +21,7 @@ export async function getDeveloper(userId: string) {
         createdAt: true,
         lastUsedAt: true,
         revokedAt: true,
+        canWrite: true,
       },
     }),
   ]);
@@ -33,6 +34,7 @@ export async function getDeveloper(userId: string) {
       created: fmtDay(dayOf(k.createdAt)),
       lastUsed: k.lastUsedAt ? fmtAgo(k.lastUsedAt) : null,
       revoked: k.revokedAt != null,
+      canWrite: k.canWrite,
     })),
   };
 }

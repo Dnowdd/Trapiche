@@ -1,12 +1,15 @@
 import { db } from "@/lib/db";
 import {
+  act,
   apiRoute,
   badParam,
   boolParam,
   pageParams,
   paginated,
 } from "@/lib/api/http";
-import { apiBook, apiBookSelect, iso } from "@/lib/api/serialize";
+import { bool, num, str } from "@/lib/api/write";
+import { addQuote } from "@/lib/actions/quotes";
+import { apiQuote, ownQuote, quoteSelect } from "@/lib/api/quotes";
 import type { Prisma } from "@/lib/generated/prisma/client";
 
 export const GET = apiRoute(async ({ userId, params }) => {
@@ -25,33 +28,26 @@ export const GET = apiRoute(async ({ userId, params }) => {
       orderBy: [{ createdAt: "desc" }, { id: "asc" }],
       skip: page.skip,
       take: page.take,
-      select: {
-        id: true,
-        text: true,
-        page: true,
-        note: true,
-        private: true,
-        hiddenAt: true,
-        createdAt: true,
-        updatedAt: true,
-        book: { select: apiBookSelect },
-      },
+      select: quoteSelect,
     }),
     db.quote.count({ where }),
   ]);
-  return paginated(
-    rows.map((q) => ({
-      id: q.id,
-      text: q.text,
-      page: q.page,
-      note: q.note,
-      private: q.private,
-      hidden: q.hiddenAt != null,
-      createdAt: iso(q.createdAt),
-      updatedAt: iso(q.updatedAt),
-      book: apiBook(q.book),
-    })),
-    total,
-    page,
-  );
+  return paginated(rows.map(apiQuote), total, page);
 });
+
+export const POST = apiRoute(
+  async ({ userId, body }) => {
+    const b = await body();
+    const bookId = str(b, "bookId", true)!;
+    const created = await act(userId, () =>
+      addQuote(bookId, {
+        text: str(b, "text", true)!,
+        page: num(b, "page") ?? null,
+        note: str(b, "note") ?? null,
+        private: bool(b, "private") ?? false,
+      }),
+    );
+    return ownQuote(userId, created!.id);
+  },
+  { write: true, status: 201 },
+);
