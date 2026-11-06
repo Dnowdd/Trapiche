@@ -21,12 +21,17 @@ export default function ReportModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  target: { reviewId: string } | { commentId: string };
+  target: { reviewId: string } | { commentId: string } | { quoteId: string };
 }) {
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [details, setDetails] = useState("");
   const { pending, error, setError, run } = useAction();
-  const isReview = "reviewId" in target;
+  const noun =
+    "reviewId" in target
+      ? "esta resenha"
+      : "commentId" in target
+        ? "este comentário"
+        : "esta citação";
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,11 +53,7 @@ export default function ReportModal({
       open={open}
       onOpenChange={onOpenChange}
       eyebrow="Denunciar"
-      title={
-        isReview
-          ? "O que há de errado com esta resenha?"
-          : "O que há de errado com este comentário?"
-      }
+      title={`O que há de errado com ${noun}?`}
       description="A moderação analisa cada denúncia. Quem escreveu não fica sabendo quem denunciou."
     >
       <form onSubmit={submit}>

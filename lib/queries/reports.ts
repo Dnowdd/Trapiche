@@ -33,16 +33,29 @@ export async function getReports(status: "OPEN" | "HIDDEN" | "DISMISSED") {
           review: { select: { book: { select: { id: true, title: true } } } },
         },
       },
+      quote: {
+        select: {
+          id: true,
+          text: true,
+          user: { select: { name: true, handle: true } },
+          book: { select: { id: true, title: true } },
+        },
+      },
     },
   });
   const seen = new Map<string, (typeof items)[number]>();
   const items = rows.map((r) => {
-    const target = r.review ?? r.comment;
-    const book = r.review?.book ?? r.comment?.review.book ?? null;
+    const target = r.review ?? r.comment ?? r.quote;
+    const book =
+      r.review?.book ?? r.comment?.review.book ?? r.quote?.book ?? null;
     return {
       id: r.id,
-      key: r.reviewId ?? r.commentId ?? r.id,
-      kind: r.reviewId ? ("review" as const) : ("comment" as const),
+      key: r.reviewId ?? r.commentId ?? r.quoteId ?? r.id,
+      kind: r.reviewId
+        ? ("review" as const)
+        : r.commentId
+          ? ("comment" as const)
+          : ("quote" as const),
       text: target?.text ?? "",
       spoiler: r.review?.spoiler ?? false,
       author: target?.user ?? null,
