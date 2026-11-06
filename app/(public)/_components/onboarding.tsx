@@ -199,8 +199,16 @@ export default function Onboarding({
         </div>
         {visible.length > 0 && (
           <div id="sugestoes" className="flex-1 min-w-0 scroll-mt-6">
-            <div className="text-[13px] text-(--ink-3) mb-3">
-              Comece por aqui — marque o que você já leu ou quer ler:
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-[13px] text-(--ink-3) mb-3">
+              <span>
+                Comece por aqui — marque o que você já leu ou quer ler:
+              </span>
+              <Link
+                href="/importar"
+                className="text-[12.5px] font-semibold text-(--ink-2) border-b border-(--ink-4) pb-px hover:text-(--ink)"
+              >
+                Vem do Goodreads ou Skoob? Importe →
+              </Link>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-3 lg:grid-cols-6 gap-3">
               {visible.slice(0, 6).map((b) => (

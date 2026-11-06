@@ -68,7 +68,7 @@ async function googleJson<T>(
   }
 }
 
-async function fetchVolumes(
+export async function fetchVolumes(
   query: string,
   maxResults = 10,
   orderBy: "relevance" | "newest" = "relevance",
