@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Maximize2, ShipWheel, Sparkles, SquarePen, X } from "lucide-react";
+import { Maximize2, ShipWheel, SquarePen, X } from "lucide-react";
 import { ASSISTANT_NAME } from "@/lib/assistant/config";
 import ChatView, { PilotMark, type ComposerHandle } from "./chat-view";
 import { useAssistantChat } from "./use-assistant-chat";
@@ -132,27 +132,15 @@ export default function AssistantLauncher({
           aria-haspopup="dialog"
           aria-controls="pratico-panel"
           aria-label={`Abrir o ${ASSISTANT_NAME}, assistente de leitura com IA`}
-          className="pratico-fab group fixed bottom-5 right-5 z-40 flex items-center gap-3 h-14 pl-2 pr-5 rounded-full cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 animate-[rise_0.4s_cubic-bezier(0.2,0.8,0.2,1)]"
+          title={ASSISTANT_NAME}
+          className="pratico-fab group fixed bottom-5 right-5 z-40 size-15 rounded-full flex items-center justify-center text-[#343600] cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 animate-[rise_0.4s_cubic-bezier(0.2,0.8,0.2,1)]"
         >
-          <span className="relative size-10 rounded-full bg-[#ffe767] text-[#343600] flex items-center justify-center">
-            <ShipWheel
-              size={21}
-              strokeWidth={1.9}
-              aria-hidden
-              className="transition-transform duration-700 ease-out group-hover:rotate-180"
-            />
-            <span className="absolute -right-1 -top-1 size-5 rounded-full bg-[#fff8d5] text-[#9a4a2a] ring-2 ring-[#24210c] flex items-center justify-center">
-              <Sparkles size={11} strokeWidth={2.4} aria-hidden />
-            </span>
-          </span>
-          <span className="flex flex-col items-start leading-none" aria-hidden>
-            <span className="text-[14.5px] font-bold text-[#fff8d5]">
-              {ASSISTANT_NAME}
-            </span>
-            <span className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#ffe767]">
-              IA de leitura
-            </span>
-          </span>
+          <ShipWheel
+            size={30}
+            strokeWidth={1.8}
+            aria-hidden
+            className="transition-transform duration-700 ease-out group-hover:rotate-180"
+          />
         </button>
       )}
 
