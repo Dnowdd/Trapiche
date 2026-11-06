@@ -7,7 +7,12 @@ import {
 } from "@/lib/assistant/markdown";
 import { cn } from "@/lib/utils";
 
-function inline(nodes: Inline[], onNavigate?: () => void): ReactNode {
+interface Ctx {
+  onNavigate?: () => void;
+  bookIds?: Set<string>;
+}
+
+function inline(nodes: Inline[], ctx: Ctx): ReactNode {
   return nodes.map((n, i) => {
     switch (n.type) {
       case "text":
@@ -15,11 +20,11 @@ function inline(nodes: Inline[], onNavigate?: () => void): ReactNode {
       case "strong":
         return (
           <strong key={i} className="font-semibold text-(--ink)">
-            {inline(n.children, onNavigate)}
+            {inline(n.children, ctx)}
           </strong>
         );
       case "em":
-        return <em key={i}>{inline(n.children, onNavigate)}</em>;
+        return <em key={i}>{inline(n.children, ctx)}</em>;
       case "code":
         return (
           <code
@@ -29,26 +34,30 @@ function inline(nodes: Inline[], onNavigate?: () => void): ReactNode {
             {n.text}
           </code>
         );
-      case "link":
+      case "link": {
+        const bookId = /^\/book\/([^/?#]+)/.exec(n.href)?.[1];
+        if (bookId && ctx.bookIds && !ctx.bookIds.has(bookId))
+          return <Fragment key={i}>{inline(n.children, ctx)}</Fragment>;
         return (
           <Link
             key={i}
             href={n.href}
-            onClick={onNavigate}
+            onClick={ctx.onNavigate}
             className="font-medium text-(--ink) underline decoration-[rgba(var(--ink-rgb),0.35)] underline-offset-[3px] hover:decoration-(--ink-2)"
           >
-            {inline(n.children, onNavigate)}
+            {inline(n.children, ctx)}
           </Link>
         );
+      }
     }
   });
 }
 
-function lines(rows: Line[], onNavigate?: () => void) {
+function lines(rows: Line[], ctx: Ctx) {
   return rows.map((row, i) => (
     <Fragment key={i}>
       {i > 0 && <br />}
-      {inline(row, onNavigate)}
+      {inline(row, ctx)}
     </Fragment>
   ));
 }
@@ -57,12 +66,15 @@ export default function RichText({
   text,
   className,
   onNavigate,
+  bookIds,
 }: {
   text: string;
   className?: string;
   onNavigate?: () => void;
+  bookIds?: Set<string>;
 }) {
   const blocks = parseMarkdown(text);
+  const ctx: Ctx = { onNavigate, bookIds };
   return (
     <div
       className={cn(
@@ -75,13 +87,13 @@ export default function RichText({
           case "p":
             return (
               <p key={i} className="m-0">
-                {lines(b.lines, onNavigate)}
+                {lines(b.lines, ctx)}
               </p>
             );
           case "h":
             return (
               <p key={i} className="m-0 font-bold text-(--ink)">
-                {inline(b.line, onNavigate)}
+                {inline(b.line, ctx)}
               </p>
             );
           case "quote":
@@ -90,7 +102,7 @@ export default function RichText({
                 key={i}
                 className="m-0 border-l-[3px] border-(--data-mark) pl-3.5 italic text-(--ink-3)"
               >
-                {lines(b.lines, onNavigate)}
+                {lines(b.lines, ctx)}
               </blockquote>
             );
           case "ul":
@@ -106,7 +118,7 @@ export default function RichText({
                       aria-hidden
                       className="absolute left-1 top-[0.7em] size-1.5 rounded-full bg-(--data-mark)"
                     />
-                    {lines(item, onNavigate)}
+                    {lines(item, ctx)}
                   </li>
                 ))}
               </ul>
@@ -127,7 +139,7 @@ export default function RichText({
                     >
                       {b.start + j}.
                     </span>
-                    {lines(item, onNavigate)}
+                    {lines(item, ctx)}
                   </li>
                 ))}
               </ol>

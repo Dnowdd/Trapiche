@@ -309,7 +309,7 @@ function CopyButton({ text }: { text: string }) {
           setCopied(false);
         }
       }}
-      className="inline-flex w-fit items-center gap-1.5 h-7 px-2 -ml-2 rounded-md text-[11.5px] font-medium text-(--ink-4) hover:text-(--ink-2) hover:bg-[rgba(var(--ink-rgb),0.06)] cursor-pointer"
+      className="inline-flex w-fit items-center gap-1.5 h-7 px-2 -ml-2 rounded-md text-[11.5px] font-medium text-(--ink-4) hover:text-(--ink-2) hover:bg-[rgba(var(--ink-rgb),0.06)] cursor-pointer opacity-0 transition-opacity duration-150 group-hover/msg:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
     >
       {copied ? (
         <Check size={13} aria-hidden />
@@ -352,14 +352,28 @@ function AssistantMessage({
   onNavigate?: () => void;
 }) {
   const parts = segments(m.content, m.blocks);
+  const bookIds = new Set(
+    m.blocks.flatMap((b) =>
+      b.type === "books"
+        ? b.books.map((x) => x.id)
+        : b.action.book
+          ? [b.action.book.id]
+          : [],
+    ),
+  );
   const working = m.streaming && (Boolean(m.status) || !m.content);
   return (
-    <div className="flex gap-3">
+    <div className="group/msg flex gap-3">
       <PilotMark size={28} spinning={m.streaming} className="mt-0.5" />
       <div className="min-w-0 flex-1 flex flex-col gap-3.5">
         {parts.map((p, i) =>
           p.kind === "text" ? (
-            <RichText key={`t${i}`} text={p.text} onNavigate={onNavigate} />
+            <RichText
+              key={`t${i}`}
+              text={p.text}
+              onNavigate={onNavigate}
+              bookIds={bookIds}
+            />
           ) : p.block.type === "books" ? (
             <BookStrip
               key={`b${p.index}`}
