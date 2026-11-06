@@ -32,7 +32,7 @@ export default async function NotificationsPage() {
             seguir suas listas ou te convidar para uma lista, aparece aqui.
           </p>
         ) : (
-          <ul className="m-0 p-1.5 list-none bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[14px]">
+          <ul className="m-0 p-1.5 list-none bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[14px]">
             {items.map((n) => (
               <NotificationRow key={n.id} n={n} />
             ))}

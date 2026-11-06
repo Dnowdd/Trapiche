@@ -124,7 +124,7 @@ export default function PrivacySettings({
                 "flex items-start gap-3.5 text-left rounded-[14px] border-[1.5px] px-4 py-3.5 cursor-pointer transition-colors duration-150",
                 active
                   ? "border-(--ink-2) bg-(--yellow-soft)"
-                  : "border-[rgba(67,62,18,0.12)] hover:bg-[rgba(67,62,18,0.03)]",
+                  : "border-[rgba(var(--ink-rgb),0.12)] hover:bg-[rgba(var(--ink-rgb),0.03)]",
               )}
             >
               <span
@@ -132,7 +132,7 @@ export default function PrivacySettings({
                   "size-9 shrink-0 rounded-full flex items-center justify-center",
                   active
                     ? "bg-(--ink-2) text-(--yellow)"
-                    : "bg-[rgba(67,62,18,0.07)] text-(--ink-3)",
+                    : "bg-[rgba(var(--ink-rgb),0.07)] text-(--ink-3)",
                 )}
               >
                 <svg
@@ -161,7 +161,9 @@ export default function PrivacySettings({
                 aria-hidden
                 className={cn(
                   "mt-1 size-4.5 shrink-0 rounded-full border-2 flex items-center justify-center",
-                  active ? "border-(--ink-2)" : "border-[rgba(67,62,18,0.25)]",
+                  active
+                    ? "border-(--ink-2)"
+                    : "border-[rgba(var(--ink-rgb),0.25)]",
                 )}
               >
                 {active && (
@@ -207,7 +209,7 @@ export default function PrivacySettings({
         />
       </div>
 
-      <div className="mt-5 rounded-[12px] bg-[rgba(67,62,18,0.05)] px-4 py-3 text-[12.5px] leading-normal text-(--ink-3)">
+      <div className="mt-5 rounded-[12px] bg-[rgba(var(--ink-rgb),0.05)] px-4 py-3 text-[12.5px] leading-normal text-(--ink-3)">
         Resenhas, comentários e listas públicas continuam visíveis onde foram
         publicados. Para esconder uma lista, mude a visibilidade dela.
       </div>

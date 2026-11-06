@@ -169,7 +169,7 @@ export default function PartialDateInput({
         id={`${id}-hint`}
         className={cn(
           "mt-1.5 text-[11px] leading-normal",
-          invalid || future ? "text-[#9a4a2a]" : "text-(--ink-4)",
+          invalid || future ? "text-(--danger)" : "text-(--ink-4)",
         )}
       >
         {hint}

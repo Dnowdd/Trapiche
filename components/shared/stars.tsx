@@ -14,7 +14,7 @@ export function starFill(value: number, index: number) {
 
 export function Star({
   fill,
-  emptyClassName = "text-[rgba(67,62,18,0.18)]",
+  emptyClassName = "text-[rgba(var(--ink-rgb),0.18)]",
 }: {
   fill: number;
   emptyClassName?: string;

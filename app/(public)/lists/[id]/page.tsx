@@ -141,7 +141,7 @@ export default async function ListPage({ params }: Props) {
         </section>
 
         {list.items.length === 0 ? (
-          <div className="mt-10 border-[1.5px] border-dashed border-[rgba(67,62,18,0.22)] rounded-[18px] py-12 px-8 text-center">
+          <div className="mt-10 border-[1.5px] border-dashed border-[rgba(var(--ink-rgb),0.22)] rounded-[18px] py-12 px-8 text-center">
             <div className="text-[16px] font-semibold text-(--ink-2)">
               Lista vazia por enquanto
             </div>

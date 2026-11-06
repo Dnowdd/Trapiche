@@ -52,7 +52,7 @@ export function VisibilityPicker({
             role="radio"
             aria-checked={value === v}
             onClick={() => onChange(v)}
-            className="text-left rounded-[10px] border-[1.5px] border-[rgba(67,62,18,0.14)] bg-(--cream-card) px-3 py-2.5 cursor-pointer transition-colors duration-120 hover:bg-(--yellow-soft) aria-checked:border-(--ink-2) aria-checked:bg-(--yellow-soft)"
+            className="text-left rounded-[10px] border-[1.5px] border-[rgba(var(--ink-rgb),0.14)] bg-(--cream-card) px-3 py-2.5 cursor-pointer transition-colors duration-120 hover:bg-(--yellow-soft) aria-checked:border-(--ink-2) aria-checked:bg-(--yellow-soft)"
           >
             <span className="block text-[13px] font-semibold text-(--ink-2)">
               {VISIBILITY_LABEL[v]}
@@ -133,7 +133,7 @@ export default function ListFormModal({
         </FormField>
         <VisibilityPicker value={visibility} onChange={setVisibility} />
         {list?.visibility === "SHARED" && visibility !== "SHARED" && (
-          <p className="m-0 -mt-1 text-[12px] text-[#9a4a2a]">
+          <p className="m-0 -mt-1 text-[12px] text-(--danger)">
             Quem você convidou vai perder acesso à lista.
           </p>
         )}

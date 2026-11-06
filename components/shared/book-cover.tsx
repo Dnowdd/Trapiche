@@ -34,7 +34,7 @@ const BookCover = ({ book, style, loading, sizes }: BookCoverProps) => {
   if (book.coverUrl && failed !== book.coverUrl) {
     return (
       <div
-        className={`rounded-[3px] relative overflow-hidden bg-[rgba(67,62,18,0.08)] shadow-[0_1px_2px_rgba(40,36,8,0.12),0_10px_24px_-14px_rgba(40,36,8,0.45)] ${shade}`}
+        className={`rounded-[3px] relative overflow-hidden bg-[rgba(var(--ink-rgb),0.08)] shadow-[0_1px_2px_rgba(40,36,8,0.12),0_10px_24px_-14px_rgba(40,36,8,0.45)] ${shade}`}
         style={style}
       >
         <Image

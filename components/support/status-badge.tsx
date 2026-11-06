@@ -4,7 +4,7 @@ import { TICKET_STATUS, type TicketStatusId } from "@/lib/support";
 const TONE: Record<TicketStatusId, string> = {
   OPEN: "bg-(--yellow-soft) text-(--ink-2) border-(--yellow-deep)",
   ANSWERED: "bg-[#e3eccb] text-[#3d5a1c] border-[#cddbb0]",
-  CLOSED: "bg-[rgba(67,62,18,0.06)] text-(--ink-4) border-transparent",
+  CLOSED: "bg-[rgba(var(--ink-rgb),0.06)] text-(--ink-4) border-transparent",
 };
 
 export default function StatusBadge({

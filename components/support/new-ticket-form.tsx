@@ -61,7 +61,7 @@ export default function NewTicketForm({
                 "h-9 px-3.5 rounded-full border text-[13px] font-medium cursor-pointer transition-colors duration-120",
                 category === id
                   ? "bg-(--ink-2) text-(--yellow) border-(--ink-2)"
-                  : "border-[rgba(67,62,18,0.15)] text-(--ink-3) hover:bg-(--yellow-soft)",
+                  : "border-[rgba(var(--ink-rgb),0.15)] text-(--ink-3) hover:bg-(--yellow-soft)",
               )}
             >
               {TICKET_CATEGORIES[id]}

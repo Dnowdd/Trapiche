@@ -40,7 +40,7 @@ function Distribution({ rating }: { rating: BookPageData["rating"] }) {
             key={n}
           >
             <span className="font-mono text-[11px] text-(--ink-3)">{n}★</span>
-            <div className="h-1.5 bg-[rgba(67,62,18,0.07)] rounded-full overflow-hidden">
+            <div className="h-1.5 bg-[rgba(var(--ink-rgb),0.07)] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full bg-(--ink-2)"
                 style={{ width: pct + "%" }}
@@ -99,7 +99,7 @@ export default function ReviewsSection({ data }: { data: BookPageData }) {
       />
 
       {empty ? (
-        <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[16px] p-6 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+        <div className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[16px] p-6 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
           <div>
             <div className="text-[16px] font-bold text-(--ink)">
               Ninguém avaliou esse livro ainda
@@ -115,7 +115,7 @@ export default function ReviewsSection({ data }: { data: BookPageData }) {
       ) : (
         <div className="flex flex-col gap-4">
           {rating.count > 0 && (
-            <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[16px] p-6 grid gap-6 sm:grid-cols-[auto_1fr] items-center">
+            <div className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[16px] p-6 grid gap-6 sm:grid-cols-[auto_1fr] items-center">
               <div className="flex sm:flex-col items-center sm:items-start gap-3 sm:gap-1 sm:pr-6 sm:border-r border-(--rule)">
                 <div className="text-[48px] font-extrabold tracking-[-0.03em] leading-none text-(--ink)">
                   {rating.average.toFixed(1).replace(".", ",")}
@@ -188,7 +188,7 @@ export default function ReviewsSection({ data }: { data: BookPageData }) {
                 </div>
               </div>
               {review.hidden && (
-                <p className="m-0 mb-2 text-[12px] text-[#9a4a2a]">
+                <p className="m-0 mb-2 text-[12px] text-(--danger)">
                   O texto desta resenha foi ocultado pela moderação e só você o
                   vê. Sua nota continua valendo.
                 </p>
@@ -211,7 +211,7 @@ export default function ReviewsSection({ data }: { data: BookPageData }) {
               )}
             </div>
           ) : (
-            <div className="border border-dashed border-[rgba(67,62,18,0.2)] rounded-[16px] py-4 px-5 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+            <div className="border border-dashed border-[rgba(var(--ink-rgb),0.2)] rounded-[16px] py-4 px-5 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
               <p className="m-0 text-[13px] text-(--ink-3)">{promptFor(v)}</p>
               <WriteButton loggedIn={loggedIn} onClick={write} />
             </div>

@@ -32,3 +32,14 @@ test("signed-in screens have no accessibility violations", async ({ page }) => {
     expect(await audit(page), path).toEqual([]);
   }
 });
+
+test.describe("dark theme", () => {
+  test.use({ colorScheme: "dark" });
+  for (const path of ["/", "/auth", `/book/${BOOK}`])
+    test(`${path} has no accessibility violations in dark mode`, async ({
+      page,
+    }) => {
+      await page.goto(path, { waitUntil: "networkidle" });
+      expect(await audit(page)).toEqual([]);
+    });
+});

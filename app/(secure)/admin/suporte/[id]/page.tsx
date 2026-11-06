@@ -40,7 +40,7 @@ export default async function StaffTicketPage({
           viewerId={session.user.id}
           staffView={staff}
         />
-        <aside className="rounded-[18px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) p-5 lg:sticky lg:top-6">
+        <aside className="rounded-[18px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) p-5 lg:sticky lg:top-6">
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-3">
             Quem abriu
           </div>

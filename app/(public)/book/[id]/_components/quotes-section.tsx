@@ -48,7 +48,7 @@ export default function QuotesSection({
         <button
           type="button"
           onClick={add}
-          className="group w-full text-left rounded-[18px] border border-dashed border-[rgba(67,62,18,0.22)] px-6 py-7 flex items-center gap-5 cursor-pointer hover:bg-(--yellow-soft) transition-colors duration-150"
+          className="group w-full text-left rounded-[18px] border border-dashed border-[rgba(var(--ink-rgb),0.22)] px-6 py-7 flex items-center gap-5 cursor-pointer hover:bg-(--yellow-soft) transition-colors duration-150"
         >
           <span className="size-12 shrink-0 rounded-full bg-(--ink-2) text-(--yellow) flex items-center justify-center transition-transform duration-150 group-hover:-rotate-6">
             <QuoteIcon size={20} strokeWidth={2.2} />

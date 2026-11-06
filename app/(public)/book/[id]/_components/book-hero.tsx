@@ -57,7 +57,7 @@ const STATUSES: { id: Status; label: string }[] = [
 ];
 
 const menuItem =
-  "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)";
+  "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(var(--ink-rgb),0.06)] focus:text-(--ink-2)";
 
 const iconButton =
   "w-10 h-10 rounded-[10px] border flex items-center justify-center cursor-pointer transition-[background,color,border-color] duration-120 disabled:cursor-wait";
@@ -65,7 +65,7 @@ const iconButton =
 function iconButtonState(active: boolean) {
   return active
     ? "bg-(--yellow) border-(--yellow-deep) text-(--ink)"
-    : "bg-(--cream-card) border-[rgba(67,62,18,0.14)] text-(--ink-3) hover:text-(--ink) hover:bg-(--yellow-soft)";
+    : "bg-(--cream-card) border-[rgba(var(--ink-rgb),0.14)] text-(--ink-3) hover:text-(--ink) hover:bg-(--yellow-soft)";
 }
 
 interface BookHeroProps {
@@ -162,7 +162,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
             aspectRatio: "2/3",
             borderRadius: 6,
             boxShadow:
-              "0 30px 50px -28px rgba(67,62,18,0.55), 0 8px 16px -8px rgba(67,62,18,0.25)",
+              "0 30px 50px -28px rgba(var(--shadow-rgb),0.55), 0 8px 16px -8px rgba(var(--shadow-rgb),0.25)",
             padding: "24px 20px",
           }}
         />
@@ -474,7 +474,7 @@ function StatusMenu({
   return (
     <DropdownMenuContent
       align="start"
-      className="w-auto min-w-48 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(67,62,18,0.10)] shadow-[0_16px_40px_-8px_rgba(67,62,18,0.22),0_2px_8px_-2px_rgba(67,62,18,0.10)]"
+      className="w-auto min-w-48 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(var(--ink-rgb),0.10)] shadow-[0_16px_40px_-8px_rgba(var(--shadow-rgb),0.22),0_2px_8px_-2px_rgba(var(--shadow-rgb),0.10)]"
     >
       {current === "READ" && onReadAgain && (
         <>
@@ -482,7 +482,7 @@ function StatusMenu({
             <RotateCcw className="w-3.5 h-3.5" />
             Li de novo
           </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
+          <DropdownMenuSeparator className="bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1" />
         </>
       )}
       {STATUSES.filter(
@@ -498,7 +498,7 @@ function StatusMenu({
       ))}
       {allowRemove && (
         <>
-          <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
+          <DropdownMenuSeparator className="bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1" />
           <DropdownMenuItem className={menuItem} onClick={() => onChoose(null)}>
             <X className="w-3.5 h-3.5" />
             Remover da estante

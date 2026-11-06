@@ -9,7 +9,7 @@ import { SectionHeader } from "./section-header";
 import { authorHref } from "@/lib/links";
 
 const arrow =
-  "w-9 h-9 rounded-full border border-[rgba(67,62,18,0.16)] bg-(--cream-card) text-(--ink-2) flex items-center justify-center cursor-pointer transition-[background,opacity] duration-150 hover:bg-(--yellow-soft) disabled:opacity-35 disabled:cursor-default disabled:hover:bg-(--cream-card)";
+  "w-9 h-9 rounded-full border border-[rgba(var(--ink-rgb),0.16)] bg-(--cream-card) text-(--ink-2) flex items-center justify-center cursor-pointer transition-[background,opacity] duration-150 hover:bg-(--yellow-soft) disabled:opacity-35 disabled:cursor-default disabled:hover:bg-(--cream-card)";
 
 export default function ByAuthor({ data }: { data: ByAuthorData }) {
   const track = useRef<HTMLDivElement>(null);

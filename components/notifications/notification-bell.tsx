@@ -51,7 +51,7 @@ export default function NotificationBell() {
         aria-label={
           unread ? `Notificações, ${unread} não lidas` : "Notificações"
         }
-        className="relative w-9 h-9 rounded-lg flex items-center justify-center text-(--ink-2) cursor-pointer outline-none transition-[background] duration-150 hover:bg-[rgba(67,62,18,0.06)]"
+        className="relative w-9 h-9 rounded-lg flex items-center justify-center text-(--ink-2) cursor-pointer outline-none transition-[background] duration-150 hover:bg-[rgba(var(--ink-rgb),0.06)]"
       >
         <Bell className="w-4.5 h-4.5" />
         {unread > 0 && (
@@ -63,7 +63,7 @@ export default function NotificationBell() {
       <DropdownMenuContent
         align="end"
         sideOffset={10}
-        className="w-80 max-w-[calc(100vw-24px)] p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(67,62,18,0.10)] shadow-[0_16px_40px_-8px_rgba(67,62,18,0.22),0_2px_8px_-2px_rgba(67,62,18,0.10)]"
+        className="w-80 max-w-[calc(100vw-24px)] p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(var(--ink-rgb),0.10)] shadow-[0_16px_40px_-8px_rgba(var(--shadow-rgb),0.22),0_2px_8px_-2px_rgba(var(--shadow-rgb),0.10)]"
       >
         <div className="px-3 pt-2 pb-1.5 font-mono text-[10px] text-(--ink-4) tracking-[0.08em] uppercase">
           Notificações
@@ -86,7 +86,7 @@ export default function NotificationBell() {
         )}
         <Link
           href="/notificacoes"
-          className="block mt-1 px-3 py-2 rounded-[8px] text-[12px] font-medium text-(--ink-2) hover:bg-[rgba(67,62,18,0.06)]"
+          className="block mt-1 px-3 py-2 rounded-[8px] text-[12px] font-medium text-(--ink-2) hover:bg-[rgba(var(--ink-rgb),0.06)]"
         >
           Ver todas
         </Link>

@@ -39,7 +39,7 @@ export default function GoogleButton({
         type="button"
         onClick={go}
         disabled={loading}
-        className="w-full h-12 rounded-[10px] bg-white text-(--ink-2) text-[14px] font-semibold border border-[rgba(67,62,18,0.18)] flex items-center justify-center gap-2.5 transition-[transform,box-shadow] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_10px_20px_-14px_rgba(67,62,18,0.5)] disabled:opacity-60 cursor-pointer [&_svg]:w-4.5 [&_svg]:h-4.5"
+        className="w-full h-12 rounded-[10px] bg-white text-[#433e12] text-[14px] font-semibold border border-[rgba(var(--ink-rgb),0.18)] flex items-center justify-center gap-2.5 transition-[transform,box-shadow] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_10px_20px_-14px_rgba(var(--shadow-rgb),0.5)] disabled:opacity-60 cursor-pointer [&_svg]:w-4.5 [&_svg]:h-4.5"
       >
         {loading ? <Loader className="animate-spin" /> : <GoogleMark />}
         {label}
@@ -50,9 +50,9 @@ export default function GoogleButton({
         </p>
       )}
       <div className="my-5 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4)">
-        <span className="h-px flex-1 bg-[rgba(67,62,18,0.12)]" />
+        <span className="h-px flex-1 bg-[rgba(var(--ink-rgb),0.12)]" />
         ou com e-mail
-        <span className="h-px flex-1 bg-[rgba(67,62,18,0.12)]" />
+        <span className="h-px flex-1 bg-[rgba(var(--ink-rgb),0.12)]" />
       </div>
     </>
   );

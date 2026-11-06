@@ -35,7 +35,7 @@ function pace(
 const TONE = {
   good: "bg-[#e3eccb] text-[#3d5a1c]",
   bad: "bg-[#f6dccb] text-[#8a3f1f]",
-  neutral: "bg-[rgba(67,62,18,0.07)] text-(--ink-3)",
+  neutral: "bg-[rgba(var(--ink-rgb),0.07)] text-(--ink-3)",
 };
 
 function Ring({ pct }: { pct: number }) {
@@ -49,7 +49,7 @@ function Ring({ pct }: { pct: number }) {
         r={r}
         fill="none"
         strokeWidth="9"
-        className="stroke-[rgba(67,62,18,0.09)]"
+        className="stroke-[rgba(var(--ink-rgb),0.09)]"
       />
       <circle
         cx="50"
@@ -81,7 +81,7 @@ export default function GoalCard({
   const p = pace(goal);
 
   return (
-    <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6">
+    <div className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4)">
           Meta de {goal.year}
@@ -146,7 +146,7 @@ export default function GoalCard({
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="mt-4 w-full h-10 rounded-[10px] border border-dashed border-[rgba(67,62,18,0.3)] text-[13px] font-medium text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft) hover:border-solid"
+              className="mt-4 w-full h-10 rounded-[10px] border border-dashed border-[rgba(var(--ink-rgb),0.3)] text-[13px] font-medium text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft) hover:border-solid"
             >
               Definir uma meta para {goal.year}
             </button>

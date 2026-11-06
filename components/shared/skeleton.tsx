@@ -12,7 +12,7 @@ export function Skeleton({
       aria-hidden
       style={style}
       className={cn(
-        "rounded-md bg-[rgba(67,62,18,0.07)] relative overflow-hidden",
+        "rounded-md bg-[rgba(var(--ink-rgb),0.07)] relative overflow-hidden",
         "after:content-[''] after:absolute after:inset-0 after:-translate-x-full after:animate-[shimmer_1.4s_ease-in-out_infinite]",
         "after:bg-[linear-gradient(90deg,transparent,rgba(255,253,223,0.7),transparent)]",
         className,

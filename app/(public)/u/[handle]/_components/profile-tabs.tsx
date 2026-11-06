@@ -25,7 +25,7 @@ export default function ProfileTabs({
   suffix?: string;
 }) {
   return (
-    <div className="px-4 sm:px-8 lg:px-15 border-b border-[rgba(67,62,18,0.12)]">
+    <div className="px-4 sm:px-8 lg:px-15 border-b border-[rgba(var(--ink-rgb),0.12)]">
       <div
         className="flex gap-6 sm:gap-8 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="tablist"
@@ -41,7 +41,7 @@ export default function ProfileTabs({
           >
             {LABELS[t]}
             {counts[t] != null && (
-              <span className="font-mono text-[10px] text-(--ink-5) bg-[rgba(67,62,18,0.06)] rounded py-px px-1.5 tracking-normal group-aria-selected:bg-(--ink-2) group-aria-selected:text-(--yellow)">
+              <span className="font-mono text-[10px] text-(--ink-5) bg-[rgba(var(--ink-rgb),0.06)] rounded py-px px-1.5 tracking-normal group-aria-selected:bg-(--ink-2) group-aria-selected:text-(--yellow)">
                 {counts[t]}
               </span>
             )}

@@ -33,7 +33,7 @@ export default function AvaliacoesTab({
     <div className="flex flex-col gap-4.5">
       {items.map((r) => (
         <article
-          className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:py-6.5 sm:px-7 grid grid-cols-[72px_1fr] sm:grid-cols-[120px_1fr] gap-4 sm:gap-7"
+          className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-5 sm:py-6.5 sm:px-7 grid grid-cols-[72px_1fr] sm:grid-cols-[120px_1fr] gap-4 sm:gap-7"
           key={r.id}
         >
           <Link href={`/book/${r.book.id}`}>
@@ -73,7 +73,7 @@ export default function AvaliacoesTab({
               )}
             </div>
             {isOwner && r.hidden && (
-              <p className="m-0 mb-2 text-[12px] text-[#9a4a2a]">
+              <p className="m-0 mb-2 text-[12px] text-(--danger)">
                 Texto ocultado pela moderação. Só você o vê.
               </p>
             )}

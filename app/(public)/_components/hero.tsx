@@ -16,7 +16,7 @@ const BOOK_POSITIONS: CSSProperties[] = [
     zIndex: 1,
     transition: "transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1)",
     boxShadow:
-      "0 24px 40px -20px rgba(67,62,18,0.4), 0 4px 10px -4px rgba(67,62,18,0.2)",
+      "0 24px 40px -20px rgba(var(--shadow-rgb),0.4), 0 4px 10px -4px rgba(var(--shadow-rgb),0.2)",
   },
   {
     position: "absolute",
@@ -28,7 +28,7 @@ const BOOK_POSITIONS: CSSProperties[] = [
     zIndex: 3,
     transition: "transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1)",
     boxShadow:
-      "0 24px 40px -20px rgba(67,62,18,0.4), 0 4px 10px -4px rgba(67,62,18,0.2)",
+      "0 24px 40px -20px rgba(var(--shadow-rgb),0.4), 0 4px 10px -4px rgba(var(--shadow-rgb),0.2)",
   },
   {
     position: "absolute",
@@ -40,7 +40,7 @@ const BOOK_POSITIONS: CSSProperties[] = [
     zIndex: 2,
     transition: "transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1)",
     boxShadow:
-      "0 24px 40px -20px rgba(67,62,18,0.4), 0 4px 10px -4px rgba(67,62,18,0.2)",
+      "0 24px 40px -20px rgba(var(--shadow-rgb),0.4), 0 4px 10px -4px rgba(var(--shadow-rgb),0.2)",
   },
 ];
 
@@ -79,7 +79,7 @@ const Hero = ({ books }: HeroProps) => {
 
         <div className="flex flex-wrap items-center gap-3.5">
           <button
-            className="bg-(--yellow) text-(--ink) py-3 px-5.5 rounded-lg text-[14px] font-semibold inline-flex items-center gap-2 border border-(--yellow-deep) transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(67,62,18,0.4)]"
+            className="bg-(--yellow) text-(--ink) py-3 px-5.5 rounded-lg text-[14px] font-semibold inline-flex items-center gap-2 border border-(--yellow-deep) transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(var(--shadow-rgb),0.4)]"
             onClick={() => router.push("/auth?mode=register")}
           >
             <svg

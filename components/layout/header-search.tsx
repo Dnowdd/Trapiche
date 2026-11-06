@@ -11,7 +11,7 @@ const DEBOUNCE_MS = 400;
 
 function CoverThumb({ url }: { url: string | null }) {
   return (
-    <div className="w-9 h-13.5 rounded-[3px] shrink-0 overflow-hidden bg-(--cream-deep) shadow-[0_1px_3px_rgba(67,62,18,0.18)]">
+    <div className="w-9 h-13.5 rounded-[3px] shrink-0 overflow-hidden bg-(--cream-deep) shadow-[0_1px_3px_rgba(var(--shadow-rgb),0.18)]">
       {url && (
         <Image
           src={url}
@@ -206,8 +206,8 @@ export default function HeaderSearch() {
           "h-10 rounded-[10px] bg-(--cream) flex items-center gap-2.5 px-4 cursor-text",
           "border transition-[border-color,box-shadow] duration-150",
           showDropdown || query
-            ? "border-[rgba(67,62,18,0.20)] shadow-[0_4px_14px_-6px_rgba(67,62,18,0.18)]"
-            : "border-[rgba(67,62,18,0.07)]",
+            ? "border-[rgba(var(--ink-rgb),0.20)] shadow-[0_4px_14px_-6px_rgba(var(--shadow-rgb),0.18)]"
+            : "border-[rgba(var(--ink-rgb),0.07)]",
         ].join(" ")}
       >
         <svg
@@ -271,9 +271,9 @@ export default function HeaderSearch() {
       </label>
 
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 mt-2 rounded-[14px] bg-(--cream) border border-[rgba(67,62,18,0.09)] shadow-[0_20px_60px_-16px_rgba(67,62,18,0.28),0_4px_12px_-4px_rgba(67,62,18,0.10)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="absolute top-full left-0 right-0 mt-2 rounded-[14px] bg-(--cream) border border-[rgba(var(--ink-rgb),0.09)] shadow-[0_20px_60px_-16px_rgba(var(--shadow-rgb),0.28),0_4px_12px_-4px_rgba(var(--shadow-rgb),0.10)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
           {loading && (
-            <div className="h-0.5 overflow-hidden bg-[rgba(67,62,18,0.06)]">
+            <div className="h-0.5 overflow-hidden bg-[rgba(var(--ink-rgb),0.06)]">
               <div className="h-full w-1/3 bg-(--ink-3) animate-[search-progress_1s_ease-in-out_infinite]" />
             </div>
           )}
@@ -342,7 +342,7 @@ export default function HeaderSearch() {
               )}
               <button
                 type="button"
-                className="w-full mt-1 px-3 py-2.5 rounded-[10px] text-left text-[13px] font-medium text-(--ink-2) hover:bg-[rgba(67,62,18,0.06)] cursor-pointer"
+                className="w-full mt-1 px-3 py-2.5 rounded-[10px] text-left text-[13px] font-medium text-(--ink-2) hover:bg-[rgba(var(--ink-rgb),0.06)] cursor-pointer"
                 onClick={openResults}
               >
                 Ver todos os resultados para “{found.query}”
@@ -435,7 +435,7 @@ function Group({
   children: React.ReactNode;
 }) {
   return (
-    <div className="[&+&]:mt-1 [&+&]:pt-1 [&+&]:border-t [&+&]:border-[rgba(67,62,18,0.06)]">
+    <div className="[&+&]:mt-1 [&+&]:pt-1 [&+&]:border-t [&+&]:border-[rgba(var(--ink-rgb),0.06)]">
       {label && (
         <div className="px-3 pt-2 pb-1 flex items-center justify-between font-mono text-[10px] text-(--ink-4) tracking-[0.08em] uppercase">
           {label}
@@ -464,7 +464,7 @@ function Row({
         type="button"
         className={[
           "w-full text-left px-3 py-2.5 rounded-[10px] flex items-center gap-3.5 transition-colors duration-100",
-          active ? "bg-[rgba(67,62,18,0.06)]" : "",
+          active ? "bg-[rgba(var(--ink-rgb),0.06)]" : "",
         ].join(" ")}
         onClick={onSelect}
         onMouseEnter={onHover}

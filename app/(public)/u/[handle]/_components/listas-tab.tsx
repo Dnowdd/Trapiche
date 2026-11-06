@@ -20,7 +20,7 @@ const stackStyle = (i: number): React.CSSProperties => ({
   width: 95,
   height: 140,
   borderRadius: 3,
-  boxShadow: "0 10px 16px -8px rgba(67,62,18,0.45)",
+  boxShadow: "0 10px 16px -8px rgba(var(--shadow-rgb),0.45)",
   left: `${20 + i * 20}%`,
   transform: `translateX(-50%) rotate(${ROTATIONS[i]})`,
   zIndex: i + 1,
@@ -29,7 +29,7 @@ const stackStyle = (i: number): React.CSSProperties => ({
 const ListCardRich = ({ list }: { list: ListItem }) => (
   <Link
     href={`/lists/${list.id}`}
-    className={`bg-(--cream-card) border rounded-[18px] p-4.5 flex flex-col gap-3.5 transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(67,62,18,0.04),0_24px_60px_-28px_rgba(67,62,18,0.3)] ${list.pinned ? "border-(--ink-2)" : "border-[rgba(67,62,18,0.08)]"}`}
+    className={`bg-(--cream-card) border rounded-[18px] p-4.5 flex flex-col gap-3.5 transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(var(--shadow-rgb),0.04),0_24px_60px_-28px_rgba(var(--shadow-rgb),0.3)] ${list.pinned ? "border-(--ink-2)" : "border-[rgba(var(--ink-rgb),0.08)]"}`}
   >
     <div className="h-42.5 relative rounded-[10px] overflow-hidden bg-(--yellow-soft)">
       <div className="absolute top-3 right-3 font-mono text-[10px] bg-(--ink-2) text-(--yellow) py-1 px-2.5 rounded-full tracking-[0.04em] z-5">
@@ -166,7 +166,7 @@ export default function ListasTab({
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="bg-transparent border-[1.5px] border-dashed border-[rgba(67,62,18,0.22)] rounded-[18px] p-4.5 flex flex-col items-center justify-center min-h-95 text-center gap-2 cursor-pointer transition-colors duration-150 hover:bg-(--yellow-soft)"
+            className="bg-transparent border-[1.5px] border-dashed border-[rgba(var(--ink-rgb),0.22)] rounded-[18px] p-4.5 flex flex-col items-center justify-center min-h-95 text-center gap-2 cursor-pointer transition-colors duration-150 hover:bg-(--yellow-soft)"
           >
             <span className="text-[36px] font-light text-(--ink-3) leading-[0.8]">
               +

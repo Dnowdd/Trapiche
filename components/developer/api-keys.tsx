@@ -134,7 +134,7 @@ function CreateKey({ disabled }: { disabled: boolean }) {
 export default function ApiKeys({ keys }: { keys: DeveloperData["keys"] }) {
   const active = keys.filter((k) => !k.revoked).length;
   return (
-    <section className="rounded-[18px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
+    <section className="rounded-[18px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden">
       <div className="flex items-center justify-between gap-4 px-5 sm:px-6 py-4 border-b border-(--rule)">
         <div>
           <h2 className="m-0 text-[16px] font-bold text-(--ink)">
@@ -162,12 +162,12 @@ export default function ApiKeys({ keys }: { keys: DeveloperData["keys"] }) {
                   {k.name}
                 </span>
                 {k.revoked ? (
-                  <span className="font-mono text-[9px] uppercase tracking-[0.06em] bg-[rgba(67,62,18,0.08)] text-(--ink-4) px-1.5 py-px rounded">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.06em] bg-[rgba(var(--ink-rgb),0.08)] text-(--ink-4) px-1.5 py-px rounded">
                     revogada
                   </span>
                 ) : (
                   <span
-                    className={`font-mono text-[9px] uppercase tracking-[0.06em] px-1.5 py-px rounded ${k.canWrite ? "bg-(--ink-2) text-(--yellow)" : "bg-[rgba(67,62,18,0.08)] text-(--ink-4)"}`}
+                    className={`font-mono text-[9px] uppercase tracking-[0.06em] px-1.5 py-px rounded ${k.canWrite ? "bg-(--ink-2) text-(--yellow)" : "bg-[rgba(var(--ink-rgb),0.08)] text-(--ink-4)"}`}
                   >
                     {k.canWrite ? "leitura e escrita" : "só leitura"}
                   </span>

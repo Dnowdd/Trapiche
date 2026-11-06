@@ -35,11 +35,11 @@ export default async function AdminHome() {
 
   return (
     <SupportShell eyebrow="Administração" title="Visão geral">
-      <div className="grid grid-cols-2 sm:grid-cols-5 rounded-2xl border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-5 rounded-2xl border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden">
         {stats.map((s, i) => (
           <div
             key={s.label}
-            className={`py-4 px-5 border-[rgba(67,62,18,0.08)] ${i > 0 ? "sm:border-l" : ""} ${i % 2 === 1 ? "max-sm:border-l" : ""} ${i >= 2 ? "max-sm:border-t" : ""}`}
+            className={`py-4 px-5 border-[rgba(var(--ink-rgb),0.08)] ${i > 0 ? "sm:border-l" : ""} ${i % 2 === 1 ? "max-sm:border-l" : ""} ${i >= 2 ? "max-sm:border-t" : ""}`}
           >
             <div className="text-[28px] font-extrabold tracking-[-0.03em] text-(--ink) leading-none tabular-nums">
               {s.value.toLocaleString("pt-BR")}
@@ -56,7 +56,7 @@ export default async function AdminHome() {
           <Link
             key={q.href}
             href={q.href}
-            className={`flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 transition-colors ${q.value > 0 ? "border-(--yellow-deep) bg-(--yellow-soft) hover:bg-(--yellow)" : "border-[rgba(67,62,18,0.1)] bg-(--cream-card) hover:bg-(--yellow-soft)"}`}
+            className={`flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 transition-colors ${q.value > 0 ? "border-(--yellow-deep) bg-(--yellow-soft) hover:bg-(--yellow)" : "border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) hover:bg-(--yellow-soft)"}`}
           >
             <span className="text-[14px] font-semibold text-(--ink-2)">
               {q.label}
@@ -84,7 +84,7 @@ export default async function AdminHome() {
           Todos os usuários →
         </Link>
       </div>
-      <div className="rounded-[18px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
+      <div className="rounded-[18px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden">
         {data.recent.map((u) => (
           <Link
             key={u.id}

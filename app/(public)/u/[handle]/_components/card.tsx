@@ -15,7 +15,7 @@ export default function Card({
 }) {
   return (
     <div
-      className={`bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7 ${className}`}
+      className={`bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7 ${className}`}
     >
       <div className="flex items-center justify-between gap-4 mb-4.5">
         <div>

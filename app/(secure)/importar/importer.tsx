@@ -64,7 +64,7 @@ function Steps() {
       {steps.map((s, i) => (
         <div
           key={s.title}
-          className="rounded-[14px] bg-(--cream-card) border border-[rgba(67,62,18,0.08)] p-4"
+          className="rounded-[14px] bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.08)] p-4"
         >
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4)">
             0{i + 1}
@@ -91,11 +91,11 @@ function Stat({
   tone?: "warn";
 }) {
   return (
-    <div className="rounded-[12px] bg-(--cream-card) border border-[rgba(67,62,18,0.08)] px-4 py-3">
+    <div className="rounded-[12px] bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.08)] px-4 py-3">
       <div
         className={cn(
           "text-[24px] font-extrabold tracking-[-0.02em] tabular-nums leading-none",
-          tone === "warn" ? "text-[#9a4a2a]" : "text-(--ink)",
+          tone === "warn" ? "text-(--danger)" : "text-(--ink)",
         )}
       >
         {value.toLocaleString("pt-BR")}
@@ -121,7 +121,7 @@ function Progress({
   const pct = state.total ? Math.round((state.done / state.total) * 100) : 0;
   const running = state.status === "RUNNING";
   return (
-    <section className="mt-8 rounded-[20px] border border-[rgba(67,62,18,0.1)] bg-(--cream) overflow-hidden">
+    <section className="mt-8 rounded-[20px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream) overflow-hidden">
       <div className="bg-(--ink-2) text-(--cream) px-5 sm:px-6 py-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <div>
@@ -165,7 +165,7 @@ function Progress({
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-2">
               Esses ficaram de fora · adicione pela busca
             </div>
-            <ul className="m-0 p-0 list-none max-h-80 overflow-y-auto rounded-[12px] border border-[rgba(67,62,18,0.08)] divide-y divide-(--rule)">
+            <ul className="m-0 p-0 list-none max-h-80 overflow-y-auto rounded-[12px] border border-[rgba(var(--ink-rgb),0.08)] divide-y divide-(--rule)">
               {state.problems.map((p) => (
                 <li
                   key={p.id}
@@ -184,7 +184,7 @@ function Progress({
                   <Link
                     href={`/search?q=${encodeURIComponent(p.isbn ?? [p.title, p.author].filter(Boolean).join(" "))}`}
                     target="_blank"
-                    className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[rgba(67,62,18,0.18)] text-[12px] text-(--ink-2) hover:bg-(--yellow-soft)"
+                    className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[rgba(var(--ink-rgb),0.18)] text-[12px] text-(--ink-2) hover:bg-(--yellow-soft)"
                   >
                     <Search size={13} /> Buscar
                   </Link>
@@ -346,7 +346,7 @@ export default function Importer({
           "flex flex-col items-center justify-center text-center gap-3 rounded-[20px] border-2 border-dashed px-6 py-12 cursor-pointer transition-colors duration-150",
           dragging
             ? "border-(--ink-2) bg-(--yellow-soft)"
-            : "border-[rgba(67,62,18,0.22)] hover:bg-(--yellow-soft)",
+            : "border-[rgba(var(--ink-rgb),0.22)] hover:bg-(--yellow-soft)",
         )}
       >
         <span className="size-14 rounded-full bg-(--ink-2) text-(--yellow) flex items-center justify-center">
@@ -367,7 +367,7 @@ export default function Importer({
       </label>
 
       {preview && (
-        <section className="rounded-[18px] bg-(--cream-card) border border-[rgba(67,62,18,0.1)] p-5 sm:p-6">
+        <section className="rounded-[18px] bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.1)] p-5 sm:p-6">
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4)">
             Detectamos um arquivo do {SOURCE_LABEL[preview.source]}
           </div>
@@ -389,12 +389,12 @@ export default function Importer({
               </span>
             ))}
             {rated > 0 && (
-              <span className="h-7 px-3 rounded-full border border-[rgba(67,62,18,0.18)] text-[12px] text-(--ink-2) inline-flex items-center">
+              <span className="h-7 px-3 rounded-full border border-[rgba(var(--ink-rgb),0.18)] text-[12px] text-(--ink-2) inline-flex items-center">
                 {rated} com nota
               </span>
             )}
             {tagCount > 0 && (
-              <span className="h-7 px-3 rounded-full border border-[rgba(67,62,18,0.18)] text-[12px] text-(--ink-2) inline-flex items-center">
+              <span className="h-7 px-3 rounded-full border border-[rgba(var(--ink-rgb),0.18)] text-[12px] text-(--ink-2) inline-flex items-center">
                 {tagCount}{" "}
                 {tagCount === 1
                   ? "prateleira vira tag"
@@ -442,7 +442,7 @@ export default function Importer({
           <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-2">
             Importações anteriores
           </div>
-          <ul className="m-0 p-0 list-none rounded-[14px] border border-[rgba(67,62,18,0.08)] divide-y divide-(--rule)">
+          <ul className="m-0 p-0 list-none rounded-[14px] border border-[rgba(var(--ink-rgb),0.08)] divide-y divide-(--rule)">
             {history.map((h) => (
               <li key={h.id}>
                 <button

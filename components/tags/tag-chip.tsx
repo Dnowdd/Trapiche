@@ -20,8 +20,8 @@ export default function TagChip({
       className={cn(
         "inline-flex items-center gap-1.5 h-7 pl-2.5 pr-3 rounded-full text-[12px] font-semibold border max-w-56",
         active
-          ? "text-(--cream)"
-          : "bg-transparent text-(--ink-3) border-[rgba(67,62,18,0.18)]",
+          ? "text-[#fff8d5]"
+          : "bg-transparent text-(--ink-3) border-[rgba(var(--ink-rgb),0.18)]",
         className,
       )}
       style={active ? { background: color, borderColor: color } : undefined}

@@ -10,7 +10,7 @@ const STACK_BASE: CSSProperties = {
   height: 130,
   bottom: 14,
   borderRadius: 3,
-  boxShadow: "0 10px 16px -8px rgba(67,62,18,0.45)",
+  boxShadow: "0 10px 16px -8px rgba(var(--shadow-rgb),0.45)",
 };
 
 const STACK_POSITIONS: CSSProperties[] = [
@@ -44,7 +44,7 @@ const Lists = async () => {
       </div>
 
       {lists.length === 0 ? (
-        <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="text-[16px] font-bold text-(--ink)">
               Ainda não tem listas públicas por aqui
@@ -66,7 +66,7 @@ const Lists = async () => {
           {lists.map((l) => (
             <Link
               href={`/lists/${l.id}`}
-              className="bg-(--cream-card) border border-[rgba(67,62,18,0.08)] rounded-[18px] p-4.5 pb-5 flex flex-col gap-3.5 transition-[transform,box-shadow] duration-180 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(67,62,18,0.04),0_24px_60px_-28px_rgba(67,62,18,0.3)]"
+              className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.08)] rounded-[18px] p-4.5 pb-5 flex flex-col gap-3.5 transition-[transform,box-shadow] duration-180 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(var(--shadow-rgb),0.04),0_24px_60px_-28px_rgba(var(--shadow-rgb),0.3)]"
               key={l.id}
             >
               <div className="h-40 relative bg-(--yellow-soft) rounded-[10px] overflow-hidden">
@@ -105,7 +105,7 @@ const Lists = async () => {
 
           <Link
             href="/profile?tab=listas"
-            className="rounded-[18px] flex flex-col items-center justify-center text-center gap-2 min-h-62 border-[1.5px] border-dashed border-[rgba(67,62,18,0.25)] transition-[background,border-color] duration-180 hover:bg-(--yellow-soft) hover:border-(--ink-3)"
+            className="rounded-[18px] flex flex-col items-center justify-center text-center gap-2 min-h-62 border-[1.5px] border-dashed border-[rgba(var(--ink-rgb),0.25)] transition-[background,border-color] duration-180 hover:bg-(--yellow-soft) hover:border-(--ink-3)"
           >
             <span className="text-[32px] font-light text-(--ink-3) leading-none">
               +

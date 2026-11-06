@@ -49,7 +49,7 @@ export default function SentCard({ email, context, go }: SentCardProps) {
       )}
 
       <button
-        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) cursor-pointer flex items-center justify-center gap-2.25 transition-[transform,box-shadow] duration-100 hover:-translate-y-px hover:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] [&_svg]:w-3.75 [&_svg]:h-3.75 mt-6"
+        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) cursor-pointer flex items-center justify-center gap-2.25 transition-[transform,box-shadow] duration-100 hover:-translate-y-px hover:shadow-[0_12px_24px_-14px_rgba(var(--shadow-rgb),0.6)] [&_svg]:w-3.75 [&_svg]:h-3.75 mt-6"
         onClick={() => go("login")}
       >
         {context === "reset" ? "Ir para o login" : "Voltar ao login"} <Arrow />

@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import QuoteModal from "./quote-modal";
 
 const iconBtn =
-  "h-8 px-2.5 rounded-lg inline-flex items-center gap-1.5 text-[12px] text-(--ink-4) hover:text-(--ink-2) hover:bg-[rgba(67,62,18,0.06)] cursor-pointer";
+  "h-8 px-2.5 rounded-lg inline-flex items-center gap-1.5 text-[12px] text-(--ink-4) hover:text-(--ink-2) hover:bg-[rgba(var(--ink-rgb),0.06)] cursor-pointer";
 
 export default function QuoteCard({
   quote,
@@ -45,7 +45,7 @@ export default function QuoteCard({
       className={cn(
         "relative m-0 flex gap-4",
         tone === "card" &&
-          "rounded-[16px] border border-[rgba(67,62,18,0.09)] bg-(--cream-card) px-5 sm:px-6 pt-6 pb-4",
+          "rounded-[16px] border border-[rgba(var(--ink-rgb),0.09)] bg-(--cream-card) px-5 sm:px-6 pt-6 pb-4",
       )}
     >
       {book && (
@@ -113,12 +113,12 @@ export default function QuoteCard({
             {quote.when}
           </span>
           {quote.private && (
-            <span className="font-mono text-[9.5px] uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-[rgba(67,62,18,0.07)] text-(--ink-3)">
+            <span className="font-mono text-[9.5px] uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-[rgba(var(--ink-rgb),0.07)] text-(--ink-3)">
               Só para mim
             </span>
           )}
           {quote.hidden && (
-            <span className="font-mono text-[9.5px] uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-[rgba(154,74,42,0.1)] text-[#9a4a2a]">
+            <span className="font-mono text-[9.5px] uppercase tracking-[0.06em] px-1.5 py-0.5 rounded bg-[rgba(154,74,42,0.1)] text-(--danger)">
               Oculta pela moderação
             </span>
           )}

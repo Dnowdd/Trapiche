@@ -21,7 +21,7 @@ export default function FavoritesEditor({ favorites }: { favorites: Book[] }) {
   };
 
   const iconBtn =
-    "w-8 h-8 rounded-lg border border-[rgba(67,62,18,0.15)] flex items-center justify-center text-(--ink-3) cursor-pointer hover:bg-(--yellow-soft) hover:text-(--ink-2) disabled:opacity-30 disabled:cursor-default";
+    "w-8 h-8 rounded-lg border border-[rgba(var(--ink-rgb),0.15)] flex items-center justify-center text-(--ink-3) cursor-pointer hover:bg-(--yellow-soft) hover:text-(--ink-2) disabled:opacity-30 disabled:cursor-default";
 
   return (
     <>
@@ -54,7 +54,7 @@ export default function FavoritesEditor({ favorites }: { favorites: Book[] }) {
               {items.map((b, i) => (
                 <li
                   key={b.id}
-                  className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[10px] py-2 px-3"
+                  className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[10px] py-2 px-3"
                 >
                   <span className="font-mono text-[11px] text-(--ink-4) w-6">
                     0{i + 1}

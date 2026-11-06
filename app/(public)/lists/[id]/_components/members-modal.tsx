@@ -42,7 +42,7 @@ export default function MembersModal({
         {list.members.map((m) => (
           <li
             key={m.id}
-            className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[10px] py-2.5 px-3.5"
+            className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[10px] py-2.5 px-3.5"
           >
             <Avatar
               name={m.name}
@@ -63,7 +63,7 @@ export default function MembersModal({
                 type="button"
                 disabled={pending}
                 onClick={() => run(() => removeCollaborator(list.id, m.id))}
-                className="text-[12px] text-(--ink-4) underline underline-offset-2 cursor-pointer hover:text-[#9a4a2a]"
+                className="text-[12px] text-(--ink-4) underline underline-offset-2 cursor-pointer hover:text-(--danger)"
               >
                 remover
               </button>

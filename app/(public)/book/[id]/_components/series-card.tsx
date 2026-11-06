@@ -128,7 +128,7 @@ export default function SeriesCard({ series }: { series: BookSeries }) {
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="w-full h-10 rounded-[12px] border border-dashed border-[rgba(67,62,18,0.25)] text-[12.5px] text-(--ink-3) hover:bg-(--yellow-soft) cursor-pointer"
+          className="w-full h-10 rounded-[12px] border border-dashed border-[rgba(var(--ink-rgb),0.25)] text-[12.5px] text-(--ink-3) hover:bg-(--yellow-soft) cursor-pointer"
         >
           + Adicionar a uma série
         </button>

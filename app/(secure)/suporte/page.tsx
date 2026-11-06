@@ -29,7 +29,7 @@ export default async function SupportPage() {
         ticket e converse direto com a gente por aqui.
       </p>
       {tickets.length === 0 ? (
-        <div className="rounded-[18px] border border-dashed border-[rgba(67,62,18,0.2)] py-14 px-6 text-center">
+        <div className="rounded-[18px] border border-dashed border-[rgba(var(--ink-rgb),0.2)] py-14 px-6 text-center">
           <div className="text-[16px] font-bold text-(--ink)">
             Nenhum ticket ainda
           </div>
@@ -44,7 +44,7 @@ export default async function SupportPage() {
           </Link>
         </div>
       ) : (
-        <div className="rounded-[18px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
+        <div className="rounded-[18px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden">
           {tickets.map((t) => (
             <TicketRow key={t.id} t={t} href={`/suporte/${t.id}`} />
           ))}

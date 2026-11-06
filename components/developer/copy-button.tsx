@@ -22,7 +22,7 @@ export default function CopyButton({
         setTimeout(() => setCopied(false), 1600);
       }}
       className={cn(
-        "h-8 px-3 rounded-lg border border-[rgba(67,62,18,0.2)] text-[12px] font-semibold text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft) shrink-0",
+        "h-8 px-3 rounded-lg border border-[rgba(var(--ink-rgb),0.2)] text-[12px] font-semibold text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft) shrink-0",
         className,
       )}
     >

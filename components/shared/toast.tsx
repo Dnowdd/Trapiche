@@ -37,7 +37,7 @@ export function Toaster() {
       {items.map((t) => (
         <div
           key={t.id}
-          className="pointer-events-auto max-w-105 px-4.5 py-3 rounded-[12px] bg-(--ink-2) text-(--cream) text-[13px] leading-normal shadow-[0_16px_40px_-12px_rgba(67,62,18,0.5)] animate-[modeIn_0.25s_cubic-bezier(0.2,0.7,0.2,1)]"
+          className="pointer-events-auto max-w-105 px-4.5 py-3 rounded-[12px] bg-(--ink-2) text-(--cream) text-[13px] leading-normal shadow-[0_16px_40px_-12px_rgba(var(--shadow-rgb),0.5)] animate-[modeIn_0.25s_cubic-bezier(0.2,0.7,0.2,1)]"
         >
           {t.message}
         </div>

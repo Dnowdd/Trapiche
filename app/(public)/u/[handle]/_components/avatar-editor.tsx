@@ -15,7 +15,7 @@ import { authClient } from "@/lib/auth-client";
 import { resizeImage } from "@/lib/client-image";
 
 const itemCls =
-  "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)";
+  "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(var(--ink-rgb),0.06)] focus:text-(--ink-2)";
 
 export default function AvatarEditor({
   name,
@@ -94,7 +94,7 @@ export default function AvatarEditor({
           className={cn(
             "absolute -bottom-0.5 -right-0.5 w-9 h-9 rounded-full bg-(--ink-2) text-(--yellow) border-[3px] border-(--cream) flex items-center justify-center cursor-pointer transition-transform duration-150 hover:scale-105 disabled:cursor-wait",
             !image &&
-              "shadow-[0_0_0_0_rgba(67,62,18,0.45)] animate-[nudge_2s_ease-out_infinite]",
+              "shadow-[0_0_0_0_rgba(var(--shadow-rgb),0.45)] animate-[nudge_2s_ease-out_infinite]",
           )}
         >
           {busy ? (
@@ -118,7 +118,7 @@ export default function AvatarEditor({
         <DropdownMenuContent
           align="start"
           sideOffset={8}
-          className="min-w-48 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(67,62,18,0.10)] shadow-[0_16px_40px_-8px_rgba(67,62,18,0.22)]"
+          className="min-w-48 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(var(--ink-rgb),0.10)] shadow-[0_16px_40px_-8px_rgba(var(--shadow-rgb),0.22)]"
         >
           <DropdownMenuItem
             className={itemCls}

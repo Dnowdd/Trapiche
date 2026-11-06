@@ -104,13 +104,13 @@ export default function BookTags({ data }: { data: BookTagsData }) {
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full border border-dashed border-[rgba(67,62,18,0.3)] text-[12px] text-(--ink-3) hover:bg-(--yellow-soft) hover:text-(--ink-2) cursor-pointer"
+          className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full border border-dashed border-[rgba(var(--ink-rgb),0.3)] text-[12px] text-(--ink-3) hover:bg-(--yellow-soft) hover:text-(--ink-2) cursor-pointer"
         >
           <Plus size={13} strokeWidth={2.4} />
           {chosen.length ? "Tag" : "Adicionar tag"}
         </button>
         {open && (
-          <div className="absolute left-0 top-9 z-30 w-68 rounded-[14px] bg-(--cream) border border-[rgba(67,62,18,0.12)] shadow-[0_24px_60px_-20px_rgba(67,62,18,0.5)] p-2">
+          <div className="absolute left-0 top-9 z-30 w-68 rounded-[14px] bg-(--cream) border border-[rgba(var(--ink-rgb),0.12)] shadow-[0_24px_60px_-20px_rgba(var(--shadow-rgb),0.5)] p-2">
             <input
               autoFocus
               value={query}
@@ -123,7 +123,7 @@ export default function BookTags({ data }: { data: BookTagsData }) {
                 if (term && !exact) create();
                 else if (filtered[0]) toggle(filtered[0].id);
               }}
-              className="w-full h-9 rounded-[9px] bg-(--cream-card) border border-[rgba(67,62,18,0.14)] px-3 text-[13px] text-(--ink-2) outline-none focus:border-(--ink-3)"
+              className="w-full h-9 rounded-[9px] bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.14)] px-3 text-[13px] text-(--ink-2) outline-none focus:border-(--ink-3)"
             />
             <div className="mt-1.5 max-h-60 overflow-y-auto flex flex-col">
               {filtered.map((t) => {

@@ -27,7 +27,7 @@ function Check({ done }: { done: boolean }) {
         "w-5 h-5 shrink-0 rounded-full border-[1.5px] flex items-center justify-center",
         done
           ? "bg-(--ink-2) border-(--ink-2) text-(--yellow)"
-          : "border-[rgba(67,62,18,0.3)]",
+          : "border-[rgba(var(--ink-rgb),0.3)]",
       )}
     >
       {done && (
@@ -98,7 +98,7 @@ function Pick({
           type="button"
           disabled={pending}
           onClick={() => setStarting(true)}
-          className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+          className={`${btn} border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
         >
           Lendo
         </button>
@@ -106,7 +106,7 @@ function Pick({
           type="button"
           disabled={pending}
           onClick={() => add("WANT", "na pilha")}
-          className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+          className={`${btn} border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
         >
           Quero
         </button>
@@ -167,7 +167,7 @@ export default function Onboarding({
           <h2 className="m-0 mt-1 text-[20px] font-extrabold tracking-[-0.02em] text-(--ink) leading-tight">
             Deixe o Trapiche com a sua cara
           </h2>
-          <div className="mt-3 h-1.5 rounded-full bg-[rgba(67,62,18,0.1)] overflow-hidden">
+          <div className="mt-3 h-1.5 rounded-full bg-[rgba(var(--ink-rgb),0.1)] overflow-hidden">
             <div
               className="h-full rounded-full bg-(--ink-2) transition-[width] duration-500"
               style={{ width: `${(done / STEPS.length) * 100}%` }}
@@ -179,7 +179,7 @@ export default function Onboarding({
                 <Link
                   href={href[s.id]}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-2 py-1.5 -mx-2 text-[13px] hover:bg-[rgba(67,62,18,0.05)]",
+                    "flex items-center gap-2.5 rounded-lg px-2 py-1.5 -mx-2 text-[13px] hover:bg-[rgba(var(--ink-rgb),0.05)]",
                     steps[s.id]
                       ? "text-(--ink-4) line-through decoration-(--ink-5)"
                       : "text-(--ink-2) font-medium",

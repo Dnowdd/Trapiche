@@ -7,7 +7,7 @@ export default function NotificationRow({ n }: { n: NotificationItem }) {
     <li>
       <Link
         href={n.href}
-        className="flex gap-3 px-3 py-2.5 rounded-[8px] hover:bg-[rgba(67,62,18,0.06)]"
+        className="flex gap-3 px-3 py-2.5 rounded-[8px] hover:bg-[rgba(var(--ink-rgb),0.06)]"
       >
         {n.image ? (
           <Avatar

@@ -72,7 +72,7 @@ export default function ReviewCard({
     comment.run(() => deleteReviewComment(id), load, toast);
 
   return (
-    <article className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-5.5 px-6.5">
+    <article className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] py-5.5 px-6.5">
       <div className="flex items-center gap-3.5 mb-3">
         <Link href={`/u/${r.handle}`} className="shrink-0">
           <Avatar

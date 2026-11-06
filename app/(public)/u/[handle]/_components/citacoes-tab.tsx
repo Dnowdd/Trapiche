@@ -31,7 +31,7 @@ export default function CitacoesTab({
 
   if (items.length === 0)
     return (
-      <div className="rounded-[18px] border border-dashed border-[rgba(67,62,18,0.2)] py-14 px-6 text-center">
+      <div className="rounded-[18px] border border-dashed border-[rgba(var(--ink-rgb),0.2)] py-14 px-6 text-center">
         <div className="font-serif text-[56px] leading-none text-(--yellow-deep)">
           “
         </div>

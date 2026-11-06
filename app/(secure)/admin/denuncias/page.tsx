@@ -42,7 +42,7 @@ export default async function ReportsPage({
               key={t.status}
               href={`/admin/denuncias?status=${t.status}`}
               aria-current={t.status === status ? "page" : undefined}
-              className="h-9 px-4 inline-flex items-center rounded-full border border-[rgba(67,62,18,0.15)] text-[13px] font-semibold text-(--ink-3) hover:bg-(--yellow-soft) aria-[current=page]:bg-(--ink-2) aria-[current=page]:text-(--yellow) aria-[current=page]:border-(--ink-2)"
+              className="h-9 px-4 inline-flex items-center rounded-full border border-[rgba(var(--ink-rgb),0.15)] text-[13px] font-semibold text-(--ink-3) hover:bg-(--yellow-soft) aria-[current=page]:bg-(--ink-2) aria-[current=page]:text-(--yellow) aria-[current=page]:border-(--ink-2)"
             >
               {t.label}
             </Link>

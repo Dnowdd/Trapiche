@@ -45,11 +45,11 @@ export default function Field({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
-          className={`w-full h-12 rounded-[10px] border-[1.5px] border-[rgba(67,62,18,0.14)] bg-(--cream-card) pl-10.5 text-[14px] text-(--ink-2) outline-none focus:border-(--ink-3) focus:bg-white focus:shadow-[0_0_0_4px_rgba(255,231,103,0.35)] placeholder:text-(--ink-4) transition-[border-color,box-shadow,background] duration-150 ${toggle ? "pr-11.5" : "pr-4"}`}
+          className={`w-full h-12 rounded-[10px] border-[1.5px] border-[rgba(var(--ink-rgb),0.14)] bg-(--cream-card) pl-10.5 text-[14px] text-(--ink-2) outline-none focus:border-(--ink-3) focus:bg-(--cream-card) focus:shadow-[0_0_0_4px_rgba(255,231,103,0.35)] placeholder:text-(--ink-4) transition-[border-color,box-shadow,background] duration-150 ${toggle ? "pr-11.5" : "pr-4"}`}
         />
         {toggle && (
           <span
-            className="absolute right-3 text-(--ink-4) cursor-pointer flex p-1 rounded-[6px] transition-[color,background] duration-120 hover:text-(--ink-2) hover:bg-[rgba(67,62,18,0.06)]"
+            className="absolute right-3 text-(--ink-4) cursor-pointer flex p-1 rounded-[6px] transition-[color,background] duration-120 hover:text-(--ink-2) hover:bg-[rgba(var(--ink-rgb),0.06)]"
             onClick={onToggle}
             role="button"
             aria-label={shown ? "ocultar senha" : "mostrar senha"}

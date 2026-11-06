@@ -3,7 +3,7 @@ import type { Tab } from "@/lib/queries/profile";
 
 function CardSkeleton({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7">
+    <div className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7">
       <Skeleton className="h-2.5 w-24 mb-2" />
       <Skeleton className="h-4 w-44 mb-5" />
       {children}
@@ -101,7 +101,7 @@ export function ProfileSkeleton() {
           ))}
         </div>
       </div>
-      <div className="px-4 sm:px-8 lg:px-15 border-y border-[rgba(67,62,18,0.12)] py-4 flex gap-8">
+      <div className="px-4 sm:px-8 lg:px-15 border-y border-[rgba(var(--ink-rgb),0.12)] py-4 flex gap-8">
         {[52, 60, 52, 80, 52, 64].map((w, i) => (
           <Skeleton key={i} className="h-3" style={{ width: w }} />
         ))}

@@ -64,7 +64,7 @@ export default function MyReadings({
         action={
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[10px] border border-[rgba(67,62,18,0.18)] text-[12px] font-medium text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft)"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[10px] border border-[rgba(var(--ink-rgb),0.18)] text-[12px] font-medium text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft)"
             onClick={() => setModal("add")}
           >
             <Plus className="w-3.5 h-3.5" />
@@ -78,7 +78,7 @@ export default function MyReadings({
           Nenhuma leitura registrada ainda.
         </p>
       ) : (
-        <ol className="m-0 p-0 list-none bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[14px] px-4">
+        <ol className="m-0 p-0 list-none bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[14px] px-4">
           {v.readings.map((r) => (
             <li
               key={r.id}

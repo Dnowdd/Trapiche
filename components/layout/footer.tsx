@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ThemeToggle from "./theme-toggle";
 
 const Footer = () => {
   return (
@@ -43,7 +44,8 @@ const Footer = () => {
       <div className="h-px bg-(--yellow-deep)" />
       <div className="flex flex-col sm:flex-row gap-3 justify-between sm:items-center font-mono text-[11px] tracking-[0.04em] text-(--ink-3)">
         <span>© {new Date().getFullYear()} TRAPICHE</span>
-        <div className="flex gap-5 uppercase">
+        <div className="flex flex-wrap items-center gap-5 uppercase">
+          <ThemeToggle />
           <Link href="/termos" className="hover:text-(--ink)">
             Termos
           </Link>

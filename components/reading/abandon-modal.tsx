@@ -95,7 +95,7 @@ export default function AbandonModal({
               role="radio"
               aria-checked={again === o.v}
               onClick={() => setAgain(o.v)}
-              className="text-[12px] font-medium py-2 px-3.5 rounded-full border border-[rgba(67,62,18,0.15)] text-(--ink-3) cursor-pointer hover:bg-(--yellow-soft) aria-checked:bg-(--ink-2) aria-checked:text-(--yellow) aria-checked:border-(--ink-2)"
+              className="text-[12px] font-medium py-2 px-3.5 rounded-full border border-[rgba(var(--ink-rgb),0.15)] text-(--ink-3) cursor-pointer hover:bg-(--yellow-soft) aria-checked:bg-(--ink-2) aria-checked:text-(--yellow) aria-checked:border-(--ink-2)"
             >
               {o.label}
             </button>

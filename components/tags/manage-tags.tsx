@@ -87,7 +87,7 @@ function TagRow({ tag }: { tag: Tag }) {
               () => toast("Tag apagada."),
             );
           }}
-          className="size-9 shrink-0 rounded-lg flex items-center justify-center text-(--ink-4) hover:text-[#9a4a2a] hover:bg-[rgba(154,74,42,0.06)] cursor-pointer"
+          className="size-9 shrink-0 rounded-lg flex items-center justify-center text-(--ink-4) hover:text-(--danger) hover:bg-[rgba(154,74,42,0.06)] cursor-pointer"
         >
           <Trash2 size={15} />
         </button>
@@ -160,7 +160,7 @@ export default function ManageTags({ tags }: { tags: Tag[] }) {
                 },
               );
             }}
-            className="rounded-[14px] bg-(--cream-card) border border-[rgba(67,62,18,0.1)] p-4"
+            className="rounded-[14px] bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.1)] p-4"
           >
             <FormError message={error} />
             <div className="flex gap-2.5">

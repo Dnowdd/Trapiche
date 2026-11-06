@@ -50,7 +50,7 @@ export default async function UnsubscribedPage({
           </Link>
           <Link
             href="/"
-            className="h-11 px-5 rounded-[12px] border border-[rgba(67,62,18,0.2)] text-(--ink-2) text-[14px] font-semibold inline-flex items-center hover:bg-(--yellow-soft)"
+            className="h-11 px-5 rounded-[12px] border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) text-[14px] font-semibold inline-flex items-center hover:bg-(--yellow-soft)"
           >
             Ir para o início
           </Link>

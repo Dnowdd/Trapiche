@@ -36,7 +36,7 @@ const Reviews = async () => {
       <div className="grid gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
         {reviews.map((r) => (
           <article
-            className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[14px] py-4.5 px-5 flex flex-col gap-3"
+            className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[14px] py-4.5 px-5 flex flex-col gap-3"
             key={r.id}
           >
             <Link

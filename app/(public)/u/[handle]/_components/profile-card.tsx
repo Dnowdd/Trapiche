@@ -79,7 +79,7 @@ export default function ProfileCard({
                 <button
                   type="button"
                   onClick={() => setEditing("privacidade")}
-                  className="ml-1 inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-[rgba(67,62,18,0.07)] text-(--ink-3) hover:bg-(--yellow-soft) hover:text-(--ink-2) cursor-pointer tracking-[0.04em] normal-case"
+                  className="ml-1 inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-[rgba(var(--ink-rgb),0.07)] text-(--ink-3) hover:bg-(--yellow-soft) hover:text-(--ink-2) cursor-pointer tracking-[0.04em] normal-case"
                 >
                   <VisibilityIcon visibility={profile.visibility} />
                   {VISIBILITY_LABEL[profile.visibility]}
@@ -115,7 +115,7 @@ export default function ProfileCard({
           {owner && (
             <Link
               href={`/u/${u.handle}?visitante=1`}
-              className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+              className={`${btn} border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
             >
               Ver como visitante
             </Link>
@@ -123,14 +123,14 @@ export default function ProfileCard({
           {profile.access.sections.diary && (
             <Link
               href={`/u/${u.handle}/retrospectiva`}
-              className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+              className={`${btn} border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
             >
               Retrospectiva
             </Link>
           )}
           <button
             aria-label="Compartilhar perfil"
-            className={`${btn} px-2.5 border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+            className={`${btn} px-2.5 border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
             onClick={() => shareLink(`/u/${u.handle}`, `${u.name} no Trapiche`)}
           >
             <svg
@@ -152,10 +152,10 @@ export default function ProfileCard({
       </div>
 
       <div
-        className={`relative mt-7 grid rounded-2xl border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden ${profile.stats.length === 5 ? "grid-cols-3 sm:grid-cols-5" : "grid-cols-2"}`}
+        className={`relative mt-7 grid rounded-2xl border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden ${profile.stats.length === 5 ? "grid-cols-3 sm:grid-cols-5" : "grid-cols-2"}`}
       >
         {profile.stats.map((s, i) => {
-          const cls = `py-3.5 px-4 sm:py-4 sm:px-5 border-[rgba(67,62,18,0.08)] ${i > 0 ? "sm:border-l" : ""} ${profile.stats.length === 5 ? `${i % 3 !== 0 ? "max-sm:border-l" : ""} ${i >= 3 ? "max-sm:border-t" : ""}` : i > 0 ? "max-sm:border-l" : ""}`;
+          const cls = `py-3.5 px-4 sm:py-4 sm:px-5 border-[rgba(var(--ink-rgb),0.08)] ${i > 0 ? "sm:border-l" : ""} ${profile.stats.length === 5 ? `${i % 3 !== 0 ? "max-sm:border-l" : ""} ${i >= 3 ? "max-sm:border-t" : ""}` : i > 0 ? "max-sm:border-l" : ""}`;
           const body = (
             <>
               <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.03em] text-(--ink) leading-none tabular-nums">

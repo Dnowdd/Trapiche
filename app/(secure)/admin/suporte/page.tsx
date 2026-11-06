@@ -37,7 +37,7 @@ export default async function StaffSupportPage({
             key={t.status}
             href={`/admin/suporte?status=${t.status}`}
             aria-current={t.status === status ? "page" : undefined}
-            className="group h-9 px-4 inline-flex items-center gap-2 rounded-full border border-[rgba(67,62,18,0.15)] text-[13px] font-semibold text-(--ink-3) hover:bg-(--yellow-soft) aria-[current=page]:bg-(--ink-2) aria-[current=page]:text-(--yellow) aria-[current=page]:border-(--ink-2)"
+            className="group h-9 px-4 inline-flex items-center gap-2 rounded-full border border-[rgba(var(--ink-rgb),0.15)] text-[13px] font-semibold text-(--ink-3) hover:bg-(--yellow-soft) aria-[current=page]:bg-(--ink-2) aria-[current=page]:text-(--yellow) aria-[current=page]:border-(--ink-2)"
           >
             {t.label}
             <span className="font-mono text-[10px] text-(--ink-5) group-aria-[current=page]:text-(--yellow-soft)">
@@ -53,7 +53,7 @@ export default async function StaffSupportPage({
             : "Nada por aqui."}
         </p>
       ) : (
-        <div className="rounded-[18px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
+        <div className="rounded-[18px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden">
           {tickets.map((t) => (
             <TicketRow
               key={t.id}

@@ -124,8 +124,8 @@ export default function ChatThread({
     );
 
   return (
-    <div className="flex flex-col rounded-[18px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-[rgba(67,62,18,0.08)]">
+    <div className="flex flex-col rounded-[18px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-[rgba(var(--ink-rgb),0.08)]">
         <StatusBadge status={status} staffView={staffView} />
         {status === "CLOSED" ? (
           staffView && (
@@ -215,7 +215,7 @@ export default function ChatThread({
                       "inline-block text-left px-3.5 py-2.5 rounded-2xl text-[14px] leading-[1.5] whitespace-pre-wrap wrap-break-word",
                       mine
                         ? "bg-(--ink-2) text-(--cream) rounded-tr-md"
-                        : "bg-(--cream) border border-[rgba(67,62,18,0.1)] text-(--ink-2) rounded-tl-md",
+                        : "bg-(--cream) border border-[rgba(var(--ink-rgb),0.1)] text-(--ink-2) rounded-tl-md",
                     )}
                   >
                     {m.body}
@@ -229,7 +229,7 @@ export default function ChatThread({
       </div>
 
       <form
-        className="border-t border-[rgba(67,62,18,0.08)] p-3 sm:p-4 flex flex-col gap-2"
+        className="border-t border-[rgba(var(--ink-rgb),0.08)] p-3 sm:p-4 flex flex-col gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           send();
@@ -275,7 +275,7 @@ export default function ChatThread({
                 send();
               }
             }}
-            className="flex-1 min-h-11 max-h-48 resize-y rounded-xl border-[1.5px] border-[rgba(67,62,18,0.14)] bg-(--cream) px-3.5 py-2.5 text-[14px] text-(--ink-2) leading-normal outline-none focus:border-(--ink-3) focus:bg-white placeholder:text-(--ink-4)"
+            className="flex-1 min-h-11 max-h-48 resize-y rounded-xl border-[1.5px] border-[rgba(var(--ink-rgb),0.14)] bg-(--cream) px-3.5 py-2.5 text-[14px] text-(--ink-2) leading-normal outline-none focus:border-(--ink-3) focus:bg-(--cream-card) placeholder:text-(--ink-4)"
           />
           <Button
             type="submit"

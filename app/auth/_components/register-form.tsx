@@ -116,7 +116,7 @@ export default function RegisterForm({
           onChange={(e) => setAgree(e.target.checked)}
           className="peer hidden"
         />
-        <span className="w-4.5 h-4.5 rounded-[5px] border-[1.5px] border-[rgba(67,62,18,0.3)] shrink-0 mt-px flex items-center justify-center transition-[background,border-color] duration-120 text-(--ink) peer-checked:bg-(--yellow) peer-checked:border-(--yellow-deep) [&_svg]:w-2.75 [&_svg]:h-2.75 [&_svg]:opacity-0 peer-checked:[&_svg]:opacity-100">
+        <span className="w-4.5 h-4.5 rounded-[5px] border-[1.5px] border-[rgba(var(--ink-rgb),0.3)] shrink-0 mt-px flex items-center justify-center transition-[background,border-color] duration-120 text-(--ink) peer-checked:bg-(--yellow) peer-checked:border-(--yellow-deep) [&_svg]:w-2.75 [&_svg]:h-2.75 [&_svg]:opacity-0 peer-checked:[&_svg]:opacity-100">
           <Check />
         </span>
         <span>
@@ -141,7 +141,7 @@ export default function RegisterForm({
       </label>
 
       <button
-        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) flex items-center justify-center gap-2.25 transition-[transform,box-shadow,opacity] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:w-3.75 [&_svg]:h-3.75"
+        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) flex items-center justify-center gap-2.25 transition-[transform,box-shadow,opacity] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(var(--shadow-rgb),0.6)] disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:w-3.75 [&_svg]:h-3.75"
         type="submit"
         disabled={loading}
       >

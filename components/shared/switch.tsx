@@ -41,8 +41,8 @@ export default function Switch({
           disabled={disabled}
           onChange={(e) => onChange(e.target.checked)}
         />
-        <span className="block w-10 h-6 rounded-full bg-[rgba(67,62,18,0.18)] transition-colors duration-150 peer-checked:bg-(--ink-2) peer-focus-visible:shadow-[0_0_0_4px_rgba(255,231,103,0.55)]" />
-        <span className="absolute top-0.5 left-0.5 size-5 rounded-full bg-(--cream) shadow-[0_1px_3px_rgba(67,62,18,0.35)] transition-transform duration-150 peer-checked:translate-x-4 peer-checked:bg-(--yellow)" />
+        <span className="block w-10 h-6 rounded-full bg-[rgba(var(--ink-rgb),0.18)] transition-colors duration-150 peer-checked:bg-(--ink-2) peer-focus-visible:shadow-[0_0_0_4px_rgba(255,231,103,0.55)]" />
+        <span className="absolute top-0.5 left-0.5 size-5 rounded-full bg-(--cream) shadow-[0_1px_3px_rgba(var(--shadow-rgb),0.35)] transition-transform duration-150 peer-checked:translate-x-4 peer-checked:bg-(--yellow)" />
       </span>
     </label>
   );

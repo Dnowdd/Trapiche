@@ -89,10 +89,10 @@ export default function AddToListModal({
                 onClick={() => toggle(l)}
                 disabled={pending}
                 aria-pressed={l.hasBook}
-                className="w-full flex items-center gap-3.5 text-left bg-(--cream-card) border border-[rgba(67,62,18,0.08)] rounded-[10px] py-3 px-4 cursor-pointer transition-colors duration-120 hover:bg-(--yellow-soft) aria-pressed:border-(--ink-2) disabled:cursor-wait"
+                className="w-full flex items-center gap-3.5 text-left bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.08)] rounded-[10px] py-3 px-4 cursor-pointer transition-colors duration-120 hover:bg-(--yellow-soft) aria-pressed:border-(--ink-2) disabled:cursor-wait"
               >
                 <span
-                  className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center shrink-0 ${l.hasBook ? "bg-(--yellow) border-(--yellow-deep)" : "border-[rgba(67,62,18,0.3)]"}`}
+                  className={`w-5 h-5 rounded-[6px] border-[1.5px] flex items-center justify-center shrink-0 ${l.hasBook ? "bg-(--yellow) border-(--yellow-deep)" : "border-[rgba(var(--ink-rgb),0.3)]"}`}
                 >
                   {busy === l.id && pending ? (
                     <span className="w-2 h-2 rounded-full bg-(--ink-3) animate-pulse" />
@@ -162,7 +162,7 @@ export default function AddToListModal({
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="mt-3 w-full border-[1.5px] border-dashed border-[rgba(67,62,18,0.22)] rounded-[10px] py-3 text-[13px] font-semibold text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft)"
+          className="mt-3 w-full border-[1.5px] border-dashed border-[rgba(var(--ink-rgb),0.22)] rounded-[10px] py-3 text-[13px] font-semibold text-(--ink-2) cursor-pointer hover:bg-(--yellow-soft)"
         >
           + Criar nova lista
         </button>

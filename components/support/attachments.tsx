@@ -100,7 +100,7 @@ export function AttachButton({
         onClick={() => input.current?.click()}
         aria-label="Anexar imagem"
         title={full ? `Até ${ATTACHMENTS_MAX} imagens` : "Anexar imagem"}
-        className="w-11 h-11 shrink-0 rounded-xl border-[1.5px] border-[rgba(67,62,18,0.14)] text-(--ink-3) flex items-center justify-center cursor-pointer hover:bg-(--yellow-soft) hover:text-(--ink-2) disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-11 h-11 shrink-0 rounded-xl border-[1.5px] border-[rgba(var(--ink-rgb),0.14)] text-(--ink-3) flex items-center justify-center cursor-pointer hover:bg-(--yellow-soft) hover:text-(--ink-2) disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <svg
           width="17"
@@ -134,7 +134,7 @@ export function PendingList({
       {items.map((i) => (
         <div
           key={i.key}
-          className="relative w-16 h-16 rounded-lg overflow-hidden border border-[rgba(67,62,18,0.15)] bg-(--cream-deep)"
+          className="relative w-16 h-16 rounded-lg overflow-hidden border border-[rgba(var(--ink-rgb),0.15)] bg-(--cream-deep)"
         >
           <Image
             src={i.preview}
@@ -154,7 +154,7 @@ export function PendingList({
         </div>
       ))}
       {busy && (
-        <div className="w-16 h-16 rounded-lg border border-dashed border-[rgba(67,62,18,0.25)] flex items-center justify-center">
+        <div className="w-16 h-16 rounded-lg border border-dashed border-[rgba(var(--ink-rgb),0.25)] flex items-center justify-center">
           <span className="w-4 h-4 rounded-full border-2 border-(--ink-3) border-t-transparent animate-spin" />
         </div>
       )}
@@ -184,7 +184,7 @@ export function MessageImages({
           href={a.url}
           target="_blank"
           rel="noopener"
-          className="block rounded-xl overflow-hidden border border-[rgba(67,62,18,0.12)] bg-(--cream-deep) hover:opacity-90"
+          className="block rounded-xl overflow-hidden border border-[rgba(var(--ink-rgb),0.12)] bg-(--cream-deep) hover:opacity-90"
           style={{ maxWidth: items.length === 1 ? 280 : 160 }}
         >
           <Image

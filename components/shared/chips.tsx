@@ -24,7 +24,7 @@ const Chips = ({ options, value, onChange, label }: ChipsProps) => {
       {options.map((o) => (
         <button
           key={o.id}
-          className="group text-[12px] font-medium py-[7px] px-[14px] rounded-full border border-[rgba(67,62,18,0.15)] bg-transparent text-(--ink-3) inline-flex items-center gap-1.5 cursor-pointer transition-[background,color,border-color] duration-[120ms] hover:bg-(--yellow-soft) hover:text-(--ink-2) aria-pressed:bg-(--ink-2) aria-pressed:text-(--yellow) aria-pressed:border-(--ink-2)"
+          className="group text-[12px] font-medium py-[7px] px-[14px] rounded-full border border-[rgba(var(--ink-rgb),0.15)] bg-transparent text-(--ink-3) inline-flex items-center gap-1.5 cursor-pointer transition-[background,color,border-color] duration-[120ms] hover:bg-(--yellow-soft) hover:text-(--ink-2) aria-pressed:bg-(--ink-2) aria-pressed:text-(--yellow) aria-pressed:border-(--ink-2)"
           aria-pressed={value === o.id}
           onClick={() => onChange(o.id)}
         >

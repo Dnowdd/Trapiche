@@ -7,7 +7,7 @@ import type {
 import { cn } from "@/lib/utils";
 
 export const control =
-  "w-full rounded-[10px] border-[1.5px] border-[rgba(67,62,18,0.14)] bg-(--cream-card) px-3.5 text-[14px] text-(--ink-2) outline-none focus:border-(--ink-3) focus:bg-white focus:shadow-[0_0_0_4px_rgba(255,231,103,0.35)] placeholder:text-(--ink-4) transition-[border-color,box-shadow,background] duration-150 disabled:opacity-60";
+  "w-full rounded-[10px] border-[1.5px] border-[rgba(var(--ink-rgb),0.14)] bg-(--cream-card) px-3.5 text-[14px] text-(--ink-2) outline-none focus:border-(--ink-3) focus:bg-(--cream-card) focus:shadow-[0_0_0_4px_rgba(255,231,103,0.35)] placeholder:text-(--ink-4) transition-[border-color,box-shadow,background] duration-150 disabled:opacity-60";
 
 export function FormField({
   label,
@@ -60,13 +60,13 @@ export function TextArea({
 
 const variants = {
   primary:
-    "bg-(--ink-2) text-(--yellow) border-(--ink-2) hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)]",
+    "bg-(--ink-2) text-(--yellow) border-(--ink-2) hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(var(--shadow-rgb),0.6)]",
   yellow:
     "bg-(--yellow) text-(--ink) border-(--yellow-deep) hover:enabled:-translate-y-px",
   ghost:
-    "bg-transparent text-(--ink-2) border-[rgba(67,62,18,0.2)] hover:enabled:bg-(--yellow-soft)",
+    "bg-transparent text-(--ink-2) border-[rgba(var(--ink-rgb),0.2)] hover:enabled:bg-(--yellow-soft)",
   danger:
-    "bg-transparent text-[#9a4a2a] border-[rgba(154,74,42,0.35)] hover:enabled:bg-[rgba(154,74,42,0.06)]",
+    "bg-transparent text-(--danger) border-[rgba(154,74,42,0.35)] hover:enabled:bg-[rgba(154,74,42,0.06)]",
 } as const;
 
 export function Button({

@@ -4,7 +4,7 @@ import type { BookPageData } from "@/lib/queries/book";
 import { SectionHeader } from "./section-header";
 
 const card =
-  "flex items-center gap-3.5 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[12px] py-3 px-4 transition-colors duration-150 hover:bg-(--yellow-soft)";
+  "flex items-center gap-3.5 bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[12px] py-3 px-4 transition-colors duration-150 hover:bg-(--yellow-soft)";
 
 export default function InLists({ lists }: { lists: BookPageData["lists"] }) {
   if (lists.mine.length === 0 && lists.community.length === 0) return null;

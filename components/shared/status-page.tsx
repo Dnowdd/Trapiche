@@ -35,4 +35,4 @@ export default function StatusPage({
 export const primaryBtn =
   "h-11 px-5 rounded-[10px] bg-(--ink-2) text-(--cream) text-[14px] font-semibold inline-flex items-center cursor-pointer hover:bg-(--ink)";
 export const ghostBtn =
-  "h-11 px-5 rounded-[10px] border border-[rgba(67,62,18,0.2)] text-(--ink-2) text-[14px] font-medium inline-flex items-center cursor-pointer hover:bg-(--yellow-soft)";
+  "h-11 px-5 rounded-[10px] border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) text-[14px] font-medium inline-flex items-center cursor-pointer hover:bg-(--yellow-soft)";

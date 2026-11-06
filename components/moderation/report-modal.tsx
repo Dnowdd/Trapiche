@@ -62,7 +62,7 @@ export default function ReportModal({
           {(Object.keys(REPORT_REASONS) as ReportReason[]).map((key) => (
             <label
               key={key}
-              className="flex items-center gap-3 rounded-[12px] border border-[rgba(67,62,18,0.12)] px-4 py-3 text-[14px] text-(--ink-2) cursor-pointer has-checked:border-(--ink-2) has-checked:bg-(--cream-card)"
+              className="flex items-center gap-3 rounded-[12px] border border-[rgba(var(--ink-rgb),0.12)] px-4 py-3 text-[14px] text-(--ink-2) cursor-pointer has-checked:border-(--ink-2) has-checked:bg-(--cream-card)"
             >
               <input
                 type="radio"

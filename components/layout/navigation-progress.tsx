@@ -49,7 +49,7 @@ function Bar() {
     >
       <div
         data-phase={phase}
-        className="h-full bg-(--ink-2) origin-left shadow-[0_0_10px_rgba(67,62,18,0.35)] scale-x-0 opacity-0 data-[phase=loading]:opacity-100 data-[phase=loading]:scale-x-[0.85] data-[phase=loading]:transition-transform data-[phase=loading]:duration-[8s] data-[phase=loading]:ease-[cubic-bezier(0.05,0.8,0.2,1)] data-[phase=done]:scale-x-100 data-[phase=done]:opacity-0 data-[phase=done]:transition-[transform,opacity] data-[phase=done]:duration-300"
+        className="h-full bg-(--ink-2) origin-left shadow-[0_0_10px_rgba(var(--shadow-rgb),0.35)] scale-x-0 opacity-0 data-[phase=loading]:opacity-100 data-[phase=loading]:scale-x-[0.85] data-[phase=loading]:transition-transform data-[phase=loading]:duration-[8s] data-[phase=loading]:ease-[cubic-bezier(0.05,0.8,0.2,1)] data-[phase=done]:scale-x-100 data-[phase=done]:opacity-0 data-[phase=done]:transition-[transform,opacity] data-[phase=done]:duration-300"
       />
     </div>
   );

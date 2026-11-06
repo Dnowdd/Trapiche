@@ -19,7 +19,7 @@ export default function ReportCard({
     run(fn, () => toast(done), toast);
 
   return (
-    <article className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[16px] py-5 px-6">
+    <article className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[16px] py-5 px-6">
       <div className="font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase mb-2 flex flex-wrap gap-x-2">
         <span>
           {r.kind === "review"

@@ -52,7 +52,7 @@ export default function TechDetails({
   return (
     <section data-screen-label="Ficha técnica">
       <SectionHeader eyebrow="Ficha técnica" title="Esta edição" small />
-      <dl className="m-0 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[14px] px-5 py-1 grid sm:grid-cols-2 sm:gap-x-10">
+      <dl className="m-0 bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[14px] px-5 py-1 grid sm:grid-cols-2 sm:gap-x-10">
         {rows.map((r) => (
           <div
             key={r.label}

@@ -48,7 +48,7 @@ export default function PasswordStrength({
         {[1, 2, 3, 4].map((i) => (
           <span
             key={i}
-            className={`flex-1 h-1 rounded-[2px] transition-[background] duration-[250ms] ${i <= score ? ON_COLORS[score] : "bg-[rgba(67,62,18,0.1)]"}`}
+            className={`flex-1 h-1 rounded-[2px] transition-[background] duration-[250ms] ${i <= score ? ON_COLORS[score] : "bg-[rgba(var(--ink-rgb),0.1)]"}`}
           ></span>
         ))}
       </div>
@@ -68,7 +68,7 @@ export default function PasswordStrength({
                 className={`flex items-center gap-1.75 text-[11px] transition-[color] duration-[200ms] ${met ? "text-(--ink-2)" : "text-(--ink-4)"}`}
               >
                 <span
-                  className={`w-3.5 h-3.5 rounded-full border-[1.5px] flex items-center justify-center shrink-0 transition-[background,border-color] duration-[200ms] [&_svg]:w-2 [&_svg]:h-2 [&_svg]:text-(--ink) ${met ? "bg-(--yellow) border-(--yellow-deep) [&_svg]:opacity-100" : "border-[rgba(67,62,18,0.22)] [&_svg]:opacity-0"}`}
+                  className={`w-3.5 h-3.5 rounded-full border-[1.5px] flex items-center justify-center shrink-0 transition-[background,border-color] duration-[200ms] [&_svg]:w-2 [&_svg]:h-2 [&_svg]:text-(--ink) ${met ? "bg-(--yellow) border-(--yellow-deep) [&_svg]:opacity-100" : "border-[rgba(var(--ink-rgb),0.22)] [&_svg]:opacity-0"}`}
                 >
                   <Check />
                 </span>

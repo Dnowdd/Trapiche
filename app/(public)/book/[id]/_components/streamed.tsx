@@ -43,9 +43,9 @@ function CoverRowSkeleton({ count }: { count: number }) {
     <div className="flex gap-4 overflow-hidden">
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className="w-28 sm:w-36 shrink-0 flex flex-col gap-2">
-          <div className="aspect-2/3 rounded bg-[rgba(67,62,18,0.07)] animate-pulse" />
-          <div className="h-3 w-4/5 rounded bg-[rgba(67,62,18,0.07)] animate-pulse" />
-          <div className="h-2.5 w-1/2 rounded bg-[rgba(67,62,18,0.05)] animate-pulse" />
+          <div className="aspect-2/3 rounded bg-[rgba(var(--ink-rgb),0.07)] animate-pulse" />
+          <div className="h-3 w-4/5 rounded bg-[rgba(var(--ink-rgb),0.07)] animate-pulse" />
+          <div className="h-2.5 w-1/2 rounded bg-[rgba(var(--ink-rgb),0.05)] animate-pulse" />
         </div>
       ))}
     </div>
@@ -55,8 +55,8 @@ function CoverRowSkeleton({ count }: { count: number }) {
 function SkeletonHeader() {
   return (
     <div className="mb-4">
-      <div className="h-2.5 w-20 rounded bg-[rgba(67,62,18,0.07)] animate-pulse mb-2" />
-      <div className="h-5 w-48 rounded bg-[rgba(67,62,18,0.09)] animate-pulse" />
+      <div className="h-2.5 w-20 rounded bg-[rgba(var(--ink-rgb),0.07)] animate-pulse mb-2" />
+      <div className="h-5 w-48 rounded bg-[rgba(var(--ink-rgb),0.09)] animate-pulse" />
     </div>
   );
 }
@@ -69,7 +69,7 @@ export function EditionsSkeleton() {
         {Array.from({ length: 3 }, (_, i) => (
           <div
             key={i}
-            className="aspect-2/3 rounded bg-[rgba(67,62,18,0.07)] animate-pulse"
+            className="aspect-2/3 rounded bg-[rgba(var(--ink-rgb),0.07)] animate-pulse"
           />
         ))}
       </div>

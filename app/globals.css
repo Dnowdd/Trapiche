@@ -63,6 +63,10 @@
   --ink-5: #737450;
   --rule: #ecedde;
   --rule-yellow: #f5dd5c;
+  --ink-rgb: 67, 62, 18;
+  --shadow-rgb: 67, 62, 18;
+  --danger: #9a4a2a;
+  --on-accent: #343600;
   --shadow-card:
     0 1px 0 rgba(67, 62, 18, 0.04), 0 8px 24px -16px rgba(67, 62, 18, 0.18);
   --shadow-lift:
@@ -134,6 +138,100 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+:root[data-theme="dark"] {
+  --yellow: #3a3416;
+  --yellow-deep: #4f4720;
+  --yellow-soft: #322d13;
+  --cream: #1d1b0c;
+  --cream-card: #262311;
+  --cream-deep: #3b3618;
+  --ink: #fff8d5;
+  --ink-2: #f2eac2;
+  --ink-3: #d8cfa1;
+  --ink-4: #b9b083;
+  --ink-5: #a39b70;
+  --rule: #34301a;
+  --rule-yellow: #4f4720;
+  --ink-rgb: 255, 248, 213;
+  --shadow-rgb: 0, 0, 0;
+  --danger: #f0a07c;
+  --on-accent: #fff8d5;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --yellow: #3a3416;
+    --yellow-deep: #4f4720;
+    --yellow-soft: #322d13;
+    --cream: #1d1b0c;
+    --cream-card: #262311;
+    --cream-deep: #3b3618;
+    --ink: #fff8d5;
+    --ink-2: #f2eac2;
+    --ink-3: #d8cfa1;
+    --ink-4: #b9b083;
+    --ink-5: #a39b70;
+    --rule: #34301a;
+    --rule-yellow: #4f4720;
+    --ink-rgb: 255, 248, 213;
+    --shadow-rgb: 0, 0, 0;
+    --danger: #f0a07c;
+    --on-accent: #fff8d5;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"]
+  :is(
+    :is(.bg-\(--ink-2\), .bg-\(--ink\)):is(
+      .text-\(--cream\),
+      .text-\(--yellow\),
+      .text-\(--cream-deep\)
+    ),
+    .bg-\[\#2b2710\]
+  ) {
+  --cream: #fff8d5;
+  --cream-deep: #f8e99d;
+  --cream-card: #fffddf;
+  --yellow: #ffe767;
+  --yellow-soft: #fff1a8;
+  --yellow-deep: #f5dd5c;
+  --ink: #343600;
+  --ink-2: #433e12;
+  --ink-3: #66623d;
+  --ink-4: #6b6c48;
+  --ink-rgb: 67, 62, 18;
+  --danger: #9a4a2a;
+  background-color: #2b2710;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"])
+    :is(
+      :is(.bg-\(--ink-2\), .bg-\(--ink\)):is(
+        .text-\(--cream\),
+        .text-\(--yellow\),
+        .text-\(--cream-deep\)
+      ),
+      .bg-\[\#2b2710\]
+    ) {
+    --cream: #fff8d5;
+    --cream-deep: #f8e99d;
+    --cream-card: #fffddf;
+    --yellow: #ffe767;
+    --yellow-soft: #fff1a8;
+    --yellow-deep: #f5dd5c;
+    --ink: #343600;
+    --ink-2: #433e12;
+    --ink-3: #66623d;
+    --ink-4: #6b6c48;
+    --ink-rgb: 67, 62, 18;
+    --danger: #9a4a2a;
+    background-color: #2b2710;
+  }
 }
 
 @layer base {

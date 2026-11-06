@@ -80,7 +80,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 "h-8 px-3 rounded-full border inline-flex items-center text-[12px] font-medium",
                 onlyPt
                   ? "bg-(--ink-2) text-(--yellow) border-(--ink-2)"
-                  : "border-[rgba(67,62,18,0.18)] text-(--ink-2) hover:bg-(--yellow-soft)",
+                  : "border-[rgba(var(--ink-rgb),0.18)] text-(--ink-2) hover:bg-(--yellow-soft)",
               ].join(" ")}
             >
               Só em português
@@ -98,7 +98,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 <Link
                   key={a.name}
                   href={authorHref(a.name)}
-                  className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(67,62,18,0.08)] rounded-[12px] py-2.5 pl-2.5 pr-4 hover:bg-(--yellow-soft)"
+                  className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.08)] rounded-[12px] py-2.5 pl-2.5 pr-4 hover:bg-(--yellow-soft)"
                 >
                   <span className="w-9 h-9 rounded-full bg-(--yellow) border border-(--ink-2) flex items-center justify-center text-[12px] font-bold text-(--ink-2)">
                     {initialsOf(a.name)}

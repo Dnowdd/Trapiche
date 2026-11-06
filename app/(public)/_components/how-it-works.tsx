@@ -29,7 +29,7 @@ const StepIlluCadastro = () => {
         style={{
           width: 30,
           height: 54,
-          border: "1.5px dashed rgba(67,62,18,0.3)",
+          border: "1.5px dashed rgba(var(--ink-rgb),0.3)",
           borderRadius: 2,
           display: "flex",
           alignItems: "center",
@@ -60,7 +60,7 @@ const StepIlluListas = () => {
             borderRadius: 2,
           }}
         />
-        {bar(120, "rgba(67,62,18,0.18)")}
+        {bar(120, "rgba(var(--ink-rgb),0.18)")}
       </div>
       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
         <div
@@ -72,7 +72,7 @@ const StepIlluListas = () => {
             border: "1px solid var(--ink-3)",
           }}
         />
-        {bar(90, "rgba(67,62,18,0.12)")}
+        {bar(90, "rgba(var(--ink-rgb),0.12)")}
       </div>
       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
         <div
@@ -83,7 +83,7 @@ const StepIlluListas = () => {
             borderRadius: 2,
           }}
         />
-        {bar(140, "rgba(67,62,18,0.10)")}
+        {bar(140, "rgba(var(--ink-rgb),0.10)")}
       </div>
     </div>
   );
@@ -157,7 +157,7 @@ const HowItWorks = () => {
       <div className="grid gap-4.5 md:grid-cols-3 pt-2">
         {steps.map((s, i) => (
           <div
-            className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 md:pt-7 md:px-7 md:pb-8 flex flex-col gap-3.5 relative md:min-h-55"
+            className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-6 md:pt-7 md:px-7 md:pb-8 flex flex-col gap-3.5 relative md:min-h-55"
             key={i}
           >
             <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.08em]">

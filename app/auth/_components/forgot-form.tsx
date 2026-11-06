@@ -53,7 +53,7 @@ export default function ForgotForm({
       />
 
       <button
-        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) flex items-center justify-center gap-2.25 transition-[transform,box-shadow,opacity] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(67,62,18,0.6)] disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:w-3.75 [&_svg]:h-3.75 mt-2"
+        className="w-full h-12.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[15px] font-semibold tracking-[-0.005em] border border-(--ink-2) flex items-center justify-center gap-2.25 transition-[transform,box-shadow,opacity] duration-100 hover:enabled:-translate-y-px hover:enabled:shadow-[0_12px_24px_-14px_rgba(var(--shadow-rgb),0.6)] disabled:opacity-60 disabled:cursor-not-allowed [&_svg]:w-3.75 [&_svg]:h-3.75 mt-2"
         type="submit"
         disabled={loading}
       >

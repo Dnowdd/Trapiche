@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const itemCls =
-  "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(67,62,18,0.06)] focus:text-(--ink-2)";
+  "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(var(--ink-rgb),0.06)] focus:text-(--ink-2)";
 
 export interface HeaderUser {
   name: string;
@@ -83,7 +83,7 @@ const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
               <DropdownMenuContent
                 align="end"
                 sideOffset={10}
-                className="min-w-56 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(67,62,18,0.10)] shadow-[0_16px_40px_-8px_rgba(67,62,18,0.22),0_2px_8px_-2px_rgba(67,62,18,0.10)]"
+                className="min-w-56 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(var(--ink-rgb),0.10)] shadow-[0_16px_40px_-8px_rgba(var(--shadow-rgb),0.22),0_2px_8px_-2px_rgba(var(--shadow-rgb),0.10)]"
               >
                 {/* Identity header */}
                 <div className="px-3 py-2.5 flex items-center gap-3">
@@ -98,7 +98,7 @@ const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
                   </div>
                 </div>
 
-                <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
+                <DropdownMenuSeparator className="bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1" />
 
                 <DropdownMenuItem
                   className={itemCls}
@@ -184,7 +184,7 @@ const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
 
                 {user.isAdmin && (
                   <>
-                    <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
+                    <DropdownMenuSeparator className="bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1" />
                     <div className="px-3 pt-1.5 pb-1 font-mono text-[9.5px] uppercase tracking-[0.08em] text-(--ink-4)">
                       Administração
                     </div>
@@ -248,7 +248,7 @@ const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
                   </>
                 )}
 
-                <DropdownMenuSeparator className="bg-[rgba(67,62,18,0.08)] -mx-1.5 my-1" />
+                <DropdownMenuSeparator className="bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1" />
 
                 <DropdownMenuItem
                   variant="destructive"
@@ -284,7 +284,7 @@ const Header = ({ initialUser }: { initialUser: HeaderUser | null }) => {
             </Link>
             <Link
               href={loginHref(pathname, "register")}
-              className="h-9 px-4 rounded-lg bg-(--ink-2) text-(--cream) text-[13px] font-semibold flex items-center transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(67,62,18,0.4)]"
+              className="h-9 px-4 rounded-lg bg-(--ink-2) text-(--cream) text-[13px] font-semibold flex items-center transition-[transform,box-shadow] duration-120 hover:-translate-y-px hover:shadow-[0_6px_16px_-8px_rgba(var(--shadow-rgb),0.4)]"
             >
               Criar conta
             </Link>

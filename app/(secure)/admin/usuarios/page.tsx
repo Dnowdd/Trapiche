@@ -49,7 +49,7 @@ export default async function AdminUsers({
       {users.length === 0 ? (
         <p className="text-[14px] text-(--ink-3)">Ninguém encontrado.</p>
       ) : (
-        <div className="rounded-[18px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
+        <div className="rounded-[18px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden">
           {users.map((u) => (
             <div
               key={u.id}

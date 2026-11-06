@@ -59,9 +59,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ffe767",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffe767" },
+    { media: "(prefers-color-scheme: dark)", color: "#3a3416" },
+  ],
+  colorScheme: "light dark",
 };
+
+const THEME_SCRIPT = `try{var t=localStorage.getItem("trapiche-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export default function RootLayout({
   children,
@@ -71,8 +76,12 @@ export default function RootLayout({
   return (
     <html
       lang="pt-br"
+      suppressHydrationWarning
       className={cn("antialiased", "font-sans", inter.variable)}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-screen flex flex-col bg-(--yellow) text-(--ink-2) min-w-360 has-[[data-responsive]]:min-w-0 font-features-['ss01','cv11'] [text-rendering:optimizeLegibility]">
         <NavigationProgress />
         {children}

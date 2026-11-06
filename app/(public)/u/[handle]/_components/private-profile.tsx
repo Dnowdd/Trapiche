@@ -18,7 +18,7 @@ export default function PrivateProfile({ profile }: { profile: ProfileData }) {
           name={u.name}
           image={u.image}
           size={104}
-          className="ring-6 ring-(--cream) shadow-[0_18px_40px_-20px_rgba(67,62,18,0.55)]"
+          className="ring-6 ring-(--cream) shadow-[0_18px_40px_-20px_rgba(var(--shadow-rgb),0.55)]"
         />
         <span className="absolute -bottom-1 -right-1 size-9 rounded-full bg-(--ink-2) text-(--yellow) flex items-center justify-center ring-4 ring-(--cream)">
           <svg
@@ -43,7 +43,7 @@ export default function PrivateProfile({ profile }: { profile: ProfileData }) {
       <div className="relative mt-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em]">
         @{u.handle} · no Trapiche desde {u.joined}
       </div>
-      <div className="relative mt-8 max-w-105 rounded-[18px] border border-dashed border-[rgba(67,62,18,0.22)] bg-(--cream-card) px-6 py-6">
+      <div className="relative mt-8 max-w-105 rounded-[18px] border border-dashed border-[rgba(var(--ink-rgb),0.22)] bg-(--cream-card) px-6 py-6">
         <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4)">
           {members ? "Perfil para membros" : "Perfil privado"}
         </div>
@@ -62,7 +62,7 @@ export default function PrivateProfile({ profile }: { profile: ProfileData }) {
             </Link>
             <Link
               href={loginHref(`/u/${u.handle}`, "register")}
-              className="h-10 px-4 rounded-[10px] border border-[rgba(67,62,18,0.2)] text-(--ink-2) text-[13px] font-semibold inline-flex items-center hover:bg-(--yellow-soft)"
+              className="h-10 px-4 rounded-[10px] border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) text-[13px] font-semibold inline-flex items-center hover:bg-(--yellow-soft)"
             >
               Criar conta
             </Link>
