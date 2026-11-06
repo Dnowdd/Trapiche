@@ -9,6 +9,7 @@ import { getFeaturedBooks } from "@/app/catalog";
 import { getSession } from "@/lib/session";
 import { getDashboard } from "@/lib/queries/dashboard";
 import Dashboard from "./_components/dashboard";
+import ForYou from "./_components/for-you";
 import type { Metadata } from "next";
 import { JsonLd, websiteJsonLd } from "@/lib/seo";
 
@@ -28,6 +29,7 @@ export default async function Home() {
       <div data-responsive className={`${shell} pb-16 md:pb-20`}>
         <Dashboard data={data} />
         <div className="flex flex-col gap-16 md:gap-20 mt-12 md:mt-16">
+          <ForYou userId={session.user.id} />
           <Popular />
           <Lists />
           <Reviews />
