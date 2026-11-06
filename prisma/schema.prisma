@@ -60,6 +60,8 @@ model User {
   quotes          Quote[]
   tags            Tag[]
   importJobs      ImportJob[]
+  challenges      Challenge[]
+  loans           Loan[]
 }
 
 enum ProfileVisibility {
@@ -179,6 +181,7 @@ model Book {
   listItems  ListItem[]
   activities Activity[]
   quotes     Quote[]
+  loans      Loan[]
   work       Work?            @relation(fields: [workId], references: [id], onDelete: SetNull)
 
   @@index([workId])
@@ -414,6 +417,7 @@ enum NotificationKind {
   LIST_MEMBER_ADDED
   SUPPORT_REPLIED
   SUPPORT_MESSAGE
+  LOAN_DUE
 }
 
 model Notification {
@@ -425,6 +429,7 @@ model Notification {
   commentId String?
   listId    String?
   ticketId  String?
+  loanId    String?
   readAt    DateTime?
   createdAt DateTime         @default(now())
 
@@ -434,6 +439,7 @@ model Notification {
   comment ReviewComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
   list    List?          @relation(fields: [listId], references: [id], onDelete: Cascade)
   ticket  SupportTicket? @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  loan    Loan?          @relation(fields: [loanId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }
@@ -692,4 +698,49 @@ model ImportRow {
 
   @@unique([jobId, index])
   @@index([jobId, status])
+}
+
+enum ChallengeKind {
+  ANY
+  TAG
+  AUTHOR
+  LANGUAGE
+  FORMAT
+  LONG
+  SHORT
+}
+
+model Challenge {
+  id        String        @id @default(cuid())
+  userId    String
+  title     String
+  kind      ChallengeKind
+  value     String?
+  target    Int
+  startsAt  DateTime      @db.Date
+  endsAt    DateTime      @db.Date
+  createdAt DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, endsAt])
+}
+
+model Loan {
+  id         String    @id @default(cuid())
+  userId     String
+  bookId     String
+  person     String
+  lentAt     DateTime  @db.Date
+  dueAt      DateTime? @db.Date
+  returnedAt DateTime? @db.Date
+  note       String?
+  remindedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book          Book           @relation(fields: [bookId], references: [id])
+  notifications Notification[]
+
+  @@index([userId, returnedAt])
 }
