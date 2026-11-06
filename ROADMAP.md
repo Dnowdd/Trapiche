@@ -45,6 +45,15 @@ _Atualizado em 6/11/2026._
 - Leitura: `/me`, `/shelf` (filtro `tag`), `/shelf/{bookId}`, `/readings`, `/lists`, `/lists/{id}`, `/lists/{id}/items`, `/tags`, `/quotes`, `/reviews/{bookId}`, `/goals/{year}`.
 - Escrita, só com chaves criadas com “Permitir escrita”: perfil, privacidade e e-mails (`PATCH /me`), status, término, abandono, sessões, progresso, curtida, favorito e tags de cada livro, resenhas, citações, tags, listas e itens, meta anual. As rotas chamam as mesmas actions do site (mesmas regras e validações).
 
+### Leitura e descoberta
+
+- Formatos de leitura: físico (páginas), e-book (%) e audiolivro (tempo ouvido de um total), com conversão automática ao trocar de formato e sessões no formato certo.
+- “Pra você ler depois” na home: leitores que leram o mesmo que você, autores que você lê e populares como reserva, sempre com o motivo.
+- Busca e ordenação dentro da estante (título, autor, nota, data).
+- Imagem da retrospectiva no formato de stories (1080×1920), com compartilhamento nativo no celular.
+- Exportação da estante em CSV no formato do Goodreads.
+- Modo escuro (sistema, claro ou escuro), sem piscar ao carregar, sem violações de acessibilidade.
+
 ### Qualidade de dados
 
 - Admins corrigem título, autores, editora, ano, páginas, idioma, sinopse e capa de edições do Open Library. A edição corrigida para de sincronizar até alguém liberar.
@@ -71,6 +80,7 @@ _Atualizado em 6/11/2026._
 - [ ] Google OAuth: criar o client no Google Cloud com o redirect `https://<domínio>/api/auth/callback/google` e setar as duas variáveis.
 - [x] Aplicar a migration `20261106120000_privacy_quotes_tags_series_imports` no Neon.
 - [x] Aplicar `20261107120000_api_key_write_scope` e `20261108120000_book_curation` no Neon.
+- [ ] Aplicar `20261109120000_reading_formats` no Neon (o código já lê essas colunas).
 - [ ] Vercel: ativar Web Analytics e Speed Insights no painel do projeto.
 - [ ] Logo, favicon definitivo e ícones (hoje há uma marca provisória “T” em `lib/og-mark.tsx` e `lib/og.tsx`).
 
