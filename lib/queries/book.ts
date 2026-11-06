@@ -103,6 +103,7 @@ export async function getReviews(
       image: r.user.image,
       stars: r.rating,
       date: fmtAgo(r.createdAt),
+      publishedAt: r.createdAt.toISOString().slice(0, 10),
       days: days.get(r.userId) ?? null,
       text: r.text ?? "",
       spoiler: r.spoiler,
