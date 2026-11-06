@@ -43,3 +43,47 @@ test.describe("dark theme", () => {
       expect(await audit(page)).toEqual([]);
     });
 });
+
+for (const scheme of ["light", "dark"] as const)
+  test.describe(`assistant in ${scheme} mode`, () => {
+    test.use({ colorScheme: scheme, reducedMotion: "reduce" });
+    test("panel and page have no accessibility violations", async ({
+      page,
+    }) => {
+      await signUp(page);
+      await page.goto(`/book/${BOOK}`, { waitUntil: "networkidle" });
+      await page.getByRole("button", { name: /Pergunte ao Prático/ }).click();
+      const panel = page.getByRole("dialog", { name: /Prático/ });
+      await expect(panel.getByText(/Oi, Leitora/)).toBeVisible();
+      expect(await audit(page), "empty panel").toEqual([]);
+      await panel
+        .getByRole("button", { name: "Colocar na minha pilha" })
+        .click();
+      await expect(
+        panel.getByRole("button", { name: "Confirmar" }),
+      ).toBeEnabled();
+      expect(await audit(page), "proposal").toEqual([]);
+      await panel.getByRole("button", { name: "Confirmar" }).click();
+      await panel
+        .getByRole("checkbox", { name: "Usar os dados da minha conta" })
+        .check();
+      await panel.getByLabel("Mensagem para o Prático").fill("Minha estante");
+      await panel.getByLabel("Mensagem para o Prático").press("Enter");
+      await expect(
+        panel.getByText("Quer que eu sugira o próximo?"),
+      ).toBeVisible();
+      expect(await audit(page), "books").toEqual([]);
+      await page.goto("/assistente", { waitUntil: "networkidle" });
+      await page
+        .getByRole("navigation", { name: "Conversas" })
+        .getByRole("button", {
+          name: "Coloca este livro no meu Quero ler.",
+          exact: true,
+        })
+        .click();
+      await expect(
+        page.getByText("Quer que eu sugira o próximo?"),
+      ).toBeVisible();
+      expect(await audit(page), "page").toEqual([]);
+    });
+  });
