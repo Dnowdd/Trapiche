@@ -45,9 +45,23 @@ _Atualizado em 6/11/2026._
 - Leitura: `/me`, `/shelf` (filtro `tag`), `/shelf/{bookId}`, `/readings`, `/lists`, `/lists/{id}`, `/lists/{id}/items`, `/tags`, `/quotes`, `/reviews/{bookId}`, `/goals/{year}`.
 - Escrita, só com chaves criadas com “Permitir escrita”: perfil, privacidade e e-mails (`PATCH /me`), status, término, abandono, sessões, progresso, curtida, favorito e tags de cada livro, resenhas, citações, tags, listas e itens, meta anual. As rotas chamam as mesmas actions do site (mesmas regras e validações).
 
+### Qualidade de dados
+
+- Admins corrigem título, autores, editora, ano, páginas, idioma, sinopse e capa de edições do Open Library. A edição corrigida para de sincronizar até alguém liberar.
+- “Dados errados? Avise a gente” em cada livro abre um ticket de suporte já preenchido.
+- Autores de mentira (“[author not identified]”, “unknown”) são filtrados na entrada e na leitura.
+
+### Segurança e operação
+
+- Limite por usuário para citações, comentários, resenhas, curtidas, listas, tags e denúncias (mensagem amigável quando passa).
+- Vercel Web Analytics e Speed Insights (sem cookies). Sentry pronto, falta o DSN.
+- Termos de uso atualizados: idade mínima, regras de conteúdo, citações e direito autoral (Lei 9.610, art. 46), importação, API e encerramento.
+- Visitantes veem 404 em endereço inexistente; só as áreas privadas pedem login.
+
 ### Qualidade
 
-- Testes unitários, de integração (Postgres local) e E2E com Playwright (cadastro, estante, tags, citações, séries, perfil privado, e-mails, chave de API, importação completa, scanner com câmera simulada e SEO), em desktop e mobile.
+- Testes unitários, de integração (Postgres local) e E2E com Playwright (cadastro, estante, tags, citações, séries, perfil privado, e-mails, chave de API, importação completa, scanner com câmera simulada, SEO e acessibilidade com axe), em desktop e mobile.
+- Acessibilidade: zero violações WCAG 2.1 AA no axe nas telas principais; contraste dos tons de texto ajustado e foco visível pelo teclado.
 - CI no GitHub Actions (`.github/workflows/ci.yml`): typecheck, lint, Prettier e testes unitários; integração e build com Postgres; E2E com Playwright.
 
 ## Antes de abrir para o público
@@ -56,6 +70,8 @@ _Atualizado em 6/11/2026._
 - [ ] Vercel: `BETTER_AUTH_URL` e `NEXT_PUBLIC_APP_URL` com o domínio final, `SKIP_EMAIL_VERIFICATION=false`, `CRON_SECRET`, `DIRECT_URL` sem `-pooler`, Upstash e Sentry.
 - [ ] Google OAuth: criar o client no Google Cloud com o redirect `https://<domínio>/api/auth/callback/google` e setar as duas variáveis.
 - [x] Aplicar a migration `20261106120000_privacy_quotes_tags_series_imports` no Neon.
+- [ ] Aplicar `20261107120000_api_key_write_scope` e `20261108120000_book_curation` no Neon antes do deploy (o código já lê essas colunas).
+- [ ] Vercel: ativar Web Analytics e Speed Insights no painel do projeto.
 - [ ] Logo, favicon definitivo e ícones (hoje há uma marca provisória “T” em `lib/og-mark.tsx` e `lib/og.tsx`).
 
 ## Próximos passos

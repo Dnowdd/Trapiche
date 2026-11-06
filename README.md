@@ -50,6 +50,8 @@ Abra [http://localhost:3000](http://localhost:3000).
 | `npm run test:e2e`                    | Testes E2E com Playwright (sobe ou reaproveita o dev server na porta 3100, banco local). |
 | `npm run admin:grant -- <email-ou-@>` | Promove uma conta a admin (`--revoke` remove). Usa `DIRECT_URL`/`DATABASE_URL`.          |
 
+O CI (`.github/workflows/ci.yml`) roda typecheck, lint, Prettier e os testes unitários, de integração e E2E (incluindo acessibilidade com axe) a cada push na `main` e em pull requests.
+
 ## Login com Google
 
 O botão “Entrar com Google” só aparece quando `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` existem.
