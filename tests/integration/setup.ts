@@ -4,6 +4,7 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 import { TEST_DATABASE_URL, assertLocal } from "./env";
 
 assertLocal(TEST_DATABASE_URL);
+process.env.BETTER_AUTH_SECRET ??= "integration-secret";
 
 export const testDb = new PrismaClient({
   adapter: new PrismaPg({ connectionString: TEST_DATABASE_URL }),
@@ -31,6 +32,8 @@ vi.mock("@/lib/emails/send", () => {
     sendPasswordReset: record("reset"),
     sendPasswordChanged: record("password-changed"),
     sendSupportReply: record("support-reply"),
+    sendMonthlyDigest: record("digest"),
+    sendReadingReminder: record("reminder"),
   };
 });
 vi.mock("next/cache", () => ({
@@ -45,7 +48,7 @@ vi.mock("@/lib/books", async (importOriginal) => ({
 beforeEach(async () => {
   sentEmails.length = 0;
   await testDb.$executeRawUnsafe(
-    `TRUNCATE "Activity", "ReadingSession", "Reading", "Review", "UserBook", "Book", "Work", "User" CASCADE`,
+    `TRUNCATE "Activity", "ReadingSession", "Reading", "Review", "UserBook", "Book", "Work", "Series", "User" CASCADE`,
   );
   const now = new Date();
   await testDb.user.create({
