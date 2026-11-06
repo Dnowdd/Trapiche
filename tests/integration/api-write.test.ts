@@ -13,6 +13,10 @@ import { POST as addItem } from "@/app/api/v1/lists/[id]/items/route";
 import * as review from "@/app/api/v1/reviews/[bookId]/route";
 import { PUT as setGoal } from "@/app/api/v1/goals/[year]/route";
 import { PATCH as patchMe } from "@/app/api/v1/me/route";
+import * as loansRoute from "@/app/api/v1/loans/route";
+import { POST as returnLoanRoute } from "@/app/api/v1/loans/[id]/return/route";
+import * as challengesRoute from "@/app/api/v1/challenges/route";
+import { PUT as formatRoute } from "@/app/api/v1/shelf/[bookId]/format/route";
 import { testDb, viewer } from "./setup";
 
 const BASE = "http://localhost/api/v1";
@@ -294,5 +298,78 @@ describe("api writes", () => {
     );
     expect(res.status).toBe(404);
     expect(await testDb.quote.count()).toBe(1);
+  });
+
+  it("handles loans, challenges and reading formats", async () => {
+    const k = await key(true);
+    let res = await call(
+      loansRoute.POST as Handler,
+      "POST",
+      "/loans",
+      k,
+      {},
+      { bookId: BOOK, person: "Ana", dueAt: "2099-01-01" },
+    );
+    expect(res.status).toBe(201);
+    expect(res.json.data).toMatchObject({
+      person: "Ana",
+      overdue: false,
+      returnedAt: null,
+    });
+    const loanId = res.json.data.id;
+    res = await call(
+      returnLoanRoute as Handler,
+      "POST",
+      `/loans/${loanId}/return`,
+      k,
+      { id: loanId },
+      {},
+    );
+    expect(res.json.data.returnedAt).not.toBeNull();
+    res = await call(loansRoute.GET as Handler, "GET", "/loans?open=true", k);
+    expect(res.json.data).toEqual([]);
+
+    res = await call(
+      challengesRoute.POST as Handler,
+      "POST",
+      "/challenges",
+      k,
+      {},
+      {
+        title: "Longos",
+        kind: "LONG",
+        target: 2,
+        startsAt: "2026-01-01",
+        endsAt: "2026-12-31",
+      },
+    );
+    expect(res.status).toBe(201);
+    expect(res.json.data).toMatchObject({
+      title: "Longos",
+      done: 0,
+      description: "com 400+ páginas",
+    });
+
+    await call(
+      shelfItem.PUT as Handler,
+      "PUT",
+      `/shelf/${BOOK}`,
+      k,
+      { bookId: BOOK },
+      { status: "READING" },
+    );
+    res = await call(
+      formatRoute as Handler,
+      "PUT",
+      `/shelf/${BOOK}/format`,
+      k,
+      { bookId: BOOK },
+      { format: "AUDIO", audioLength: 300 },
+    );
+    expect(res.json.data).toMatchObject({
+      format: "AUDIO",
+      audioLength: 300,
+      progress: 0,
+    });
   });
 });

@@ -56,6 +56,24 @@ const ENDPOINTS: {
     paginated: false,
   },
   {
+    path: "/loans",
+    title: "Empréstimos",
+    description:
+      "Livros que você emprestou: com quem, desde quando, prazo, devolução e se está atrasado.",
+    params: [
+      ["open", "true (só os que não voltaram) ou false (só os devolvidos)."],
+    ],
+    paginated: false,
+  },
+  {
+    path: "/challenges",
+    title: "Desafios",
+    description:
+      "Seus desafios de leitura com meta, período e progresso calculado.",
+    params: [],
+    paginated: false,
+  },
+  {
     path: "/quotes",
     title: "Citações",
     description: "Os trechos que você guardou, com página, nota e livro.",
@@ -197,6 +215,31 @@ const WRITES: { method: string; path: string; body: string }[] = [
     method: "DELETE",
     path: "/lists/{id}/items/{bookId}",
     body: "Tira o livro da lista.",
+  },
+  {
+    method: "POST",
+    path: "/loans",
+    body: "bookId, person; lentAt, dueAt (AAAA-MM-DD) e note opcionais.",
+  },
+  {
+    method: "GET · PATCH · DELETE",
+    path: "/loans/{id}",
+    body: "person, lentAt, dueAt, note.",
+  },
+  {
+    method: "POST",
+    path: "/loans/{id}/return",
+    body: "returnedAt opcional (padrão: hoje).",
+  },
+  {
+    method: "POST",
+    path: "/challenges",
+    body: "title, kind (ANY, TAG, AUTHOR, LANGUAGE, FORMAT, LONG, SHORT), value conforme o tipo, target, startsAt e endsAt.",
+  },
+  {
+    method: "DELETE",
+    path: "/challenges/{id}",
+    body: "Apaga o desafio.",
   },
   {
     method: "GET · PUT",
