@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { renderEmail, renderText, type EmailContent } from "./layout";
 import {
+  monthlyDigestEmail,
+  readingReminderEmail,
   changeEmailConfirmation,
   newEmailVerification,
   passwordChangedEmail,
@@ -15,7 +17,11 @@ function from() {
   return process.env.RESEND_FROM_EMAIL ?? "Trapiche <onboarding@resend.dev>";
 }
 
-async function send(to: string, content: EmailContent) {
+async function send(
+  to: string,
+  content: EmailContent,
+  headers?: Record<string, string>,
+) {
   if (!process.env.RESEND_API_KEY) {
     console.info(
       `[email skipped: no RESEND_API_KEY] ${content.subject} → ${to}`,
@@ -29,6 +35,7 @@ async function send(to: string, content: EmailContent) {
     subject: content.subject,
     html: renderEmail(content),
     text: renderText(content),
+    headers,
   });
   if (error) console.error(`[email failed] ${content.subject} → ${to}`, error);
 }
@@ -55,3 +62,16 @@ export const sendPasswordChanged = (v: Who) =>
 export const sendSupportReply = (
   v: Who & { number: number; subject: string; excerpt: string; url: string },
 ) => send(v.to, supportReplyEmail(v));
+
+const unsubscribeHeaders = (url: string) => ({
+  "List-Unsubscribe": `<${url}>`,
+  "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+});
+
+export const sendMonthlyDigest = (
+  v: Who & Omit<Parameters<typeof monthlyDigestEmail>[0], "name">,
+) => send(v.to, monthlyDigestEmail(v), unsubscribeHeaders(v.unsubscribeUrl));
+
+export const sendReadingReminder = (
+  v: Who & Omit<Parameters<typeof readingReminderEmail>[0], "name">,
+) => send(v.to, readingReminderEmail(v), unsubscribeHeaders(v.unsubscribeUrl));

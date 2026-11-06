@@ -182,3 +182,113 @@ export function supportReplyEmail(v: {
     quote: false,
   };
 }
+
+export function monthlyDigestEmail(v: {
+  name: string;
+  label: string;
+  books: {
+    title: string;
+    author: string;
+    url: string;
+    rating: number | null;
+  }[];
+  pages: number;
+  hours: number;
+  readingDays: number;
+  retroUrl: string;
+  unsubscribeUrl: string;
+}): EmailContent {
+  const n = v.books.length;
+  const fmt = (x: number) => x.toLocaleString("pt-BR");
+  return {
+    subject:
+      n > 0
+        ? `Seu ${v.label} em livros: ${n} ${n === 1 ? "livro terminado" : "livros terminados"}`
+        : `Seu ${v.label} em livros`,
+    preheader:
+      n > 0
+        ? `${fmt(v.pages)} páginas, ${fmt(v.hours)}h de leitura e ${n} ${n === 1 ? "livro" : "livros"} na estante de lidos.`
+        : `${fmt(v.pages)} páginas lidas em ${v.readingDays} dias de leitura.`,
+    eyebrow: `Resumo<br />do mês`,
+    title: `Seu ${e(v.label)} em livros.`,
+    blocks: [
+      {
+        kind: "text",
+        html: `${hello(v.name)} — aqui vai o que ficou registrado no seu diário no mês passado.`,
+      },
+      {
+        kind: "stats",
+        items: [
+          { value: fmt(n), label: n === 1 ? "livro" : "livros" },
+          { value: fmt(v.pages), label: "páginas" },
+          { value: `${fmt(v.hours)}h`, label: "de leitura" },
+        ],
+      },
+      ...(n > 0
+        ? [
+            {
+              kind: "list" as const,
+              items: v.books.slice(0, 8).map((b) => ({
+                title: b.title,
+                url: b.url,
+                detail: [
+                  b.author,
+                  b.rating ? `${b.rating.toLocaleString("pt-BR")} ★` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · "),
+              })),
+            },
+          ]
+        : []),
+      {
+        kind: "button",
+        label: "Ver minha retrospectiva",
+        url: v.retroUrl,
+        fallback: false,
+      },
+    ],
+    unsubscribe: { url: v.unsubscribeUrl, label: "Resumo do mês" },
+  };
+}
+
+export function readingReminderEmail(v: {
+  name: string;
+  days: number;
+  books: { title: string; progress: number | null; url: string }[];
+  unsubscribeUrl: string;
+}): EmailContent {
+  const first = v.books[0];
+  return {
+    subject: `Como vai ${first.title}?`,
+    preheader: `Faz ${v.days} dias que você não registra leitura. Que tal umas páginas hoje?`,
+    eyebrow: "Lembrete<br />de leitura",
+    title: "Seu livro está esperando na mesa de cabeceira.",
+    blocks: [
+      {
+        kind: "text",
+        html: `${hello(v.name)} — faz <strong style="color:#433e12">${v.days} dias</strong> que você não registra leitura. Sem pressão: às vezes dez páginas antes de dormir já mudam o dia.`,
+      },
+      {
+        kind: "list",
+        items: v.books.slice(0, 3).map((b) => ({
+          title: b.title,
+          url: b.url,
+          detail: b.progress != null ? `${b.progress}% lido` : "em andamento",
+        })),
+      },
+      {
+        kind: "button",
+        label: "Registrar a leitura de hoje",
+        url: first.url,
+        fallback: false,
+      },
+      {
+        kind: "small",
+        html: "Mandamos no máximo um lembrete a cada duas semanas.",
+      },
+    ],
+    quote: true,
+    unsubscribe: { url: v.unsubscribeUrl, label: "Lembrete de leitura" },
+  };
+}

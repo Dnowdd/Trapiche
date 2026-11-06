@@ -53,7 +53,9 @@ export type Block =
   | { kind: "note"; title: string; body?: string }
   | { kind: "quote"; text: string; by: string }
   | { kind: "divider" }
-  | { kind: "small"; html: string };
+  | { kind: "small"; html: string }
+  | { kind: "stats"; items: { value: string; label: string }[] }
+  | { kind: "list"; items: { title: string; detail?: string; url?: string }[] };
 
 export interface EmailContent {
   subject: string;
@@ -62,6 +64,7 @@ export interface EmailContent {
   title: string;
   blocks: Block[];
   quote?: boolean;
+  unsubscribe?: { url: string; label: string };
 }
 
 const p = (html: string, extra = "") =>
@@ -91,6 +94,20 @@ function block(b: Block) {
         <td width="52" valign="top" style="padding:18px 0 18px 20px"><div style="width:32px;height:32px;border-radius:16px;background:${C.dark};color:${C.yellow};font-family:${FONT};font-size:15px;font-weight:800;line-height:32px;text-align:center">!</div></td>
         <td valign="top" style="padding:18px 20px 18px 12px;font-family:${FONT}"><div style="font-size:15px;font-weight:700;color:${C.ink2};line-height:22px">${b.title}</div>${b.body ? `<div style="font-size:13px;color:${C.ink3};line-height:20px">${b.body}</div>` : ""}</td>
       </tr></table>`;
+    case "stats":
+      return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px;background:${C.dark};border-radius:16px"><tr>${b.items
+        .map(
+          (it, i) =>
+            `<td align="center" valign="top" style="padding:22px 8px;${i ? `border-left:1px solid #4a4420;` : ""}font-family:${FONT}"><div style="font-size:32px;line-height:36px;font-weight:800;letter-spacing:-1px;color:${C.yellow}">${escapeHtml(it.value)}</div><div style="margin-top:6px;font-family:${MONO};font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#d8cf9a">${escapeHtml(it.label)}</div></td>`,
+        )
+        .join("")}</tr></table>`;
+    case "list":
+      return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px">${b.items
+        .map(
+          (it) =>
+            `<tr><td style="padding:10px 0;border-bottom:1px solid ${C.rule};font-family:${FONT}"><div style="font-size:15px;font-weight:700;line-height:21px;color:${C.ink2}">${it.url ? `<a href="${escapeHtml(it.url)}" style="color:${C.ink2};text-decoration:none">${escapeHtml(it.title)}</a>` : escapeHtml(it.title)}</div>${it.detail ? `<div style="font-size:13px;line-height:19px;color:${C.ink4}">${escapeHtml(it.detail)}</div>` : ""}</td></tr>`,
+        )
+        .join("")}</table>`;
     case "quote":
       return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px"><tr><td style="border-left:3px solid ${C.noteBorder};padding:6px 0 6px 16px;font-family:${FONT};font-size:15px;line-height:24px;color:${C.ink2};white-space:pre-line">${b.text}<div style="margin-top:8px;font-family:${MONO};font-size:10px;letter-spacing:1px;text-transform:uppercase;color:${C.ink4}">${b.by}</div></td></tr></table>`;
   }
@@ -144,7 +161,11 @@ ${
 <tr><td class="px" style="background:${C.dark};padding:32px 40px;border-radius:0 0 24px 24px">
   <div style="font-family:${FONT};font-size:18px;font-weight:800;color:${C.card}">Trapiche</div>
   <div style="margin-top:6px;font-family:${FONT};font-size:13px;color:#b7ae7a">O porto seguro das suas leituras.</div>
-  <div style="margin-top:22px;font-family:${MONO};font-size:10.5px;line-height:18px;color:#8a835a">Você recebeu este e-mail porque há uma conta Trapiche associada a este endereço.<br />${link("/suporte", "Suporte")} &nbsp;·&nbsp; ${link("/privacidade", "Privacidade")} &nbsp;·&nbsp; ${link("/termos", "Termos")}</div>
+  <div style="margin-top:22px;font-family:${MONO};font-size:10.5px;line-height:18px;color:#8a835a">${
+    content.unsubscribe
+      ? `Você recebe este e-mail porque ativou “${escapeHtml(content.unsubscribe.label)}” nas preferências. <a href="${escapeHtml(content.unsubscribe.url)}" style="color:#d8cf9a;text-decoration:underline">Parar de receber</a>`
+      : "Você recebeu este e-mail porque há uma conta Trapiche associada a este endereço."
+  }<br />${link("/suporte", "Suporte")} &nbsp;·&nbsp; ${link("/privacidade", "Privacidade")} &nbsp;·&nbsp; ${link("/termos", "Termos")}</div>
   <div style="margin-top:18px;font-family:${MONO};font-size:10px;color:#6b6440">&copy; ${year} Trapiche</div>
 </td></tr>
 </table>
@@ -174,7 +195,21 @@ export function renderText(content: EmailContent) {
     if (b.kind === "note")
       lines.push(strip(b.title) + (b.body ? ` ${strip(b.body)}` : ""), "");
     if (b.kind === "quote") lines.push(strip(b.text), `— ${strip(b.by)}`, "");
+    if (b.kind === "stats")
+      lines.push(
+        b.items.map((it) => `${it.value} ${it.label}`).join(" · "),
+        "",
+      );
+    if (b.kind === "list")
+      lines.push(
+        ...b.items.map(
+          (it) => `• ${it.title}${it.detail ? ` (${it.detail})` : ""}`,
+        ),
+        "",
+      );
   }
   lines.push("—", "Trapiche · O porto seguro das suas leituras.", appUrl("/"));
+  if (content.unsubscribe)
+    lines.push("", `Parar de receber: ${content.unsubscribe.url}`);
   return lines.join("\n");
 }

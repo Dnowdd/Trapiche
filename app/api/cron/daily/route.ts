@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { isOpenLibraryId } from "@/lib/open-library";
 import { byAuthor, editionsOf, relatedBooks } from "@/lib/queries/book";
 import { getHomePopular } from "@/lib/queries/home";
+import { sendMonthlyDigests, sendReadingReminders } from "@/lib/reminders";
 
 export const maxDuration = 300;
 
@@ -49,8 +50,30 @@ export async function GET(req: NextRequest) {
     ]);
   });
 
+  const [digests, reminders] = await Promise.all([
+    sendMonthlyDigests().catch((err) => {
+      console.error("[cron] digests failed", err);
+      return null;
+    }),
+    sendReadingReminders().catch((err) => {
+      console.error("[cron] reminders failed", err);
+      return null;
+    }),
+  ]);
+  await db.importJob
+    .updateMany({
+      where: {
+        status: "RUNNING",
+        createdAt: { lt: new Date(Date.now() - 7 * 86_400_000) },
+      },
+      data: { status: "CANCELED", finishedAt: new Date() },
+    })
+    .catch(() => null);
+
   return NextResponse.json({
     refreshed: google.length,
     warmed: popular.length,
+    digests,
+    reminders,
   });
 }
