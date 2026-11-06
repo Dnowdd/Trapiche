@@ -288,6 +288,7 @@ export function useAssistantChat(options: Options = {}) {
     threadId,
     messages,
     shareData,
+    syncShareData: setShareDataState,
     savingShare,
     setShareData,
     streaming,

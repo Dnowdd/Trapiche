@@ -5,20 +5,38 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { usePathname, useRouter } from "next/navigation";
 import { loginHref } from "@/lib/links";
 import Link from "next/link";
-import { ShipWheel } from "lucide-react";
+import {
+  CodeXml,
+  Flag,
+  Import,
+  LayoutDashboard,
+  LifeBuoy,
+  LogOut,
+  MessagesSquare,
+  ShipWheel,
+  UserRound,
+} from "lucide-react";
+import ThemeToggle from "./theme-toggle";
+import AssistantLauncher from "@/components/assistant/assistant-launcher";
 import HeaderSearch from "./header-search";
 import Avatar from "@/components/shared/avatar";
 import NotificationBell from "@/components/notifications/notification-bell";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 const itemCls =
   "gap-2.5 cursor-pointer px-3 py-2 text-[13px] text-(--ink-2) rounded-[8px] focus:bg-[rgba(var(--ink-rgb),0.06)] focus:text-(--ink-2)";
+
+const sepCls = "bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1.5";
+const labelCls =
+  "px-3 pt-1 pb-1 font-mono text-[9.5px] uppercase tracking-[0.08em] text-(--ink-4)";
 
 export interface HeaderUser {
   name: string;
@@ -65,7 +83,8 @@ const Header = ({
 
       <HeaderSearch />
 
-      <div className="flex items-center gap-4.5 md:order-last">
+      <div className="flex items-center gap-3 md:gap-4 md:order-last">
+        <ThemeToggle />
         {user ? (
           <>
             <NotificationBell />
@@ -90,9 +109,8 @@ const Header = ({
               <DropdownMenuContent
                 align="end"
                 sideOffset={10}
-                className="min-w-56 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(var(--ink-rgb),0.10)] shadow-[0_16px_40px_-8px_rgba(var(--shadow-rgb),0.22),0_2px_8px_-2px_rgba(var(--shadow-rgb),0.10)]"
+                className="min-w-60 p-1.5 rounded-[12px] bg-(--cream) border border-[rgba(var(--ink-rgb),0.10)] shadow-[0_16px_40px_-8px_rgba(var(--shadow-rgb),0.22),0_2px_8px_-2px_rgba(var(--shadow-rgb),0.10)]"
               >
-                {/* Identity header */}
                 <div className="px-3 py-2.5 flex items-center gap-3">
                   <Avatar name={user.name} image={user.image} size={40} />
                   <div className="min-w-0">
@@ -105,187 +123,96 @@ const Header = ({
                   </div>
                 </div>
 
-                <DropdownMenuSeparator className="bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1" />
-
-                <DropdownMenuItem
-                  className={itemCls}
-                  onClick={() => router.push(profileHref)}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                  </svg>
-                  Meu perfil
-                </DropdownMenuItem>
-
-                {assistant && (
+                <DropdownMenuSeparator className={sepCls} />
+                <DropdownMenuGroup>
                   <DropdownMenuItem
                     className={itemCls}
-                    onClick={() => router.push("/assistente")}
+                    onClick={() => router.push(profileHref)}
                   >
-                    <ShipWheel size={14} strokeWidth={2} aria-hidden />
-                    Prático, o assistente
+                    <UserRound size={15} aria-hidden />
+                    Meu perfil
                   </DropdownMenuItem>
-                )}
-
-                <DropdownMenuItem
-                  className={itemCls}
-                  onClick={() => router.push("/importar")}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  {assistant && (
+                    <DropdownMenuItem
+                      className={itemCls}
+                      onClick={() => router.push("/assistente")}
+                    >
+                      <ShipWheel size={15} aria-hidden />
+                      <span className="flex-1">Prático</span>
+                      <span className="rounded-full bg-(--yellow) px-1.5 py-px font-mono text-[9px] font-semibold uppercase tracking-[0.06em] text-(--on-accent)">
+                        IA
+                      </span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    className={itemCls}
+                    onClick={() => router.push("/importar")}
                   >
-                    <path d="M12 3v12" />
-                    <path d="m7 10 5 5 5-5" />
-                    <path d="M5 21h14" />
-                  </svg>
-                  Importar livros
-                </DropdownMenuItem>
+                    <Import size={15} aria-hidden />
+                    Importar livros
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
 
-                <DropdownMenuItem
-                  className={itemCls}
-                  onClick={() => router.push("/desenvolvedores")}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                <DropdownMenuSeparator className={sepCls} />
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className={labelCls}>
+                    Ajuda e ferramentas
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem
+                    className={itemCls}
+                    onClick={() => router.push("/suporte")}
                   >
-                    <path d="m16 18 6-6-6-6" />
-                    <path d="m8 6-6 6 6 6" />
-                  </svg>
-                  Desenvolvedores
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  className={itemCls}
-                  onClick={() => router.push("/suporte")}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    <LifeBuoy size={15} aria-hidden />
+                    Suporte
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={itemCls}
+                    onClick={() => router.push("/desenvolvedores")}
                   >
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14" />
-                    <path d="M12 17h.01" />
-                  </svg>
-                  Suporte
-                </DropdownMenuItem>
+                    <CodeXml size={15} aria-hidden />
+                    Desenvolvedores
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
 
                 {user.isAdmin && (
                   <>
-                    <DropdownMenuSeparator className="bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1" />
-                    <div className="px-3 pt-1.5 pb-1 font-mono text-[9.5px] uppercase tracking-[0.08em] text-(--ink-4)">
-                      Administração
-                    </div>
-                    <DropdownMenuItem
-                      className={itemCls}
-                      onClick={() => router.push("/admin")}
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    <DropdownMenuSeparator className={sepCls} />
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className={labelCls}>
+                        Administração
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem
+                        className={itemCls}
+                        onClick={() => router.push("/admin")}
                       >
-                        <rect x="3" y="3" width="7" height="9" rx="1" />
-                        <rect x="14" y="3" width="7" height="5" rx="1" />
-                        <rect x="14" y="12" width="7" height="9" rx="1" />
-                        <rect x="3" y="16" width="7" height="5" rx="1" />
-                      </svg>
-                      Painel
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={itemCls}
-                      onClick={() => router.push("/admin/denuncias")}
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        <LayoutDashboard size={15} aria-hidden />
+                        Painel
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className={itemCls}
+                        onClick={() => router.push("/admin/denuncias")}
                       >
-                        <path d="M4 22V4a1 1 0 0 1 1-1h13l-2 5 2 5H5" />
-                      </svg>
-                      Denúncias
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className={itemCls}
-                      onClick={() => router.push("/admin/suporte")}
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        <Flag size={15} aria-hidden />
+                        Denúncias
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className={itemCls}
+                        onClick={() => router.push("/admin/suporte")}
                       >
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
-                      Tickets de suporte
-                    </DropdownMenuItem>
+                        <MessagesSquare size={15} aria-hidden />
+                        Tickets de suporte
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                   </>
                 )}
 
-                <DropdownMenuSeparator className="bg-[rgba(var(--ink-rgb),0.08)] -mx-1.5 my-1" />
-
+                <DropdownMenuSeparator className={sepCls} />
                 <DropdownMenuItem
                   variant="destructive"
-                  className="gap-2.5 cursor-pointer px-3 py-2 text-[13px] rounded-[8px] focus:bg-red-50"
+                  className="gap-2.5 cursor-pointer px-3 py-2 text-[13px] rounded-[8px]"
                   onClick={handleLogout}
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                  </svg>
+                  <LogOut size={15} aria-hidden />
                   Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -308,6 +235,9 @@ const Header = ({
           </div>
         )}
       </div>
+      {user && assistant && (
+        <AssistantLauncher firstName={user.name.split(" ")[0] || user.name} />
+      )}
     </header>
   );
 };

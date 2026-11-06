@@ -389,3 +389,47 @@
     transform: none;
   }
 }
+
+@property --fab-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes fabSpin {
+  to {
+    --fab-angle: 360deg;
+  }
+}
+
+.pratico-fab {
+  isolation: isolate;
+  background: #24210c;
+  box-shadow:
+    0 18px 40px -14px rgba(36, 33, 12, 0.75),
+    0 0 0 1px rgba(255, 231, 103, 0.08),
+    0 10px 34px -10px rgba(255, 196, 64, 0.55);
+}
+
+.pratico-fab::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--fab-angle),
+    #ffe767,
+    #f0a07c,
+    #fff8d5,
+    #b08c24,
+    #ffe767
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: fabSpin 5s linear infinite;
+}

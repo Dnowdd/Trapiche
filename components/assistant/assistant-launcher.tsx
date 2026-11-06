@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Maximize2, ShipWheel, SquarePen, X } from "lucide-react";
+import { Maximize2, ShipWheel, Sparkles, SquarePen, X } from "lucide-react";
 import { ASSISTANT_NAME } from "@/lib/assistant/config";
 import ChatView, { PilotMark, type ComposerHandle } from "./chat-view";
 import { useAssistantChat } from "./use-assistant-chat";
+import { getAssistantDataSharing } from "@/lib/actions/assistant";
 
 const KEY = "trapiche-assistant";
 
@@ -36,12 +37,16 @@ function writeSaved(saved: Saved) {
 const iconButton =
   "size-9 rounded-[10px] flex items-center justify-center text-(--ink-3) hover:text-(--ink) hover:bg-[rgba(var(--ink-rgb),0.07)] cursor-pointer";
 
+export const OPEN_EVENT = "pratico:open";
+
+export function openPratico(prompt?: string) {
+  window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: { prompt } }));
+}
+
 export default function AssistantLauncher({
   firstName,
-  shareData,
 }: {
   firstName: string;
-  shareData: boolean;
 }) {
   const pathname = usePathname();
   const bookId = /^\/book\/([^/?#]+)/.exec(pathname)?.[1] ?? null;
@@ -50,8 +55,18 @@ export default function AssistantLauncher({
   const restored = useRef<string | null>(null);
   const launcher = useRef<HTMLButtonElement>(null);
   const composer = useRef<ComposerHandle>(null);
-  const chat = useAssistantChat({ bookId, shareData });
-  const { open: openThread, messages, threadId } = chat;
+  const chat = useAssistantChat({ bookId });
+  const { open: openThread, messages, threadId, syncShareData, send } = chat;
+
+  useEffect(() => {
+    let alive = true;
+    void getAssistantDataSharing().then((r) => {
+      if (alive && r.ok) syncShareData(r.data!.enabled);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [syncShareData]);
 
   useEffect(() => {
     const saved = readSaved();
@@ -76,6 +91,16 @@ export default function AssistantLauncher({
     if (pending && !messages.length) void openThread(pending);
     requestAnimationFrame(() => composer.current?.focus());
   }, [messages.length, openThread]);
+
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const prompt = (e as CustomEvent<{ prompt?: string }>).detail?.prompt;
+      show();
+      if (prompt) void send(prompt);
+    };
+    window.addEventListener(OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_EVENT, onOpen);
+  }, [show, send]);
 
   const hide = useCallback(() => {
     setOpen(false);
@@ -106,18 +131,27 @@ export default function AssistantLauncher({
           onClick={show}
           aria-haspopup="dialog"
           aria-controls="pratico-panel"
-          className="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 h-12 pl-2 pr-4.5 rounded-full bg-(--ink-2) text-(--yellow) shadow-[0_18px_40px_-14px_rgba(var(--shadow-rgb),0.75),0_2px_6px_rgba(var(--shadow-rgb),0.18)] cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 animate-[rise_0.4s_cubic-bezier(0.2,0.8,0.2,1)]"
+          aria-label={`Abrir o ${ASSISTANT_NAME}, assistente de leitura com IA`}
+          className="pratico-fab group fixed bottom-5 right-5 z-40 flex items-center gap-3 h-14 pl-2 pr-5 rounded-full cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 animate-[rise_0.4s_cubic-bezier(0.2,0.8,0.2,1)]"
         >
-          <span className="size-8 rounded-full bg-(--yellow) text-(--ink-2) flex items-center justify-center">
+          <span className="relative size-10 rounded-full bg-[#ffe767] text-[#343600] flex items-center justify-center">
             <ShipWheel
-              size={18}
+              size={21}
               strokeWidth={1.9}
               aria-hidden
               className="transition-transform duration-700 ease-out group-hover:rotate-180"
             />
+            <span className="absolute -right-1 -top-1 size-5 rounded-full bg-[#fff8d5] text-[#9a4a2a] ring-2 ring-[#24210c] flex items-center justify-center">
+              <Sparkles size={11} strokeWidth={2.4} aria-hidden />
+            </span>
           </span>
-          <span className="text-[13.5px] font-semibold text-(--cream)">
-            Pergunte ao {ASSISTANT_NAME}
+          <span className="flex flex-col items-start leading-none" aria-hidden>
+            <span className="text-[14.5px] font-bold text-[#fff8d5]">
+              {ASSISTANT_NAME}
+            </span>
+            <span className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#ffe767]">
+              IA de leitura
+            </span>
           </span>
         </button>
       )}

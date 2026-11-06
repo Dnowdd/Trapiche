@@ -27,6 +27,16 @@ export async function loadAssistantThread(threadId: string) {
   });
 }
 
+export async function getAssistantDataSharing() {
+  return withUser(async (userId) => {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { assistantShareData: true },
+    });
+    return { enabled: user?.assistantShareData ?? false };
+  });
+}
+
 export async function setAssistantDataSharing(enabled: boolean) {
   return withUser(async (userId) => {
     await db.user.update({
