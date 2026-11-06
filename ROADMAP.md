@@ -70,7 +70,7 @@ _Atualizado em 6/11/2026._
 - [ ] Vercel: `BETTER_AUTH_URL` e `NEXT_PUBLIC_APP_URL` com o domínio final, `SKIP_EMAIL_VERIFICATION=false`, `CRON_SECRET`, `DIRECT_URL` sem `-pooler`, Upstash e Sentry.
 - [ ] Google OAuth: criar o client no Google Cloud com o redirect `https://<domínio>/api/auth/callback/google` e setar as duas variáveis.
 - [x] Aplicar a migration `20261106120000_privacy_quotes_tags_series_imports` no Neon.
-- [ ] Aplicar `20261107120000_api_key_write_scope` e `20261108120000_book_curation` no Neon antes do deploy (o código já lê essas colunas).
+- [x] Aplicar `20261107120000_api_key_write_scope` e `20261108120000_book_curation` no Neon.
 - [ ] Vercel: ativar Web Analytics e Speed Insights no painel do projeto.
 - [ ] Logo, favicon definitivo e ícones (hoje há uma marca provisória “T” em `lib/og-mark.tsx` e `lib/og.tsx`).
 
