@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { ensureBook } from "../books";
 import { editionIds } from "../works";
@@ -244,7 +244,7 @@ export async function setShelfStatus(
         },
       });
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -295,7 +295,7 @@ export async function finishBook(
       });
       if (review) await upsertReview(tx, userId, bookId, ids, review);
     });
-    refresh();
+    revalidate();
     return { days };
   });
 }
@@ -345,7 +345,7 @@ export async function abandonBook(
         readingId: reading.id,
       });
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -418,7 +418,7 @@ export async function logReadingSession(
       }
       return Boolean(pageCount && pageEnd >= pageCount);
     });
-    refresh();
+    revalidate();
     return { reachedEnd };
   });
 }
@@ -460,7 +460,7 @@ export async function updateProgress(
         data: { currentPage },
       });
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -478,7 +478,7 @@ export async function toggleBookLike(bookId: string) {
         ? { liked: false, likedAt: null }
         : { liked: true, likedAt: new Date() },
     });
-    refresh();
+    revalidate();
     return { liked: !entry.liked };
   });
 }
@@ -511,7 +511,7 @@ export async function toggleFavorite(bookId: string) {
         data: { favoritePosition: count + 1 },
       });
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -539,7 +539,7 @@ export async function saveFavorites(bookIds: string[]) {
         });
       }
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -644,7 +644,7 @@ export async function addPastReading(
           },
         });
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -668,7 +668,7 @@ export async function updateReading(
       });
       await renumber(tx, userId, reading.bookId);
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -696,7 +696,7 @@ export async function deleteReading(readingId: string) {
           data: { status: "READING" },
         });
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -760,6 +760,6 @@ export async function switchEdition(fromBookId: string, toBookId: string) {
           });
       }
     });
-    refresh();
+    revalidate();
   });
 }

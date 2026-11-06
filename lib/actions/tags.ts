@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { ensureBook } from "../books";
 import { fail, withUser } from "./result";
@@ -35,7 +35,7 @@ export async function createTag(input: {
       },
       select: { id: true, name: true, color: true, private: true },
     });
-    refresh();
+    revalidate();
     return tag;
   });
 }
@@ -60,14 +60,14 @@ export async function updateTag(
       data: { name, color: parseColor(input.color), private: input.private },
     });
     if (!count) fail("Essa tag não existe mais.");
-    refresh();
+    revalidate();
   });
 }
 
 export async function deleteTag(tagId: string) {
   return withUser(async (userId) => {
     await db.tag.deleteMany({ where: { id: tagId, userId } });
-    refresh();
+    revalidate();
   });
 }
 
@@ -97,6 +97,6 @@ export async function setBookTags(bookId: string, tagIds: string[]) {
         skipDuplicates: true,
       });
     });
-    refresh();
+    revalidate();
   });
 }

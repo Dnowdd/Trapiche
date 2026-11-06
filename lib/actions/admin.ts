@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { fail, withUser } from "./result";
 
@@ -22,6 +22,6 @@ export async function setAdmin(targetId: string, admin: boolean) {
       if (admins <= 1) fail("O Trapiche precisa ter pelo menos um admin.");
     }
     await db.user.update({ where: { id: targetId }, data: { isAdmin: admin } });
-    refresh();
+    revalidate();
   });
 }

@@ -13,10 +13,14 @@ export const testDb = new PrismaClient({
 export const viewer = { id: "user-test" as string | null };
 
 vi.mock("@/lib/db", () => ({ db: testDb }));
-vi.mock("@/lib/session", () => ({
-  getViewerId: async () => viewer.id,
-  getSession: async () => (viewer.id ? { user: { id: viewer.id } } : null),
-}));
+vi.mock("@/lib/session", async () => {
+  const { actingUserId } = await import("@/lib/actor");
+  const current = () => actingUserId() ?? viewer.id;
+  return {
+    getViewerId: async () => current(),
+    getSession: async () => (current() ? { user: { id: current() } } : null),
+  };
+});
 export const sentEmails: { kind: string; to: string }[] = [];
 
 vi.mock("@/lib/emails/send", () => {

@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { ensureBook } from "../books";
 import { fail, withUser } from "./result";
@@ -63,7 +63,7 @@ export async function createList(input: {
       });
       return list;
     });
-    refresh();
+    revalidate();
     return { id: list.id };
   });
 }
@@ -86,7 +86,7 @@ export async function updateList(
         await tx.listFollow.deleteMany({ where: { listId } });
       }
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -116,7 +116,7 @@ export async function addBookToList(listId: string, bookId: string) {
         data: { userId, bookId, listId, kind: "ADDED_TO_LIST" },
       }),
     ]);
-    refresh();
+    revalidate();
   });
 }
 
@@ -134,7 +134,7 @@ export async function removeBookFromList(listId: string, bookId: string) {
         data: { updatedAt: new Date() },
       }),
     ]);
-    refresh();
+    revalidate();
   });
 }
 
@@ -146,7 +146,7 @@ export async function toggleListPin(listId: string) {
       where: { listId_userId: { listId, userId } },
       data: { pinned: !member.pinned },
     });
-    refresh();
+    revalidate();
     return { pinned: !member.pinned };
   });
 }
@@ -172,7 +172,7 @@ export async function toggleListFollow(listId: string) {
       await db.listFollow.create({ data: { listId, userId } });
       await notify(notice);
     }
-    refresh();
+    revalidate();
     return { following: !following };
   });
 }
@@ -206,7 +206,7 @@ export async function addCollaborator(listId: string, handle: string) {
       kind: "LIST_MEMBER_ADDED",
       listId,
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -220,7 +220,7 @@ export async function removeCollaborator(listId: string, memberId: string) {
     await db.listMember.deleteMany({
       where: { listId, userId: memberId, role: "EDITOR" },
     });
-    refresh();
+    revalidate();
   });
 }
 

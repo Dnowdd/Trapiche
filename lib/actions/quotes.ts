@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { ensureBook } from "../books";
 import { fail, withUser } from "./result";
@@ -19,7 +19,7 @@ export async function addQuote(bookId: string, input: QuoteInput) {
       data: { ...data, userId, bookId },
       select: { id: true },
     });
-    refresh();
+    revalidate();
     return quote;
   });
 }
@@ -32,13 +32,13 @@ export async function updateQuote(quoteId: string, input: QuoteInput) {
       data,
     });
     if (!count) fail("Essa citação não existe mais.");
-    refresh();
+    revalidate();
   });
 }
 
 export async function deleteQuote(quoteId: string) {
   return withUser(async (userId) => {
     await db.quote.deleteMany({ where: { id: quoteId, userId } });
-    refresh();
+    revalidate();
   });
 }

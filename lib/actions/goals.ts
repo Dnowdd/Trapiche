@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { today } from "../dates";
 import { fail, withUser } from "./result";
@@ -23,6 +23,6 @@ export async function setReadingGoal(year: number, target: number | null) {
         update: { target: n },
       });
     }
-    refresh();
+    revalidate();
   });
 }

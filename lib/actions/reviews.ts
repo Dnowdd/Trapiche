@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { ensureBook } from "../books";
 import { editionIds } from "../works";
@@ -19,7 +19,7 @@ export async function saveReview(bookId: string, input: ReviewInput) {
     await db.$transaction((tx) =>
       upsertReview(tx, userId, bookId, ids, review),
     );
-    refresh();
+    revalidate();
   });
 }
 
@@ -27,7 +27,7 @@ export async function deleteReview(bookId: string) {
   return withUser(async (userId) => {
     const ids = await editionIds(bookId);
     await db.review.deleteMany({ where: { userId, bookId: { in: ids } } });
-    refresh();
+    revalidate();
   });
 }
 
@@ -55,7 +55,7 @@ export async function toggleReviewLike(reviewId: string) {
       await db.reviewLike.create({ data: { userId, reviewId } });
       await notify(notice);
     }
-    refresh();
+    revalidate();
     return { liked: !liked };
   });
 }
@@ -78,7 +78,7 @@ export async function addReviewComment(reviewId: string, text: string) {
       reviewId,
       commentId: comment.id,
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -92,7 +92,7 @@ export async function deleteReviewComment(commentId: string) {
     if (comment.userId !== userId && comment.review.userId !== userId)
       fail("Você não pode apagar esse comentário.");
     await db.reviewComment.delete({ where: { id: commentId } });
-    refresh();
+    revalidate();
   });
 }
 

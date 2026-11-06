@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { fail, withUser } from "./result";
 import { imageType } from "../image-type";
@@ -38,7 +38,7 @@ export async function updateProfile(input: {
       where: { id: userId },
       data: { name, handle, bio: bio || null, city: city || null },
     });
-    refresh();
+    revalidate();
     return { handle };
   });
 }
@@ -75,7 +75,7 @@ export async function uploadAvatar(form: FormData) {
     });
     const image = `/api/avatars/${userId}?v=${avatar.updatedAt.getTime()}`;
     await db.user.update({ where: { id: userId }, data: { image } });
-    refresh();
+    revalidate();
     return { image };
   });
 }
@@ -84,7 +84,7 @@ export async function removeAvatar() {
   return withUser(async (userId) => {
     await db.userAvatar.deleteMany({ where: { userId } });
     await db.user.update({ where: { id: userId }, data: { image: null } });
-    refresh();
+    revalidate();
   });
 }
 
@@ -112,7 +112,7 @@ export async function updatePrivacy(input: PrivacyInput) {
     };
     for (const flag of PRIVACY_FLAGS) data[flag] = input[flag] === true;
     await db.user.update({ where: { id: userId }, data });
-    refresh();
+    revalidate();
   });
 }
 
@@ -128,6 +128,6 @@ export async function updateEmailPreferences(input: {
         monthlyDigest: input.monthlyDigest === true,
       },
     });
-    refresh();
+    revalidate();
   });
 }

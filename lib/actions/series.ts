@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { ensureBook } from "../books";
 import { linkWork } from "../works";
@@ -39,7 +39,7 @@ export async function setBookSeries(
         where: { id: series.id },
         data: { description: description || null },
       });
-    refresh();
+    revalidate();
     return { slug: series.slug };
   });
 }
@@ -49,6 +49,6 @@ export async function removeBookFromSeries(bookId: string) {
     const workId = await adminWork(userId, bookId);
     await db.seriesWork.deleteMany({ where: { workId } });
     await db.series.deleteMany({ where: { works: { none: {} } } });
-    refresh();
+    revalidate();
   });
 }

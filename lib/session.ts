@@ -2,6 +2,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "./auth";
+import { actingUserId } from "./actor";
 
 export const getSession = cache(async () =>
   auth.api.getSession({ headers: await headers() }),
@@ -14,5 +15,5 @@ export async function requireSession() {
 }
 
 export async function getViewerId() {
-  return (await getSession())?.user.id ?? null;
+  return actingUserId() ?? (await getSession())?.user.id ?? null;
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { revalidate } from "../revalidate";
 import { db } from "../db";
 import { fail, withUser } from "./result";
 import { REPORT_REASONS, type ReportReason } from "../report-reasons";
@@ -126,7 +126,7 @@ export async function resolveReport(
         },
       });
     });
-    refresh();
+    revalidate();
   });
 }
 
@@ -140,6 +140,6 @@ export async function restoreContent(reportId: string) {
       where: { ...target, status: "HIDDEN" },
       data: { status: "DISMISSED" },
     });
-    refresh();
+    revalidate();
   });
 }
