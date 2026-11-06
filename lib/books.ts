@@ -4,7 +4,11 @@ import { bestCover } from "./cover-probe";
 import { linkWork } from "./works";
 import { autoLinkSeries } from "./series";
 import { coverUrl, getVolume } from "./google-books";
-import { getOpenLibraryBook, isOpenLibraryId } from "./open-library";
+import {
+  getOpenLibraryBook,
+  isOpenLibraryId,
+  PLACEHOLDER_AUTHOR,
+} from "./open-library";
 import type { Book as BookRow } from "./generated/prisma/client";
 import type { Book as CoverBook, GoogleBooksVolume } from "./types/book";
 
@@ -47,11 +51,15 @@ export const bookSummarySelect = {
   publisher: true,
 } as const;
 
+export function cleanAuthors(authors: string[]) {
+  return authors.filter((a) => a.trim() && !PLACEHOLDER_AUTHOR.test(a.trim()));
+}
+
 export function toCover(book: BookSummary): CoverBook {
   return {
     id: book.id,
     title: book.title,
-    author: book.authors[0] ?? "Autor desconhecido",
+    author: cleanAuthors(book.authors)[0] ?? "Autor desconhecido",
     pages: book.pageCount ?? 0,
     glyph: GLYPHS[hashIndex(book.id, GLYPHS.length)],
     palette: {
@@ -121,7 +129,10 @@ export function volumeToRow(v: GoogleBooksVolume) {
   };
 }
 
-export type BookData = ReturnType<typeof volumeToRow> & { syncedAt: Date };
+export type BookData = ReturnType<typeof volumeToRow> & {
+  syncedAt: Date;
+  curatedAt?: Date | null;
+};
 
 const OPEN_DATA_STALE_MS = 30 * 86_400_000;
 const GOOGLE_STALE_MS = 86_400_000;
@@ -137,7 +148,10 @@ async function syncBook(id: string, persist: boolean) {
   const openData = isOpenLibraryId(id);
   const staleMs = openData ? OPEN_DATA_STALE_MS : GOOGLE_STALE_MS;
   const cached = await db.book.findUnique({ where: { id } });
-  if (cached && Date.now() - cached.syncedAt.getTime() < staleMs) {
+  if (
+    cached &&
+    (cached.curatedAt || Date.now() - cached.syncedAt.getTime() < staleMs)
+  ) {
     if (!cached.workId)
       cached.workId = await linkWork(cached).catch(() => null);
     return { cached, fresh: cached };
@@ -172,7 +186,8 @@ async function syncBook(id: string, persist: boolean) {
 
 export const loadBook = cache(async (id: string): Promise<BookData | null> => {
   const { cached, fresh } = await syncBook(id, false);
-  return fresh ?? cached;
+  const book = fresh ?? cached;
+  return book ? { ...book, authors: cleanAuthors(book.authors) } : null;
 });
 
 export async function ensureBook(id: string) {

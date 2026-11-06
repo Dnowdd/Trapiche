@@ -142,7 +142,7 @@ enum ActivityKind {
 }
 
 model Book {
-  id                 String   @id
+  id                 String    @id
   title              String
   subtitle           String?
   authors            String[]
@@ -161,8 +161,10 @@ model Book {
   workId             String?
   seriesName         String?
   seriesPosition     Float?
-  syncedAt           DateTime @default(now())
-  createdAt          DateTime @default(now())
+  curatedAt          DateTime?
+  curatedById        String?
+  syncedAt           DateTime  @default(now())
+  createdAt          DateTime  @default(now())
 
   shelf      UserBook[]
   readings   Reading[]

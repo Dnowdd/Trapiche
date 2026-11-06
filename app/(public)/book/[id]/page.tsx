@@ -7,6 +7,7 @@ import { todayISO } from "@/lib/dates";
 import { getBookPage, openLibraryEquivalent } from "@/lib/queries/book";
 import { getViewerId } from "@/lib/session";
 import { authorHref } from "@/lib/links";
+import { isOpenLibraryId } from "@/lib/open-library";
 import BookHero from "./_components/book-hero";
 import InLists from "./_components/in-lists";
 import MyReading from "./_components/my-reading";
@@ -18,6 +19,8 @@ import { getBookQuotes } from "@/lib/queries/quotes";
 import { getBookSeries } from "@/lib/queries/series";
 import SeriesCard from "./_components/series-card";
 import BookTags from "@/components/tags/book-tags";
+import BookEditor from "./_components/book-editor";
+import { isAdmin } from "@/lib/queries/reports";
 import { getBookTags } from "@/lib/queries/tags";
 import {
   bookJsonLd,
@@ -82,11 +85,12 @@ export default async function BookDetailPage({ params }: Props) {
   const book = await loadBook(id);
   const equivalent = book ? await openLibraryEquivalent(book) : null;
   if (equivalent) redirect(`/book/${equivalent}`);
-  const [data, quotes, series, tags] = await Promise.all([
+  const [data, quotes, series, tags, admin] = await Promise.all([
     getBookPage(id, viewerId),
     getBookQuotes(id, viewerId),
     getBookSeries(id, viewerId),
     getBookTags(id, viewerId),
+    viewerId ? isAdmin(viewerId) : Promise.resolve(false),
   ]);
   if (!data) notFound();
   const today = todayISO();
@@ -188,7 +192,15 @@ export default async function BookDetailPage({ params }: Props) {
                 languageLabel={data.languageLabel}
               />
             </Suspense>
-            <TechDetails book={data.book} language={data.languageLabel} />
+            <TechDetails
+              book={data.book}
+              language={data.languageLabel}
+              admin={
+                admin && isOpenLibraryId(data.book.id) ? (
+                  <BookEditor book={data.book} />
+                ) : null
+              }
+            />
           </aside>
         </div>
 

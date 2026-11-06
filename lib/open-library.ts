@@ -95,7 +95,9 @@ async function authorNames(keys: string[]) {
   const authors = await Promise.all(
     keys.slice(0, 3).map((k) => olFetch<{ name?: string }>(`${k}.json`)),
   );
-  return authors.map((a) => a?.name).filter((n): n is string => Boolean(n));
+  return authors
+    .map((a) => a?.name)
+    .filter((n): n is string => Boolean(n) && !PLACEHOLDER_AUTHOR.test(n!));
 }
 
 function editionToRow(
@@ -294,7 +296,7 @@ export async function findPublisherWorks(publisher: string, limit = 100) {
     .sort((a, b) => b.popularity - a.popularity);
 }
 
-const PLACEHOLDER_AUTHOR =
+export const PLACEHOLDER_AUTHOR =
   /^\[.*\]$|not identified|unknown|desconhecid|anonymous|anônimo|anonimo/i;
 
 interface OLSearchDoc {

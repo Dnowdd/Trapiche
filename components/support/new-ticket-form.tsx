@@ -21,11 +21,17 @@ import {
 import { cn } from "@/lib/utils";
 import { AttachButton, PendingList, useAttachments } from "./attachments";
 
-export default function NewTicketForm() {
+export default function NewTicketForm({
+  initial,
+}: {
+  initial?: { category: TicketCategoryId; subject: string; body: string };
+}) {
   const router = useRouter();
-  const [category, setCategory] = useState<TicketCategoryId>("BUG");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  const [category, setCategory] = useState<TicketCategoryId>(
+    initial?.category ?? "BUG",
+  );
+  const [subject, setSubject] = useState(initial?.subject ?? "");
+  const [body, setBody] = useState(initial?.body ?? "");
   const { pending, error, run } = useAction();
   const files = useAttachments();
 

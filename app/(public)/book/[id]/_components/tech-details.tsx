@@ -9,9 +9,11 @@ import { SectionHeader } from "./section-header";
 export default function TechDetails({
   book,
   language,
+  admin,
 }: {
   book: BookPageData["book"];
   language: string | null;
+  admin?: React.ReactNode;
 }) {
   const rows = [
     {
@@ -27,7 +29,25 @@ export default function TechDetails({
     { label: "ISBN-10", value: book.isbn10, mono: true },
   ].filter((r) => r.value);
 
-  if (rows.length === 0) return null;
+  const report = (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+      <Link
+        href={`/suporte/novo?livro=${encodeURIComponent(book.id)}`}
+        className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
+      >
+        Dados errados? Avise a gente
+      </Link>
+      {admin}
+    </div>
+  );
+
+  if (rows.length === 0)
+    return (
+      <section data-screen-label="Ficha técnica">
+        <SectionHeader eyebrow="Ficha técnica" title="Esta edição" small />
+        {report}
+      </section>
+    );
 
   return (
     <section data-screen-label="Ficha técnica">
@@ -92,6 +112,7 @@ export default function TechDetails({
           </a>
         </div>
       )}
+      {report}
     </section>
   );
 }
