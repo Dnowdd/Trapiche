@@ -8,6 +8,12 @@ import { useAction } from "@/components/reading/use-action";
 import { toast } from "@/components/shared/toast";
 import { returnToPile } from "@/lib/actions/shelf";
 import type { getEstante } from "@/lib/queries/profile";
+import type { getUserTags } from "@/lib/queries/tags";
+import TagChip from "@/components/tags/tag-chip";
+import ManageTags from "@/components/tags/manage-tags";
+import { cn } from "@/lib/utils";
+
+type Tags = Awaited<ReturnType<typeof getUserTags>>;
 
 type Item = Awaited<ReturnType<typeof getEstante>>[number];
 type Status = Item["status"];
@@ -184,15 +190,23 @@ function AbandonedRow({ it, isOwner }: { it: Item; isOwner: boolean }) {
 
 export default function EstanteTab({
   items,
+  tags,
   initial,
+  initialTag,
   handle,
   isOwner,
 }: {
   items: Item[];
+  tags: Tags;
   initial?: string;
+  initialTag?: string;
   handle: string;
   isOwner: boolean;
 }) {
+  const [tag, setTag] = useState<string | null>(
+    tags.some((t) => t.id === initialTag) ? initialTag! : null,
+  );
+  const activeTag = tags.find((t) => t.id === tag) ?? null;
   const countOf = (s: Status) => items.filter((i) => i.status === s).length;
   const fallback =
     countOf("READ") > 0
@@ -201,33 +215,95 @@ export default function EstanteTab({
   const [filter, setFilter] = useState<Status>(
     FILTERS.some((f) => f.id === initial) ? (initial as Status) : fallback,
   );
-  const shown = items.filter((i) => i.status === filter);
+  const shown = activeTag
+    ? items.filter((i) => i.tags.includes(activeTag.id))
+    : items.filter((i) => i.status === filter);
 
-  const select = (id: string) => {
-    setFilter(id as Status);
+  const sync = (status: string, tagId: string | null) =>
     window.history.replaceState(
       null,
       "",
-      `/u/${handle}?tab=estante&status=${id}`,
+      `/u/${handle}?tab=estante&status=${status}${tagId ? `&tag=${tagId}` : ""}`,
     );
+  const select = (id: string) => {
+    setFilter(id as Status);
+    setTag(null);
+    sync(id, null);
   };
+  const pickTag = (id: string) => {
+    const next = tag === id ? null : id;
+    setTag(next);
+    sync(filter, next);
+  };
+  const visibleTags = tags.filter((t) => t.count > 0 || isOwner);
 
   return (
     <>
-      <Chips
-        value={filter}
-        onChange={select}
-        options={FILTERS.map((f) => ({
-          id: f.id,
-          label: f.label,
-          count: countOf(f.id),
-        }))}
-      />
+      {(visibleTags.length > 0 || isOwner) && (
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mr-1">
+            Tags
+          </span>
+          {visibleTags.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              aria-pressed={tag === t.id}
+              onClick={() => pickTag(t.id)}
+              className="cursor-pointer"
+            >
+              <TagChip
+                name={t.name}
+                color={t.color}
+                isPrivate={t.private}
+                active={tag === t.id}
+              >
+                <span
+                  className={cn(
+                    "font-mono text-[10px]",
+                    tag === t.id ? "text-(--yellow-soft)" : "text-(--ink-5)",
+                  )}
+                >
+                  {t.count}
+                </span>
+              </TagChip>
+            </button>
+          ))}
+          {isOwner && <ManageTags tags={tags} />}
+        </div>
+      )}
+      {activeTag ? (
+        <div className="mb-[22px] flex items-center gap-3 text-[13px] text-(--ink-3)">
+          <span>
+            {shown.length} {shown.length === 1 ? "livro" : "livros"} com a tag{" "}
+            <strong className="text-(--ink-2)">{activeTag.name}</strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => pickTag(activeTag.id)}
+            className="text-[12px] border-b border-(--ink-4) pb-px cursor-pointer hover:text-(--ink)"
+          >
+            Limpar filtro
+          </button>
+        </div>
+      ) : (
+        <Chips
+          value={filter}
+          onChange={select}
+          options={FILTERS.map((f) => ({
+            id: f.id,
+            label: f.label,
+            count: countOf(f.id),
+          }))}
+        />
+      )}
       {shown.length === 0 ? (
         <div className="rounded-[18px] border border-dashed border-[rgba(67,62,18,0.18)] py-14 px-6 text-center text-[14px] text-(--ink-4)">
-          {EMPTY[filter][isOwner ? "owner" : "visitor"]}
+          {activeTag
+            ? "Nenhum livro da estante com essa tag."
+            : EMPTY[filter][isOwner ? "owner" : "visitor"]}
         </div>
-      ) : filter === "ABANDONED" ? (
+      ) : !activeTag && filter === "ABANDONED" ? (
         <div className="flex flex-col gap-3.5">
           {shown.map((it) => (
             <AbandonedRow key={it.book.id} it={it} isOwner={isOwner} />
