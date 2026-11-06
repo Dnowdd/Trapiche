@@ -13,7 +13,7 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Trapiche"
       title="Termos de uso"
-      updated="7 de novembro de 2026"
+      updated="8 de novembro de 2026"
     >
       <p>
         O Trapiche é um diário de leituras: você registra o que lê, guarda
@@ -88,6 +88,14 @@ export default function TermsPage() {
         Books e podem ter erros. Use o link “Dados errados?” na página do livro
         para avisar. Os direitos sobre capas, textos e marcas pertencem aos
         autores e editoras.
+      </p>
+
+      <h2>Links de compra</h2>
+      <p>
+        A página de cada livro tem links para lojas e sebos. Alguns podem ser
+        links de afiliado: se você comprar por eles, o Trapiche pode ganhar uma
+        comissão, sem custo extra para você. Isso nunca muda o que aparece nas
+        buscas, nas notas ou nas recomendações.
       </p>
 
       <h2>Importação</h2>
