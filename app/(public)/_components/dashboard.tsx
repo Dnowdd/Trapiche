@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ChallengesCard from "@/components/goals/challenges-card";
 import Avatar from "@/components/shared/avatar";
 import BookCover from "@/components/shared/book-cover";
 import GoalCard from "@/components/goals/goal-card";
@@ -145,12 +146,20 @@ export default function Dashboard({ data }: { data: Data }) {
                     Próximos da pilha
                   </h2>
                 </div>
-                <Link
-                  href={`/u/${user.handle}?tab=estante&status=WANT`}
-                  className={linkCls}
-                >
-                  Ver pilha →
-                </Link>
+                <div className="flex items-center gap-4">
+                  <Link
+                    href={`/u/${user.handle}?tab=estante&status=WANT&sortear=1`}
+                    className={linkCls}
+                  >
+                    Sortear um
+                  </Link>
+                  <Link
+                    href={`/u/${user.handle}?tab=estante&status=WANT`}
+                    className={linkCls}
+                  >
+                    Ver pilha →
+                  </Link>
+                </div>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
                 {data.pile.map(({ book }) => (
@@ -174,10 +183,49 @@ export default function Dashboard({ data }: { data: Data }) {
               </div>
             </div>
           )}
+          {data.loans.length > 0 && (
+            <div className={card}>
+              <div className="mb-3">
+                <div className={eyebrow}>Emprestados</div>
+                <h2 className="m-0 mt-0.5 text-[16px] font-bold text-(--ink)">
+                  Fora da sua estante
+                </h2>
+              </div>
+              <ul className="m-0 p-0 list-none divide-y divide-(--rule)">
+                {data.loans.map((l) => (
+                  <li key={l.id}>
+                    <Link
+                      href={`/book/${l.book.id}#emprestimo`}
+                      className="flex items-center gap-3 py-2.5 group"
+                    >
+                      <BookCover
+                        book={l.book}
+                        size="sm"
+                        style={{ width: 30, height: 45, flexShrink: 0 }}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[13px] font-semibold text-(--ink-2) truncate group-hover:underline">
+                          {l.book.title}
+                        </span>
+                        <span
+                          className={`block text-[11.5px] ${l.overdue ? "text-(--danger)" : "text-(--ink-4)"}`}
+                        >
+                          com {l.person} há {l.days}{" "}
+                          {l.days === 1 ? "dia" : "dias"}
+                          {l.overdue ? " · passou da data" : ""}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <aside className="flex flex-col gap-5.5">
           <GoalCard goal={data.goal} isOwner handle={user.handle} />
+          <ChallengesCard items={data.challenges} isOwner tags={data.tags} />
         </aside>
       </div>
     </section>

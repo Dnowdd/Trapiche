@@ -1,4 +1,6 @@
 import { db } from "../db";
+import { getOpenLoans } from "./loans";
+import { getChallenges } from "./challenges";
 import { bookSummarySelect, toCover } from "../books";
 import { fmtAgo, today } from "../dates";
 import { getFeaturedBooks } from "@/app/catalog";
@@ -32,30 +34,47 @@ export function greeting(now = new Date()) {
 
 export async function getDashboard(userId: string) {
   const year = today().getUTCFullYear();
-  const [user, readingNow, goal, pile, shelfCount, shelfIds, popular] =
-    await Promise.all([
-      db.user.findUniqueOrThrow({
-        where: { id: userId },
-        select: { name: true, handle: true, image: true, bio: true },
-      }),
-      getReadingNow(userId),
-      getGoal(userId, year),
-      db.userBook.findMany({
-        where: { userId, status: "WANT" },
-        orderBy: { statusChangedAt: "desc" },
-        take: 6,
-        include: { book: { select: bookSummarySelect } },
-      }),
-      db.userBook.count({ where: { userId, status: { not: null } } }),
-      db.userBook.findMany({
-        where: { userId, status: { not: null } },
-        select: {
-          bookId: true,
-          book: { select: { workId: true, title: true } },
-        },
-      }),
-      getHomePopular(18),
-    ]);
+  const [
+    user,
+    readingNow,
+    goal,
+    pile,
+    shelfCount,
+    shelfIds,
+    popular,
+    loans,
+    challenges,
+    tags,
+  ] = await Promise.all([
+    db.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { name: true, handle: true, image: true, bio: true },
+    }),
+    getReadingNow(userId),
+    getGoal(userId, year),
+    db.userBook.findMany({
+      where: { userId, status: "WANT" },
+      orderBy: { statusChangedAt: "desc" },
+      take: 6,
+      include: { book: { select: bookSummarySelect } },
+    }),
+    db.userBook.count({ where: { userId, status: { not: null } } }),
+    db.userBook.findMany({
+      where: { userId, status: { not: null } },
+      select: {
+        bookId: true,
+        book: { select: { workId: true, title: true } },
+      },
+    }),
+    getHomePopular(18),
+    getOpenLoans(userId),
+    getChallenges(userId),
+    db.tag.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
 
   const onShelf = new Set(
     shelfIds.flatMap((s) => [s.bookId, s.book.workId].filter(Boolean)),
@@ -85,6 +104,9 @@ export async function getDashboard(userId: string) {
     user,
     readingNow,
     goal,
+    loans,
+    challenges,
+    tags,
     pile: pile.map((p) => ({
       book: toCover(p.book),
       since: p.statusChangedAt ? fmtAgo(p.statusChangedAt) : null,
