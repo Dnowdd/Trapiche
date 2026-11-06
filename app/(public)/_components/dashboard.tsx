@@ -6,6 +6,8 @@ import GoalCard from "@/components/goals/goal-card";
 import { greeting, type Dashboard as Data } from "@/lib/queries/dashboard";
 import { todayISO } from "@/lib/dates";
 import Onboarding from "./onboarding";
+import PraticoHome from "@/components/assistant/pratico-home";
+import { assistantEnabled } from "@/lib/assistant/config";
 
 const card =
   "bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-5 sm:p-6";
@@ -136,6 +138,8 @@ export default function Dashboard({ data }: { data: Data }) {
               </div>
             )}
           </div>
+
+          {assistantEnabled() && <PraticoHome />}
 
           {data.pile.length > 0 && (
             <div className={card}>
