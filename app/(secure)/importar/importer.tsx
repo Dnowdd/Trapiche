@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { FileUp, Download, Search } from "lucide-react";
+import {
+  CalendarDays,
+  Download,
+  FileUp,
+  Library,
+  Search,
+  Star,
+  Tags,
+} from "lucide-react";
 import { Button, FormError } from "@/components/shared/form";
 import { toast } from "@/components/shared/toast";
 import { cancelImport, processImport, startImport } from "@/lib/actions/import";
@@ -60,7 +68,7 @@ function Steps() {
     },
   ];
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
       {steps.map((s, i) => (
         <div
           key={s.title}
@@ -80,6 +88,29 @@ function Steps() {
     </div>
   );
 }
+
+const INCLUDED = [
+  {
+    icon: Library,
+    title: "Estantes e status",
+    body: "Lidos, lendo, quero ler e abandonados vão para o lugar certo.",
+  },
+  {
+    icon: Star,
+    title: "Notas e resenhas",
+    body: "Viram suas avaliações, sem encher a atividade recente.",
+  },
+  {
+    icon: CalendarDays,
+    title: "Datas de leitura",
+    body: "Quando você terminou cada livro entra no seu diário.",
+  },
+  {
+    icon: Tags,
+    title: "Prateleiras viram tags",
+    body: "Suas prateleiras personalizadas continuam organizando a estante.",
+  },
+];
 
 function Stat({
   value,
@@ -293,8 +324,59 @@ export default function Importer({
     if (res.ok && res.data) setState(res.data);
   };
 
+  const aside = (
+    <aside className="flex flex-col gap-6 lg:sticky lg:top-6">
+      <section>
+        <div className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4)">
+          Como exportar
+        </div>
+        <Steps />
+        <a
+          href={`data:text/csv;charset=utf-8,${encodeURIComponent(TEMPLATE_CSV)}`}
+          download="trapiche-modelo.csv"
+          className="mt-3 inline-flex items-center gap-2 text-[13px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
+        >
+          <Download size={14} aria-hidden /> Baixar planilha modelo
+        </a>
+      </section>
+      {history.length > 0 && (
+        <section>
+          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-2">
+            Importações anteriores
+          </div>
+          <ul className="m-0 p-0 list-none rounded-[14px] border border-[rgba(var(--ink-rgb),0.08)] divide-y divide-(--rule) overflow-hidden">
+            {history.map((h) => (
+              <li key={h.id}>
+                <button
+                  type="button"
+                  onClick={() => setState(h)}
+                  className="w-full text-left flex flex-col gap-0.5 px-4 py-3 cursor-pointer hover:bg-(--yellow-soft)"
+                >
+                  <span className="text-[13.5px] text-(--ink-2) truncate">
+                    <strong>{SOURCE_LABEL[h.source]}</strong>
+                    {h.fileName ? ` · ${h.fileName}` : ""}
+                  </span>
+                  <span className="font-mono text-[10.5px] text-(--ink-4)">
+                    {h.imported} importados · {h.when}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </aside>
+  );
+
+  const layout = (main: React.ReactNode) => (
+    <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12 xl:gap-16 items-start">
+      <div className="flex min-w-0 flex-col gap-6">{main}</div>
+      {aside}
+    </div>
+  );
+
   if (state)
-    return (
+    return layout(
       <>
         <Progress
           state={state}
@@ -311,7 +393,7 @@ export default function Importer({
             Importar outro arquivo
           </button>
         )}
-      </>
+      </>,
     );
 
   const counts = preview
@@ -327,9 +409,8 @@ export default function Importer({
     : 0;
   const rated = preview ? preview.rows.filter((r) => r.rating).length : 0;
 
-  return (
-    <div className="mt-8 flex flex-col gap-6">
-      <Steps />
+  return layout(
+    <>
       <FormError message={error} />
       <label
         onDragOver={(e) => {
@@ -343,7 +424,7 @@ export default function Importer({
           void pick(e.dataTransfer.files[0]);
         }}
         className={cn(
-          "flex flex-col items-center justify-center text-center gap-3 rounded-[20px] border-2 border-dashed px-6 py-12 cursor-pointer transition-colors duration-150",
+          "flex flex-col items-center justify-center text-center gap-3 rounded-[20px] border-2 border-dashed px-6 py-12 lg:py-20 cursor-pointer transition-colors duration-150",
           dragging
             ? "border-(--ink-2) bg-(--yellow-soft)"
             : "border-[rgba(var(--ink-rgb),0.22)] hover:bg-(--yellow-soft)",
@@ -429,40 +510,28 @@ export default function Importer({
         </section>
       )}
 
-      <a
-        href={`data:text/csv;charset=utf-8,${encodeURIComponent(TEMPLATE_CSV)}`}
-        download="trapiche-modelo.csv"
-        className="self-start inline-flex items-center gap-2 text-[13px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
-      >
-        <Download size={14} /> Baixar planilha modelo
-      </a>
-
-      {history.length > 0 && (
-        <section>
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-2">
-            Importações anteriores
-          </div>
-          <ul className="m-0 p-0 list-none rounded-[14px] border border-[rgba(var(--ink-rgb),0.08)] divide-y divide-(--rule)">
-            {history.map((h) => (
-              <li key={h.id}>
-                <button
-                  type="button"
-                  onClick={() => setState(h)}
-                  className="w-full text-left flex items-center justify-between gap-3 px-4 py-3 cursor-pointer hover:bg-(--yellow-soft)"
-                >
-                  <span className="text-[13.5px] text-(--ink-2)">
-                    <strong>{SOURCE_LABEL[h.source]}</strong>
-                    {h.fileName ? ` · ${h.fileName}` : ""}
-                  </span>
-                  <span className="font-mono text-[10.5px] text-(--ink-4)">
-                    {h.imported} importados · {h.when}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+      {!preview && (
+        <section className="grid gap-3 sm:grid-cols-2">
+          {INCLUDED.map((item) => (
+            <div
+              key={item.title}
+              className="flex gap-3 rounded-[14px] border border-[rgba(var(--ink-rgb),0.08)] bg-(--cream-card) p-4"
+            >
+              <span className="size-8 shrink-0 rounded-[10px] bg-(--yellow) text-(--on-accent) flex items-center justify-center">
+                <item.icon size={15} aria-hidden />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[13.5px] font-bold text-(--ink-2)">
+                  {item.title}
+                </span>
+                <span className="mt-0.5 block text-[12.5px] leading-normal text-(--ink-4)">
+                  {item.body}
+                </span>
+              </span>
+            </div>
+          ))}
         </section>
       )}
-    </div>
+    </>,
   );
 }

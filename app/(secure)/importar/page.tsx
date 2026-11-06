@@ -18,7 +18,7 @@ export default async function ImportPage() {
       data-responsive
       className="bg-(--cream) rounded-[22px] md:rounded-[30px] border-8 md:border-15 border-(--yellow) mx-2 md:mx-3.75 overflow-hidden"
     >
-      <div className="max-w-220 pt-7 md:pt-10 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15">
+      <div className="pt-7 md:pt-10 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15">
         <div className="font-mono text-[11px] text-(--ink-4) tracking-[0.06em] uppercase">
           Sua estante
         </div>
