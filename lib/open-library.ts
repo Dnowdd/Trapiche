@@ -1,6 +1,7 @@
 import { cachedJson, HttpError, markUnavailable } from "./api-cache";
 import { authorSurname, normalize, sameTitle, workKey } from "./editions";
 import type { GoogleBooksVolume } from "./types/book";
+import { parseSeries } from "./series";
 
 const API_BASE = "https://openlibrary.org";
 const COVERS_BASE = "https://covers.openlibrary.org";
@@ -32,6 +33,7 @@ interface OLEdition {
   physical_dimensions?: string;
   authors?: { key: string }[];
   works?: { key: string }[];
+  series?: string[];
 }
 
 interface OLWork {
@@ -103,6 +105,7 @@ function editionToRow(
 ) {
   const lang = e.languages?.[0]?.key.split("/").pop();
   const cover = e.covers?.find((c) => c > 0);
+  const series = e.series?.map(parseSeries).find(Boolean) ?? null;
   return {
     id: idOf(e.key),
     title: e.title,
@@ -120,6 +123,8 @@ function editionToRow(
     dimensions: e.physical_dimensions ?? null,
     googleRating: null,
     googleRatingsCount: null,
+    seriesName: series?.name ?? null,
+    seriesPosition: series?.position ?? null,
   };
 }
 

@@ -2,6 +2,7 @@ import { cache } from "react";
 import { db } from "./db";
 import { bestCover } from "./cover-probe";
 import { linkWork } from "./works";
+import { autoLinkSeries } from "./series";
 import { coverUrl, getVolume } from "./google-books";
 import { getOpenLibraryBook, isOpenLibraryId } from "./open-library";
 import type { Book as BookRow } from "./generated/prisma/client";
@@ -115,6 +116,8 @@ export function volumeToRow(v: GoogleBooksVolume) {
     dimensions: dimensionsOf(v),
     googleRating: info.averageRating ?? null,
     googleRatingsCount: info.ratingsCount ?? null,
+    seriesName: null as string | null,
+    seriesPosition: null as number | null,
   };
 }
 
@@ -160,6 +163,7 @@ async function syncBook(id: string, persist: boolean) {
       : fallback;
     if (shouldSave && !fresh.workId)
       fresh.workId = await linkWork(fresh).catch(() => null);
+    if (shouldSave) await autoLinkSeries(fresh).catch(() => null);
     return { cached, fresh };
   } catch (err) {
     return { cached, fresh: null, err };
