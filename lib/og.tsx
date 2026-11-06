@@ -54,13 +54,18 @@ function fonts() {
   return fontsPromise;
 }
 
-export async function ogImage(node: ReactNode) {
+export async function ogImage(
+  node: ReactNode,
+  size: { width: number; height: number } = OG_SIZE,
+  headers: Record<string, string> = {},
+) {
   return new ImageResponse(node as React.ReactElement, {
-    ...OG_SIZE,
+    ...size,
     fonts: await fonts(),
     headers: {
       "Cache-Control":
         "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      ...headers,
     },
   });
 }

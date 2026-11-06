@@ -12,7 +12,7 @@ import {
   getRetrospective,
   type Retrospective,
 } from "@/lib/queries/stats";
-import ShareButton from "./_components/share-button";
+import ShareButton, { StoryButton } from "./_components/share-button";
 
 interface Props {
   params: Promise<{ handle: string }>;
@@ -137,7 +137,7 @@ function Highlights({ h }: { h: Retrospective["highlights"] }) {
           <Link
             key={label}
             href={`/book/${data!.book.id}`}
-            className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[16px] p-4 flex gap-3.5 transition-colors duration-150 hover:bg-(--yellow-soft)"
+            className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[16px] p-4 flex gap-3.5 transition-colors duration-150 hover:bg-(--yellow-soft)"
           >
             <BookCover
               book={data!.book}
@@ -184,7 +184,7 @@ function Ranking({
   unit: [string, string];
 }) {
   return (
-    <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[16px] p-5">
+    <div className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[16px] p-5">
       <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">
         {eyebrow}
       </div>
@@ -228,7 +228,7 @@ function MonthGrid({ data, handle }: { data: Retrospective; handle: string }) {
                   </span>
                 )}
               </div>
-              <div className="h-1.5 my-3 bg-[rgba(67,62,18,0.07)] rounded-full overflow-hidden">
+              <div className="h-1.5 my-3 bg-[rgba(var(--ink-rgb),0.07)] rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full bg-(--ink-2)"
                   style={{ width: `${(m.pages / max) * 100}%` }}
@@ -256,7 +256,7 @@ function MonthGrid({ data, handle }: { data: Retrospective; handle: string }) {
                         width: 32,
                         height: 48,
                         padding: 3,
-                        boxShadow: "0 2px 6px rgba(67,62,18,0.25)",
+                        boxShadow: "0 2px 6px rgba(var(--shadow-rgb),0.25)",
                       }}
                     />
                   ))}
@@ -265,11 +265,11 @@ function MonthGrid({ data, handle }: { data: Retrospective; handle: string }) {
             </>
           );
           const cls =
-            "rounded-[14px] border border-[rgba(67,62,18,0.08)] p-4 flex flex-col";
+            "rounded-[14px] border border-[rgba(var(--ink-rgb),0.08)] p-4 flex flex-col";
           return future ? (
             <div
               key={m.month}
-              className={`${cls} border-dashed border-[rgba(67,62,18,0.2)] bg-transparent`}
+              className={`${cls} border-dashed border-[rgba(var(--ink-rgb),0.2)] bg-transparent`}
             >
               {body}
             </div>
@@ -291,7 +291,7 @@ function MonthGrid({ data, handle }: { data: Retrospective; handle: string }) {
 function PeriodNav({ data, handle }: { data: Retrospective; handle: string }) {
   const chip =
     "h-8 px-3.5 inline-flex items-center rounded-full border text-[12px] font-semibold transition-colors duration-150";
-  const idle = `${chip} border-[rgba(67,62,18,0.15)] text-(--ink-3) hover:bg-(--yellow-soft)`;
+  const idle = `${chip} border-[rgba(var(--ink-rgb),0.15)] text-(--ink-3) hover:bg-(--yellow-soft)`;
   const active = `${chip} border-(--ink-2) bg-(--ink-2) text-(--yellow)`;
   const m = data.month;
   const prev = m
@@ -404,10 +404,17 @@ export default async function RetrospectivePage({
               </h1>
             </div>
             {!empty && (
-              <ShareButton
-                path={retroHref(user.handle, data.year, data.month)}
-                title={`Retrospectiva ${data.label} de ${user.name}`}
-              />
+              <div className="flex flex-wrap gap-2">
+                <StoryButton
+                  src={`/api/retrospectiva/${user.handle}/story?ano=${data.year}${data.month ? `&mes=${data.month}` : ""}`}
+                  fileName={`trapiche-${data.year}${data.month ? `-${data.month}` : ""}.png`}
+                  title={`Retrospectiva ${data.label}`}
+                />
+                <ShareButton
+                  path={retroHref(user.handle, data.year, data.month)}
+                  title={`Retrospectiva ${data.label} de ${user.name}`}
+                />
+              </div>
             )}
           </div>
           {empty ? (
@@ -447,7 +454,7 @@ export default async function RetrospectivePage({
         </section>
 
         {data.goal?.target != null && (
-          <div className="mt-5 bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[16px] p-5">
+          <div className="mt-5 bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[16px] p-5">
             <div className="flex items-baseline justify-between gap-3 mb-2.5">
               <span className="text-[14px] font-bold text-(--ink-2)">
                 Meta de {data.year}: {data.goal.done} de{" "}
@@ -457,7 +464,7 @@ export default async function RetrospectivePage({
                 {data.goal.pct}%
               </span>
             </div>
-            <div className="h-2.5 bg-[rgba(67,62,18,0.08)] rounded-full overflow-hidden">
+            <div className="h-2.5 bg-[rgba(var(--ink-rgb),0.08)] rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full bg-(--ink-2)"
                 style={{ width: `${data.goal.pct}%` }}
