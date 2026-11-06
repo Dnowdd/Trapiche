@@ -59,6 +59,17 @@ _Atualizado em 6/11/2026._
 - Empréstimos: com quem, desde quando, prazo, devolução; lembrete por notificação quando atrasa; selo na estante e card no painel.
 - Retrospectiva com páginas por mês, distribuição e média das notas, idiomas, formatos e décadas de publicação.
 
+### Assistente de leitura (Prático)
+
+- Chat com IA (OpenAI, Responses API com streaming) em um painel flutuante em todas as páginas para quem está logado, e em `/assistente` com histórico de conversas.
+- Conhece a conta do leitor por ferramentas: estante, lendo agora, estatísticas por ano ou mês, resenhas e citações, recomendações, metas, desafios, empréstimos e listas. Busca no catálogo e mostra capas clicáveis com botão “Quero ler”.
+- Mudanças só por cartões de confirmação (estante, terminar livro, sessão de leitura, nota, citação, listas, meta, desafio e empréstimo), executados pelas mesmas ações do site, com checagem de dono e contra clique duplo.
+- Sugestões que mudam na página de um livro, parar a resposta, tentar de novo, copiar, modo escuro e mobile em tela cheia.
+- Limite de 40 mensagens por dia por conta (no banco, não zera ao apagar conversas) e de 8 por minuto; tokens por mensagem e por dia guardados para acompanhar custo.
+- Dados da conta só com consentimento: checkbox “Usar os dados da minha conta” no chat, desmarcado por padrão. Sem ele, o modelo não recebe nome, estante, notas, metas nem estatísticas, e as ferramentas que leem a conta nem são oferecidas.
+- LGPD: seção na Política de Privacidade, conversas na exportação JSON, apagar uma ou todas, `store: false` e identificador anônimo para a OpenAI.
+- Modelo padrão `gpt-6-luna` (troca por `OPENAI_MODEL`).
+
 ### Qualidade de dados
 
 - Admins corrigem título, autores, editora, ano, páginas, idioma, sinopse e capa de edições do Open Library. A edição corrigida para de sincronizar até alguém liberar.
@@ -86,6 +97,7 @@ _Atualizado em 6/11/2026._
 - [x] Aplicar a migration `20261106120000_privacy_quotes_tags_series_imports` no Neon.
 - [x] Aplicar `20261107120000_api_key_write_scope` e `20261108120000_book_curation` no Neon.
 - [x] Aplicar `20261109120000_reading_formats` e `20261110120000_challenges_loans` no Neon.
+- [ ] Aplicar `20261111120000_assistant` no Neon.
 - [ ] Vercel: ativar Web Analytics e Speed Insights no painel do projeto.
 - [ ] Logo, favicon definitivo e ícones (hoje há uma marca provisória “T” em `lib/og-mark.tsx` e `lib/og.tsx`).
 
