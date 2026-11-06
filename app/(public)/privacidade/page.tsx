@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <LegalPage
       eyebrow="Trapiche"
       title="Política de Privacidade"
-      updated="8 de novembro de 2026"
+      updated="6 de novembro de 2026"
     >
       <p>
         Esta página explica, em linguagem simples, quais dados o Trapiche
@@ -62,6 +62,11 @@ export default function PrivacyPage() {
           o necessário para lembrar (um primeiro nome basta).
         </li>
         <li>
+          <strong>Assistente (Prático):</strong> as conversas com o assistente
+          (suas mensagens, as respostas, os livros mostrados e os cartões de
+          confirmação) e um contador diário de mensagens e de uso.
+        </li>
+        <li>
           <strong>Suporte:</strong> os tickets, as mensagens e as imagens que
           você anexar.
         </li>
@@ -85,7 +90,8 @@ export default function PrivacyPage() {
         <li>
           <strong>Executar o serviço que você pediu</strong> (art. 7º, V): criar
           a conta, guardar sua estante e seu diário, mostrar suas resenhas,
-          listas e citações, importar livros e responder o suporte.
+          listas e citações, importar livros, responder às suas perguntas no
+          assistente e responder o suporte.
         </li>
         <li>
           <strong>Legítimo interesse</strong> (art. 7º, IX): segurança da conta,
@@ -95,8 +101,10 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Consentimento</strong> (art. 7º, I): e-mails opcionais (resumo
-          do mês e lembrete de leitura) e o login com Google. Você pode desligar
-          os e-mails a qualquer momento, no perfil ou pelo link em cada e-mail.
+          do mês e lembrete de leitura), o login com Google e o uso dos dados da
+          conta pelo assistente. Você pode desligar os e-mails a qualquer
+          momento, no perfil ou pelo link em cada e-mail, e desmarcar o uso dos
+          dados no próprio assistente.
         </li>
       </ul>
 
@@ -145,6 +153,10 @@ export default function PrivacyPage() {
           das suas resenhas.
         </li>
         <li>
+          <strong>OpenAI:</strong> gera as respostas do Prático, só quando você
+          usa o assistente. Veja os detalhes logo abaixo.
+        </li>
+        <li>
           <strong>Google:</strong> se você entrar com o Google, ele confirma sua
           identidade. O Google Books também fornece dados de alguns livros.
         </li>
@@ -165,15 +177,51 @@ export default function PrivacyPage() {
         da LGPD e os compromissos contratuais de proteção de cada um.
       </p>
 
+      <h2 id="assistente">Assistente de leitura (Prático)</h2>
+      <p>
+        O Prático é opcional. Se você não usar, nada é enviado. Quando você
+        manda uma mensagem, enviamos à OpenAI, que gera a resposta:
+      </p>
+      <ul>
+        <li>a sua mensagem e as mensagens recentes daquela conversa;</li>
+        <li>
+          a data de hoje e, se você estiver na página de um livro, qual é o
+          livro.
+        </li>
+      </ul>
+      <p>
+        Os dados da sua conta só vão junto se você marcar “Usar os dados da
+        minha conta” no assistente. Com a opção marcada, enviamos também seu
+        nome, seu @ e os dados que a pergunta pede, como livros da estante,
+        notas, resenhas, citações, estatísticas, metas, desafios, listas e
+        empréstimos (com o nome que você anotou). A opção começa desmarcada e
+        você pode desmarcar a qualquer momento; a partir daí, nenhum dado da
+        conta é enviado.
+      </p>
+      <p>
+        Nunca enviamos seu e-mail, sua senha ou seu IP. Para a OpenAI, sua conta
+        aparece só como um código irreversível, usado para evitar abuso. Pedimos
+        que ela não guarde as respostas. Pelas regras da API da OpenAI, esses
+        dados não são usados para treinar modelos e podem ficar guardados por
+        até 30 dias para monitorar abuso, sendo apagados depois.
+      </p>
+      <p>
+        O assistente só muda a sua conta quando você confirma um cartão. As
+        conversas ficam guardadas no Trapiche para você voltar a elas, e só você
+        vê. Dá para apagar uma conversa ou todas, quando quiser, na página do{" "}
+        <Link href="/assistente">Prático</Link>. As respostas são automáticas e
+        podem ter erros.
+      </p>
+
       <h2>Por quanto tempo</h2>
       <p>
         Guardamos seus dados enquanto a conta existir. Ao excluir a conta,
         apagamos na hora o perfil, a foto, a estante, o diário, as resenhas, as
         citações, as tags, as listas que você criou, as importações, as
-        notificações e os tickets de suporte com os anexos. Cópias de segurança
-        automáticas do banco podem manter esses dados por poucos dias, até serem
-        sobrescritas. Relatórios de erro expiram conforme a retenção do Sentry,
-        de até 90 dias.
+        conversas com o assistente, as notificações e os tickets de suporte com
+        os anexos. Cópias de segurança automáticas do banco podem manter esses
+        dados por poucos dias, até serem sobrescritas. Relatórios de erro
+        expiram conforme a retenção do Sentry, de até 90 dias.
       </p>
 
       <h2>Seus direitos</h2>
@@ -182,9 +230,9 @@ export default function PrivacyPage() {
         <li>
           <strong>Acessar e levar seus dados:</strong> em “Editar perfil →
           Conta”, baixe um arquivo JSON com tudo o que está ligado a você,
-          inclusive suporte, citações, tags, importações, empréstimos, desafios
-          e a sua foto. Também dá para baixar a estante em CSV, no formato do
-          Goodreads, para levar para outro app.
+          inclusive suporte, citações, tags, importações, empréstimos, desafios,
+          conversas com o assistente e a sua foto. Também dá para baixar a
+          estante em CSV, no formato do Goodreads, para levar para outro app.
         </li>
         <li>
           <strong>Corrigir:</strong> edite perfil, leituras, resenhas e listas

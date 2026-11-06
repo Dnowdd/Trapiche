@@ -13,7 +13,7 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Trapiche"
       title="Termos de uso"
-      updated="8 de novembro de 2026"
+      updated="6 de novembro de 2026"
     >
       <p>
         O Trapiche é um diário de leituras: você registra o que lê, guarda
@@ -104,6 +104,29 @@ export default function TermsPage() {
         confirma que os dados são seus. O Trapiche usa o arquivo só para montar
         a sua estante.
       </p>
+
+      <h2>Assistente de leitura (Prático)</h2>
+      <ul>
+        <li>
+          O Prático é um assistente feito com inteligência artificial. As
+          respostas são geradas automaticamente e podem ter erros, inclusive
+          sobre livros, autores e datas. Confira o que for importante.
+        </li>
+        <li>
+          Ele só muda a sua conta quando você toca em “Confirmar” num cartão.
+          Leia o cartão antes de confirmar.
+        </li>
+        <li>
+          Use o assistente para assuntos de leitura. Não tente fazê-lo gerar
+          conteúdo ilegal, ofensivo ou que viole direitos de terceiros, nem
+          contornar os limites de uso. Há um limite diário de mensagens por
+          conta.
+        </li>
+        <li>
+          Como seus dados são usados no assistente está na{" "}
+          <Link href="/privacidade#assistente">Política de Privacidade</Link>.
+        </li>
+      </ul>
 
       <h2>API e chaves de desenvolvedor</h2>
       <ul>

@@ -35,6 +35,8 @@ export async function GET() {
     authSessions,
     loans,
     challenges,
+    assistantThreads,
+    assistantUsage,
   ] = await Promise.all([
     db.user.findUniqueOrThrow({
       where: { id: userId },
@@ -49,6 +51,7 @@ export async function GET() {
         emailVerified: true,
         inactivityReminder: true,
         monthlyDigest: true,
+        assistantShareData: true,
         ...privacySelect,
       },
     }),
@@ -290,6 +293,23 @@ export async function GET() {
         createdAt: true,
       },
     }),
+    db.assistantThread.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        title: true,
+        createdAt: true,
+        messages: {
+          orderBy: { createdAt: "asc" },
+          select: { role: true, content: true, blocks: true, createdAt: true },
+        },
+      },
+    }),
+    db.assistantUsage.findMany({
+      where: { userId },
+      orderBy: { day: "asc" },
+      select: { day: true, messages: true },
+    }),
   ]);
 
   const dataUri = (mimeType: string, data: Uint8Array) =>
@@ -346,6 +366,19 @@ export async function GET() {
       loginSessions: authSessions,
       loans,
       challenges,
+      assistant: {
+        conversations: assistantThreads.map((t) => ({
+          title: t.title,
+          createdAt: t.createdAt,
+          messages: t.messages.map((m) => ({
+            from: m.role === "USER" ? "you" : "assistant",
+            text: m.content,
+            cards: m.blocks,
+            createdAt: m.createdAt,
+          })),
+        })),
+        messagesPerDay: assistantUsage,
+      },
       avatar: avatar
         ? {
             updatedAt: avatar.updatedAt,
