@@ -3,6 +3,7 @@ import { createAuthMiddleware } from "better-auth/api";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "./db";
 import { authRateLimitStorage } from "./rate-limit";
+import { uniqueHandle } from "./handles";
 import {
   sendChangeEmailConfirmation,
   sendNewEmailVerification,
@@ -15,11 +16,48 @@ const skipEmailVerification = process.env.SKIP_EMAIL_VERIFICATION === "true";
 
 const handleOf = (user: object) => (user as { handle?: string }).handle ?? "";
 
+export const googleEnabled = Boolean(
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+);
+
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
 
   database: prismaAdapter(db, { provider: "postgresql" }),
+
+  socialProviders: googleEnabled
+    ? {
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID!,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          prompt: "select_account",
+          mapProfileToUser: async (profile) => ({
+            handle: await uniqueHandle(profile.email, profile.name),
+          }),
+        },
+      }
+    : {},
+
+  account: {
+    accountLinking: { enabled: true, trustedProviders: ["google"] },
+  },
+
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          if (typeof user.handle === "string" && user.handle) return;
+          return {
+            data: {
+              ...user,
+              handle: await uniqueHandle(user.email, user.name),
+            },
+          };
+        },
+      },
+    },
+  },
 
   emailAndPassword: {
     enabled: true,

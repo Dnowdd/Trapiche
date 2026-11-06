@@ -29,6 +29,7 @@ interface RegisterFormProps {
   loading: boolean;
   go: (mode: AuthMode) => void;
   submit: (e: { preventDefault(): void }) => void;
+  social?: React.ReactNode;
 }
 
 export default function RegisterForm({
@@ -47,6 +48,7 @@ export default function RegisterForm({
   setAgree,
   loading,
   submit,
+  social,
 }: RegisterFormProps) {
   return (
     <form
@@ -66,6 +68,7 @@ export default function RegisterForm({
         </p>
       </div>
 
+      {social}
       <div className="grid grid-cols-2 gap-3.5">
         <Field
           label="Nome"

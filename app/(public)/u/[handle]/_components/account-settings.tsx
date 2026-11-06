@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   FormError,
@@ -169,12 +169,43 @@ function EmailForm() {
   );
 }
 
+function useProviders() {
+  const [providers, setProviders] = useState<string[] | null>(null);
+  useEffect(() => {
+    authClient
+      .listAccounts()
+      .then(({ data }) =>
+        setProviders(data?.map((a) => a.providerId) ?? ["credential"]),
+      )
+      .catch(() => setProviders(["credential"]));
+  }, []);
+  return providers;
+}
+
 export default function AccountSettings() {
+  const providers = useProviders();
+  const hasPassword = providers?.includes("credential") ?? true;
+  const google = providers?.includes("google") ?? false;
+
   return (
     <div className="flex flex-col gap-7">
       <EmailForm />
       <div className="h-px bg-(--rule)" />
-      <PasswordForm />
+      {hasPassword ? (
+        <PasswordForm />
+      ) : (
+        <div>
+          <div className={sectionTitle}>Senha</div>
+          <p className="m-0 text-[13px] text-(--ink-3) leading-normal">
+            Você entra com o Google, então não há senha do Trapiche para trocar.
+          </p>
+        </div>
+      )}
+      {google && hasPassword && (
+        <p className="m-0 -mt-3 text-[12px] text-(--ink-4)">
+          Sua conta também está ligada ao Google.
+        </p>
+      )}
     </div>
   );
 }

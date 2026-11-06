@@ -15,6 +15,7 @@ import { authErrorMessage } from "./errors";
 import type { AuthMode, SentContext } from "./types";
 import { authClient } from "@/lib/auth-client";
 import type { Book } from "@/lib/types/book";
+import GoogleButton from "./google-button";
 
 const WEAK_PASSWORD =
   "Escolha uma senha mais forte: 8+ caracteres e pelo menos dois entre maiúscula e minúscula, número e símbolo.";
@@ -23,9 +24,13 @@ const isStrong = (pw: string) => pw.length >= 8 && scorePassword(pw) >= 3;
 
 interface AuthContentProps {
   books: Book[];
+  googleEnabled: boolean;
 }
 
-export default function AuthContent({ books }: AuthContentProps) {
+export default function AuthContent({
+  books,
+  googleEnabled,
+}: AuthContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNext(searchParams.get("next"));
@@ -252,6 +257,15 @@ export default function AuthContent({ books }: AuthContentProps) {
               loading={loading}
               go={go}
               submit={submit}
+              social={
+                googleEnabled && (
+                  <GoogleButton
+                    next={next}
+                    label="Entrar com Google"
+                    onError={setError}
+                  />
+                )
+              }
             />
           )}
           {mode === "register" && (
@@ -273,6 +287,36 @@ export default function AuthContent({ books }: AuthContentProps) {
               loading={loading}
               go={go}
               submit={submit}
+              social={
+                googleEnabled && (
+                  <GoogleButton
+                    next={next}
+                    label="Criar conta com Google"
+                    onError={setError}
+                    note={
+                      <>
+                        Com o Google, você concorda com os{" "}
+                        <Link
+                          href="/termos"
+                          target="_blank"
+                          className="underline"
+                        >
+                          Termos
+                        </Link>{" "}
+                        e a{" "}
+                        <Link
+                          href="/privacidade"
+                          target="_blank"
+                          className="underline"
+                        >
+                          Política de Privacidade
+                        </Link>
+                        .
+                      </>
+                    }
+                  />
+                )
+              }
             />
           )}
           {mode === "forgot" && (

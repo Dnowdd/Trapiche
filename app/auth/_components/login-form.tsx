@@ -15,6 +15,7 @@ interface LoginFormProps {
   loading: boolean;
   go: (mode: AuthMode) => void;
   submit: (e: { preventDefault(): void }) => void;
+  social?: React.ReactNode;
 }
 
 export default function LoginForm({
@@ -29,6 +30,7 @@ export default function LoginForm({
   loading,
   go,
   submit,
+  social,
 }: LoginFormProps) {
   return (
     <form
@@ -48,6 +50,7 @@ export default function LoginForm({
         </p>
       </div>
 
+      {social}
       <Field
         label="E-mail"
         icon={<MailIcon />}
