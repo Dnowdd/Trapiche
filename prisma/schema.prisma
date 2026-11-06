@@ -29,6 +29,7 @@ model User {
   showCity          Boolean           @default(true)
 
   inactivityReminder Boolean   @default(false)
+  assistantShareData Boolean   @default(false)
   monthlyDigest      Boolean   @default(false)
   lastReminderAt     DateTime?
   lastDigestMonth    String?
@@ -38,30 +39,32 @@ model User {
   sessions  Session[]
   accounts  Account[]
 
-  shelf           UserBook[]
-  readings        Reading[]
-  readingSessions ReadingSession[]
-  reviews         Review[]
-  reviewLikes     ReviewLike[]
-  reviewComments  ReviewComment[]
-  ownedLists      List[]
-  listMemberships ListMember[]
-  listItemsAdded  ListItem[]
-  listFollows     ListFollow[]
-  activities      Activity[]
-  notifications   Notification[]   @relation("NotificationRecipient")
-  notified        Notification[]   @relation("NotificationActor")
-  reports         Report[]
-  readingGoals    ReadingGoal[]
-  avatar          UserAvatar?
-  supportTickets  SupportTicket[]
-  apiKeys         ApiKey[]
-  supportMessages SupportMessage[]
-  quotes          Quote[]
-  tags            Tag[]
-  importJobs      ImportJob[]
-  challenges      Challenge[]
-  loans           Loan[]
+  shelf            UserBook[]
+  readings         Reading[]
+  readingSessions  ReadingSession[]
+  reviews          Review[]
+  reviewLikes      ReviewLike[]
+  reviewComments   ReviewComment[]
+  ownedLists       List[]
+  listMemberships  ListMember[]
+  listItemsAdded   ListItem[]
+  listFollows      ListFollow[]
+  activities       Activity[]
+  notifications    Notification[]    @relation("NotificationRecipient")
+  notified         Notification[]    @relation("NotificationActor")
+  reports          Report[]
+  readingGoals     ReadingGoal[]
+  avatar           UserAvatar?
+  supportTickets   SupportTicket[]
+  apiKeys          ApiKey[]
+  supportMessages  SupportMessage[]
+  quotes           Quote[]
+  tags             Tag[]
+  importJobs       ImportJob[]
+  challenges       Challenge[]
+  loans            Loan[]
+  assistantThreads AssistantThread[]
+  assistantUsage   AssistantUsage[]
 }
 
 enum ProfileVisibility {
@@ -743,4 +746,50 @@ model Loan {
   notifications Notification[]
 
   @@index([userId, returnedAt])
+}
+
+enum AssistantRole {
+  USER
+  ASSISTANT
+}
+
+model AssistantThread {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AssistantMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model AssistantMessage {
+  id           String        @id @default(cuid())
+  threadId     String
+  role         AssistantRole
+  content      String
+  blocks       Json?
+  model        String?
+  inputTokens  Int?
+  outputTokens Int?
+  createdAt    DateTime      @default(now())
+
+  thread AssistantThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+}
+
+model AssistantUsage {
+  userId       String
+  day          DateTime @db.Date
+  messages     Int      @default(0)
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, day])
 }
