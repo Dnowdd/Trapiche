@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "4mb" },
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
