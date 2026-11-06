@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getViewerId } from "@/lib/session";
+import { privacySelect } from "@/lib/privacy";
 
 export async function GET() {
   const userId = await getViewerId();
@@ -27,6 +28,11 @@ export async function GET() {
     tickets,
     avatar,
     apiKeys,
+    quotes,
+    tags,
+    imports,
+    accounts,
+    authSessions,
   ] = await Promise.all([
     db.user.findUniqueOrThrow({
       where: { id: userId },
@@ -38,6 +44,10 @@ export async function GET() {
         city: true,
         createdAt: true,
         developerSince: true,
+        emailVerified: true,
+        inactivityReminder: true,
+        monthlyDigest: true,
+        ...privacySelect,
       },
     }),
     db.userBook.findMany({
@@ -143,6 +153,7 @@ export async function GET() {
         resolvedAt: true,
         reviewId: true,
         commentId: true,
+        quoteId: true,
       },
     }),
     db.supportTicket.findMany({
@@ -188,6 +199,70 @@ export async function GET() {
         revokedAt: true,
       },
     }),
+    db.quote.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        text: true,
+        page: true,
+        note: true,
+        private: true,
+        createdAt: true,
+        book,
+      },
+    }),
+    db.tag.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+      select: {
+        name: true,
+        color: true,
+        private: true,
+        createdAt: true,
+        books: { select: { userBook: { select: { book } } } },
+      },
+    }),
+    db.importJob.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        source: true,
+        fileName: true,
+        status: true,
+        total: true,
+        createdAt: true,
+        finishedAt: true,
+        rows: {
+          orderBy: { index: "asc" },
+          select: {
+            title: true,
+            author: true,
+            isbn: true,
+            shelf: true,
+            rating: true,
+            review: true,
+            dateRead: true,
+            tags: true,
+            status: true,
+            bookId: true,
+          },
+        },
+      },
+    }),
+    db.account.findMany({
+      where: { userId },
+      select: { providerId: true, createdAt: true },
+    }),
+    db.session.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        createdAt: true,
+        expiresAt: true,
+        ipAddress: true,
+        userAgent: true,
+      },
+    }),
   ]);
 
   const dataUri = (mimeType: string, data: Uint8Array) =>
@@ -228,6 +303,20 @@ export async function GET() {
         })),
       })),
       apiKeys,
+      quotes,
+      tags: tags.map((t) => ({
+        name: t.name,
+        color: t.color,
+        private: t.private,
+        createdAt: t.createdAt,
+        books: t.books.map((b) => b.userBook.book),
+      })),
+      imports,
+      loginMethods: accounts.map((a) => ({
+        provider: a.providerId === "credential" ? "email" : a.providerId,
+        linkedAt: a.createdAt,
+      })),
+      loginSessions: authSessions,
       avatar: avatar
         ? {
             updatedAt: avatar.updatedAt,
