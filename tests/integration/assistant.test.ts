@@ -484,6 +484,43 @@ describe("assistant runner", () => {
     ).toBe(false);
   });
 
+  it("discovers catalog books by page count and subject", async () => {
+    await testDb.book.createMany({
+      data: [
+        {
+          id: "book-long",
+          title: "Calhamaço",
+          authors: ["Autora Longa"],
+          pageCount: 900,
+          categories: ["Fantasia"],
+        },
+        {
+          id: "book-poem",
+          title: "Versos",
+          authors: ["Poeta"],
+          pageCount: 90,
+          categories: ["Poesia"],
+        },
+      ],
+    });
+    const ctx = { userId: USER, shareData: false, emit: () => {} };
+    const short = (await runTool(
+      "discover_books",
+      { max_pages: 250, min_pages: null, language: null, subject: null },
+      ctx,
+    )) as { books: { id: string }[] };
+    expect(short.books.map((b) => b.id).sort()).toEqual([
+      "book-1",
+      "book-poem",
+    ]);
+    const poems = (await runTool(
+      "discover_books",
+      { max_pages: null, min_pages: null, language: null, subject: "poesia" },
+      ctx,
+    )) as { books: { id: string }[] };
+    expect(poems.books.map((b) => b.id)).toEqual(["book-poem"]);
+  });
+
   it("searches the catalog and marks what is already on the shelf", async () => {
     await testDb.userBook.create({
       data: { userId: USER, bookId: "book-1", status: "READ" },

@@ -143,7 +143,7 @@ describe("assistant tools", () => {
     for (const tool of TOOLS) {
       if (tool.name.startsWith("propose_")) continue;
       expect(TOOL_STATUS[tool.name], tool.name).toBeTruthy();
-      expect(tool.name).toMatch(/^(get_|search_|show_)/);
+      expect(tool.name).toMatch(/^(get_|search_|show_|discover_)/);
     }
   });
 
