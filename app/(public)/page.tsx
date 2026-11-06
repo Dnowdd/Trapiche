@@ -9,6 +9,12 @@ import { getFeaturedBooks } from "@/app/catalog";
 import { getSession } from "@/lib/session";
 import { getDashboard } from "@/lib/queries/dashboard";
 import Dashboard from "./_components/dashboard";
+import type { Metadata } from "next";
+import { JsonLd, websiteJsonLd } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const shell =
   "bg-(--cream) rounded-[22px] md:rounded-[30px] border-8 md:border-15 border-(--yellow) mx-2 md:mx-3.75 overflow-hidden";
@@ -33,6 +39,7 @@ export default async function Home() {
   const books = shuffle(await getFeaturedBooks());
   return (
     <div data-responsive className={shell}>
+      <JsonLd data={websiteJsonLd()} />
       <Hero books={books} />
       <div className="flex flex-col gap-16 md:gap-20">
         <HowItWorks />

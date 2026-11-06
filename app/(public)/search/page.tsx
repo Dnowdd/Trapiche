@@ -16,7 +16,12 @@ export async function generateMetadata({
   searchParams,
 }: Props): Promise<Metadata> {
   const { q } = await searchParams;
-  return { title: q ? `Busca: ${q}` : "Busca" };
+  return {
+    title: q ? `Busca: ${q}` : "Busca de livros",
+    description: "Busque livros por título, autor ou ISBN no Trapiche.",
+    robots: q ? { index: false, follow: true } : undefined,
+    alternates: { canonical: "/search" },
+  };
 }
 
 async function toWork(v: GoogleBooksVolume, editions: number) {

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/shared/toast";
@@ -15,8 +16,49 @@ export const metadata: Metadata = {
     default: "Trapiche — seu diário de leituras",
     template: "%s · Trapiche",
   },
-  description:
-    "Catalogue o que você lê, acompanhe seu progresso, escreva resenhas e monte listas de livros.",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "diário de leitura",
+    "livros",
+    "resenhas de livros",
+    "estante virtual",
+    "meta de leitura",
+    "citações de livros",
+    "listas de livros",
+    "alternativa ao Skoob",
+    "alternativa ao Goodreads",
+  ],
+  category: "books",
+  formatDetection: { telephone: false, email: false, address: false },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "pt_BR",
+    title: "Trapiche — seu diário de leituras",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Trapiche — seu diário de leituras",
+    description: SITE_DESCRIPTION,
+  },
+  appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: "default" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffe767",
+  colorScheme: "light",
 };
 
 export default function RootLayout({

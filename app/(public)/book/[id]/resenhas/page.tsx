@@ -13,10 +13,23 @@ interface Props {
   searchParams: Promise<{ pagina?: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const { id } = await params;
+  const { pagina } = await searchParams;
   const book = await loadBook(id);
-  return book ? { title: `Resenhas de ${book.title}` } : {};
+  if (!book) return {};
+  const by = book.authors[0] ? `, de ${book.authors[0]}` : "";
+  const page = Math.max(1, Number(pagina) || 1);
+  return {
+    title: `Resenhas de ${book.title}${page > 1 ? ` · página ${page}` : ""}`,
+    description: `O que os leitores acharam de ${book.title}${by}: notas e resenhas da comunidade do Trapiche.`,
+    alternates: {
+      canonical: `/book/${id}/resenhas${page > 1 ? `?pagina=${page}` : ""}`,
+    },
+  };
 }
 
 export default async function ReviewsPage({ params, searchParams }: Props) {

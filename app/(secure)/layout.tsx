@@ -2,6 +2,11 @@ import Footer from "@/components/layout/footer";
 import SiteHeader from "@/components/layout/site-header";
 import { requireSession } from "@/lib/session";
 import React from "react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export const dynamic = "force-dynamic";
 

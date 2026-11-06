@@ -7,6 +7,8 @@ const PUBLIC_PATHS = [
   "/api/cron",
   "/api/avatars/",
   "/api/v1/",
+  "/api/email/",
+  "/api/books/isbn/",
 ];
 const PUBLIC_EXACT = [
   "/",
@@ -15,16 +17,22 @@ const PUBLIC_EXACT = [
   "/search",
   "/sitemap.xml",
   "/robots.txt",
+  "/manifest.webmanifest",
+  "/emails/cancelado",
   "/api/books",
   "/api/books/search",
 ];
+const IMAGE = "(?:\\/(?:opengraph|twitter)-image[^/]*)?";
 const PUBLIC_PATTERNS = [
-  /^\/book\/[^/]+(\/resenhas|\/opengraph-image[^/]*)?$/,
-  /^\/lists\/[^/]+$/,
-  /^\/u\/[^/]+(\/retrospectiva(\/opengraph-image[^/]*)?)?$/,
-  /^\/author\/[^/]+$/,
-  /^\/publisher\/[^/]+$/,
-];
+  `^(?:\\/(?:opengraph|twitter)-image[^/]*|\\/(?:icon|apple-icon)[^/]*)$`,
+  `^\\/book\\/[^/]+(?:\\/resenhas|\\/citacoes)?${IMAGE}$`,
+  `^\\/lists\\/[^/]+${IMAGE}$`,
+  `^\\/u\\/[^/]+(?:\\/retrospectiva)?${IMAGE}$`,
+  `^\\/author\\/[^/]+${IMAGE}$`,
+  `^\\/publisher\\/[^/]+${IMAGE}$`,
+  `^\\/serie\\/[^/]+${IMAGE}$`,
+  `^\\/citacao\\/[^/]+${IMAGE}$`,
+].map((source) => new RegExp(source));
 
 function isPublic(pathname: string) {
   return (

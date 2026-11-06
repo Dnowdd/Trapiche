@@ -7,6 +7,7 @@ import { VISIBILITY_LABEL } from "@/components/lists/visibility";
 import { getListPage } from "@/lib/queries/lists";
 import { getViewerId } from "@/lib/session";
 import ListActions from "./_components/list-actions";
+import { clip, itemListJsonLd, JsonLd } from "@/lib/seo";
 import RemoveItem from "./_components/remove-item";
 
 interface Props {
@@ -16,7 +17,30 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const list = await getListPage(id, await getViewerId());
-  return list ? { title: list.title } : {};
+  if (!list) return {};
+  const count = list.items.length;
+  const description = list.note
+    ? clip(list.note, 158)
+    : `${count} ${count === 1 ? "livro" : "livros"} numa lista de ${list.owner.name} no Trapiche${
+        list.items.length
+          ? `: ${list.items
+              .slice(0, 3)
+              .map((i) => i.book.title)
+              .join(", ")}${count > 3 ? " e mais" : ""}.`
+          : "."
+      }`;
+  const title = `${list.title}, lista de ${list.owner.name}`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/lists/${list.id}` },
+    robots:
+      list.visibility === "PUBLIC"
+        ? undefined
+        : { index: false, follow: false },
+    openGraph: { title, description, url: `/lists/${list.id}` },
+    twitter: { card: "summary_large_image", title, description },
+  };
 }
 
 export default async function ListPage({ params }: Props) {
@@ -29,6 +53,19 @@ export default async function ListPage({ params }: Props) {
       data-responsive
       className="bg-(--cream) rounded-[22px] md:rounded-[30px] border-8 md:border-15 border-(--yellow) mx-2 md:mx-3.75 overflow-hidden"
     >
+      {list.visibility === "PUBLIC" && (
+        <JsonLd
+          data={itemListJsonLd({
+            name: list.title,
+            description: list.note,
+            path: `/lists/${list.id}`,
+            books: list.items.map((i) => ({
+              id: i.book.id,
+              title: i.book.title,
+            })),
+          })}
+        />
+      )}
       <div className="pt-7 md:pt-12.5 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15">
         <div className="flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
           <Link href="/" className="hover:text-(--ink-2)">

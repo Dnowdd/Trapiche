@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "../_components/legal/legal-page";
 
-export const metadata: Metadata = { title: "Termos de uso" };
+export const metadata: Metadata = {
+  title: "Termos de uso",
+  description: "Os termos de uso do Trapiche, o diário de leituras.",
+  alternates: { canonical: "/termos" },
+};
 
 export default function TermsPage() {
   return (

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublisherPage } from "@/lib/queries/people";
+import { publisherHref } from "@/lib/links";
 import WorksGrid, { GoogleWorks } from "../../_components/works-grid";
 
 interface Props {
@@ -10,9 +11,13 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = decodeURIComponent((await params).name);
+  const title = `${name}: livros da editora`;
+  const description = `Catálogo de livros publicados por ${name}, com notas, resenhas e citações de leitores no Trapiche.`;
   return {
-    title: name,
-    description: `Livros publicados por ${name} no Trapiche.`,
+    title,
+    description,
+    alternates: { canonical: publisherHref(name) },
+    openGraph: { title, description, url: publisherHref(name) },
   };
 }
 
