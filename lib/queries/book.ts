@@ -1,4 +1,5 @@
 import { db } from "../db";
+import { fmtDuration, progressOf } from "../progress";
 import {
   bookSummarySelect,
   languageLabel,
@@ -363,19 +364,29 @@ async function viewerState(
     const elapsed = paceFrom
       ? Math.max(1, daysBetween(paceFrom, today()) + 1)
       : 0;
-    const pagesRead = Math.max(0, page);
-    const pace = elapsed ? pagesRead / elapsed : 0;
-    const remaining = Math.max(0, total - page);
+    const prog = progressOf(entry, pageCount);
+    const pace = elapsed && prog.fraction ? prog.fraction / elapsed : 0;
+    const remainingDays =
+      pace > 0 && prog.fraction != null
+        ? Math.ceil((1 - prog.fraction) / pace)
+        : null;
     reading = {
       number: active.number,
-      progress: total ? Math.min(100, Math.round((page / total) * 100)) : 0,
+      progress: prog.percent ?? 0,
+      known: prog.percent != null,
+      label: prog.label,
+      big: prog.big,
+      format: entry.format,
+      progressPercent: entry.progressPercent,
+      audioPosition: entry.audioPosition,
+      audioLength: entry.audioLength,
       page,
       total,
       started: fmtPartial(active.startedAt, active.startPrecision),
       startedPartial: partialToISO(active.startedAt, active.startPrecision),
       expectedDone:
-        total && pace > 0
-          ? fmtExpected(addDays(today(), Math.ceil(remaining / pace)))
+        remainingDays != null
+          ? fmtExpected(addDays(today(), remainingDays))
           : null,
       streakDays: streakFrom(daily.map((s) => s.date)),
       sessions: active.sessions.slice(0, 5).map((s) => ({
@@ -387,6 +398,15 @@ async function viewerState(
         pages: s.pages,
         minutes: s.minutes,
         pageEnd: s.pageEnd,
+        reached:
+          s.format === "EBOOK" && s.progressEnd != null
+            ? `até ${Math.round(s.progressEnd * 100)}%`
+            : s.format === "AUDIO"
+              ? s.progressEnd != null && entry.audioLength
+                ? `até ${fmtDuration(s.progressEnd * entry.audioLength)}`
+                : "ouvindo"
+              : `até pág. ${s.pageEnd}`,
+        format: s.format,
       })),
       sessionsCount: active.sessions.length,
     };
@@ -397,6 +417,10 @@ async function viewerState(
     liked: entry?.liked ?? false,
     favorite: entry?.favoritePosition != null,
     currentPage: entry?.currentPage ?? 0,
+    format: entry?.format ?? "PRINT",
+    progressPercent: entry?.progressPercent ?? null,
+    audioPosition: entry?.audioPosition ?? null,
+    audioLength: entry?.audioLength ?? null,
     timesRead: finished + (active ? 1 : 0),
     reading,
     readings: closed.map((r) => ({

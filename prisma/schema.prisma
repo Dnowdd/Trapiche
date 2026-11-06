@@ -114,6 +114,12 @@ enum ShelfStatus {
   REREADING
 }
 
+enum ReadingFormat {
+  PRINT
+  EBOOK
+  AUDIO
+}
+
 enum ReadingStatus {
   ACTIVE
   FINISHED
@@ -190,19 +196,23 @@ model Work {
 }
 
 model UserBook {
-  id               String       @id @default(cuid())
+  id               String        @id @default(cuid())
   userId           String
   bookId           String
   status           ShelfStatus?
   statusChangedAt  DateTime?
-  liked            Boolean      @default(false)
+  liked            Boolean       @default(false)
   likedAt          DateTime?
   favoritePosition Int?
-  currentPage      Int          @default(0)
+  currentPage      Int           @default(0)
+  format           ReadingFormat @default(PRINT)
+  progressPercent  Float?
+  audioPosition    Int?
+  audioLength      Int?
   abandonReason    String?
-  wantsToReturn    Boolean      @default(true)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  wantsToReturn    Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   book Book          @relation(fields: [bookId], references: [id])
@@ -251,6 +261,8 @@ model ReadingSession {
   pages         Int
   minutes       Int
   pageEnd       Int
+  format        ReadingFormat @default(PRINT)
+  progressEnd   Float?
   note          String?
   createdAt     DateTime      @default(now())
 

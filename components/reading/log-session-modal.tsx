@@ -14,13 +14,18 @@ import { logReadingSession } from "@/lib/actions/shelf";
 import { toast } from "@/components/shared/toast";
 import { useAction } from "./use-action";
 import PartialDateInput from "./partial-date-input";
-import { PageCountField } from "./progress-modal";
+import { DurationField, PageCountField, PercentField } from "./progress-modal";
+import { fmtDuration, type ReadingFormat } from "@/lib/progress";
 
 export interface ReadingOption {
   id: string;
   title: string;
   currentPage: number;
   pageCount: number | null;
+  format?: ReadingFormat;
+  progressPercent?: number | null;
+  audioPosition?: number | null;
+  audioLength?: number | null;
 }
 
 interface LogSessionModalProps {
@@ -43,10 +48,13 @@ export default function LogSessionModal({
   const [date, setDate] = useState<string | null>(today);
   const [total, setTotal] = useState("");
   const [page, setPage] = useState("");
+  const [percent, setPercent] = useState("");
+  const [position, setPosition] = useState("");
   const [minutes, setMinutes] = useState("");
   const [note, setNote] = useState("");
   const { pending, error, run } = useAction();
 
+  const format = book?.format ?? "PRINT";
   const pagesRead =
     book && page ? Math.max(0, Number(page) - book.currentPage) : 0;
 
@@ -61,13 +69,17 @@ export default function LogSessionModal({
         logReadingSession(book.id, {
           date: date!,
           pageEnd: page,
+          percentEnd: percent,
+          audioPosition: position,
           minutes,
           note,
-          pageCount: book.pageCount ? null : total,
+          pageCount: book.pageCount || format !== "PRINT" ? null : total,
         }),
       (data) => {
         onOpenChange(false);
         setPage("");
+        setPercent("");
+        setPosition("");
         setMinutes("");
         setNote("");
         toast("Leitura registrada no diário.");
@@ -101,7 +113,7 @@ export default function LogSessionModal({
               <select
                 value={book?.id}
                 onChange={(e) => setBookId(e.target.value)}
-                className="w-full h-11 rounded-[10px] border-[1.5px] border-[rgba(67,62,18,0.14)] bg-(--cream-card) px-3 text-[14px] text-(--ink-2) outline-none focus:border-(--ink-3)"
+                className="w-full h-11 rounded-[10px] border-[1.5px] border-[rgba(var(--ink-rgb),0.14)] bg-(--cream-card) px-3 text-[14px] text-(--ink-2) outline-none focus:border-(--ink-3)"
               >
                 {books.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -117,32 +129,56 @@ export default function LogSessionModal({
             onChange={setDate}
             today={today}
           />
-          {book && !book.pageCount && (
+          {book && !book.pageCount && format === "PRINT" && (
             <PageCountField value={total} onChange={setTotal} />
           )}
           <div className="grid grid-cols-2 gap-3.5">
-            <FormField
-              label="Parei na página"
-              hint={
-                book?.pageCount
-                  ? `de ${book.pageCount}${pagesRead ? ` · +${pagesRead} pgs` : ""}`
-                  : pagesRead
-                    ? `+${pagesRead} pgs`
-                    : undefined
-              }
-            >
-              <TextInput
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={max}
-                required
-                value={page}
-                placeholder={String(book?.currentPage ?? 0)}
-                onChange={(e) => setPage(e.target.value)}
+            {format === "EBOOK" ? (
+              <PercentField
+                label="Parei em (%)"
+                value={percent}
+                onChange={setPercent}
               />
-            </FormField>
-            <FormField label="Minutos">
+            ) : format === "AUDIO" ? (
+              <DurationField
+                label="Ouvi até"
+                value={position}
+                onChange={setPosition}
+                required
+                hint={
+                  book?.audioLength
+                    ? `de ${fmtDuration(book.audioLength)}`
+                    : book?.audioPosition
+                      ? `antes: ${fmtDuration(book.audioPosition)}`
+                      : "Ex.: 2h15"
+                }
+              />
+            ) : (
+              <FormField
+                label="Parei na página"
+                hint={
+                  book?.pageCount
+                    ? `de ${book.pageCount}${pagesRead ? ` · +${pagesRead} pgs` : ""}`
+                    : pagesRead
+                      ? `+${pagesRead} pgs`
+                      : undefined
+                }
+              >
+                <TextInput
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={max}
+                  required
+                  value={page}
+                  placeholder={String(book?.currentPage ?? 0)}
+                  onChange={(e) => setPage(e.target.value)}
+                />
+              </FormField>
+            )}
+            <FormField
+              label={format === "AUDIO" ? "Minutos ouvidos" : "Minutos"}
+            >
               <TextInput
                 type="number"
                 inputMode="numeric"

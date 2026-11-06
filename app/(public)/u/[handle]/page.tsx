@@ -155,6 +155,10 @@ async function TabContent({
             title: r.book.title,
             currentPage: r.currentPage,
             pageCount: r.pageCount,
+            format: r.format,
+            progressPercent: r.progressPercent,
+            audioPosition: r.audioPosition,
+            audioLength: r.audioLength,
           }))}
         />
       );

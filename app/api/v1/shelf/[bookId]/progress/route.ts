@@ -7,7 +7,10 @@ export const PUT = apiRoute<{ bookId: string }>(
     const b = await body();
     await act(userId, () =>
       updateProgress(bookId, {
-        currentPage: num(b, "currentPage", true)!,
+        currentPage: num(b, "currentPage"),
+        percent: num(b, "percent"),
+        audioPosition: num(b, "audioPosition"),
+        audioLength: b.audioLength === null ? null : num(b, "audioLength"),
         startedAt: str(b, "startedAt") ?? null,
         pageCount: num(b, "pageCount") ?? null,
       }),

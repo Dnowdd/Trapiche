@@ -1,5 +1,6 @@
 import { db } from "../db";
 import { editionIds } from "../works";
+import { progressOf } from "../progress";
 import { ApiError, badParam } from "./http";
 import { apiBook, apiBookSelect, iso } from "./serialize";
 
@@ -68,6 +69,10 @@ export async function shelfItem(userId: string, bookId: string) {
       liked: true,
       favoritePosition: true,
       currentPage: true,
+      format: true,
+      progressPercent: true,
+      audioPosition: true,
+      audioLength: true,
       book: { select: apiBookSelect },
       tags: {
         select: { tag: { select: { id: true, name: true, color: true } } },
@@ -83,6 +88,11 @@ export async function shelfItem(userId: string, bookId: string) {
       liked: entry.liked,
       favoritePosition: entry.favoritePosition,
       currentPage: entry.currentPage,
+      format: entry.format,
+      progressPercent: entry.progressPercent,
+      audioPosition: entry.audioPosition,
+      audioLength: entry.audioLength,
+      progress: progressOf(entry, entry.book.pageCount).percent,
       tags: entry.tags.map((t) => t.tag),
       book: apiBook(entry.book),
     },

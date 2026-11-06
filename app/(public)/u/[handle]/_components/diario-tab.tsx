@@ -12,12 +12,13 @@ import type { getDiario } from "@/lib/queries/profile";
 type Data = Awaited<ReturnType<typeof getDiario>>;
 
 const levelClass: Record<string, string> = {
-  l0: "bg-[rgba(67,62,18,0.05)]",
+  l0: "bg-[rgba(var(--ink-rgb),0.05)]",
   l1: "bg-[#fff1a8]",
   l2: "bg-[#f5dd5c]",
   l3: "bg-[#d7b937]",
   l4: "bg-[#8a6e1e]",
-  future: "bg-transparent border border-dashed border-[rgba(67,62,18,0.1)]",
+  future:
+    "bg-transparent border border-dashed border-[rgba(var(--ink-rgb),0.1)]",
 };
 
 const MONTHS = [
@@ -58,7 +59,7 @@ function levelFor(minutes: number) {
 }
 
 const statCard =
-  "bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] py-5 px-5.5 flex flex-col gap-1.5 relative min-h-31";
+  "bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] py-5 px-5.5 flex flex-col gap-1.5 relative min-h-31";
 const badge =
   "self-start font-mono text-[10px] py-px px-1.5 rounded-[3px] tracking-[0.04em] mt-0.5";
 
@@ -103,7 +104,9 @@ function DiaryStats({ data }: { data: Data }) {
           </span>
         </div>
         {ly.avgPerDay > 0 && (
-          <div className={`${badge} bg-[rgba(67,62,18,0.08)] text-(--ink-3)`}>
+          <div
+            className={`${badge} bg-[rgba(var(--ink-rgb),0.08)] text-(--ink-3)`}
+          >
             era {ly.avgPerDay} min em {ly.year}
           </div>
         )}
@@ -125,7 +128,9 @@ function DiaryStats({ data }: { data: Data }) {
           </span>
         </div>
         {data.record.length > 0 && (
-          <div className={`${badge} bg-[rgba(67,62,18,0.08)] text-(--ink-3)`}>
+          <div
+            className={`${badge} bg-[rgba(var(--ink-rgb),0.08)] text-(--ink-3)`}
+          >
             recorde: {data.record.length}{" "}
             {data.record.length === 1 ? "dia" : "dias"} em {data.record.year}
           </div>
@@ -230,7 +235,7 @@ function Heatmap({ data }: { data: Data }) {
   }, [year]);
 
   return (
-    <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7 mb-5.5">
+    <div className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-5 sm:p-6 sm:px-7 mb-5.5">
       <div className="flex justify-between items-center mb-4.5">
         <div>
           <h3 className="m-0 text-[16px] font-bold text-(--ink)">
@@ -242,7 +247,7 @@ function Heatmap({ data }: { data: Data }) {
           </div>
         </div>
         {data.years.length > 1 && (
-          <div className="flex gap-1.5 bg-[rgba(67,62,18,0.04)] p-0.75 rounded-md">
+          <div className="flex gap-1.5 bg-[rgba(var(--ink-rgb),0.04)] p-0.75 rounded-md">
             {data.years.map((y) => (
               <button
                 key={y}
@@ -339,7 +344,7 @@ export default function DiarioTab({
     <>
       <DiaryStats data={data} />
       <Heatmap data={data} />
-      <div className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-6 px-7">
+      <div className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-6 px-7">
         <div className="flex items-center justify-between mb-3.5">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mb-0.5">
@@ -403,10 +408,23 @@ export default function DiarioTab({
                 )}
               </div>
               <div className="text-right font-mono text-[11px] text-(--ink-3) tracking-[0.04em] flex flex-col gap-1 [&_strong]:text-(--ink) [&_strong]:text-[16px] [&_strong]:font-bold [&_strong]:font-['Inter',sans-serif] [&_strong]:tracking-[-0.01em]">
-                <div>
-                  <strong>{e.pages}</strong> pgs
-                </div>
-                <div>{e.minutes} min</div>
+                {e.format === "AUDIO" && !e.pages ? (
+                  <>
+                    <div>
+                      <strong>{e.minutes}</strong> min
+                    </div>
+                    <div>ouvindo</div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <strong>{e.pages}</strong> pgs
+                    </div>
+                    <div>
+                      {e.minutes} min{e.format === "EBOOK" ? " · e-book" : ""}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ))

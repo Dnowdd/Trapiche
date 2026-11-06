@@ -5,6 +5,56 @@ import LogSessionModal from "@/components/reading/log-session-modal";
 import FinishModal from "@/components/reading/finish-modal";
 import ProgressModal from "@/components/reading/progress-modal";
 import type { BookPageData } from "@/lib/queries/book";
+import { useAction } from "@/components/reading/use-action";
+import { toast } from "@/components/shared/toast";
+import { setReadingFormat } from "@/lib/actions/shelf";
+import { FORMAT_LABEL, type ReadingFormat } from "@/lib/progress";
+import { cn } from "@/lib/utils";
+
+const FORMATS: ReadingFormat[] = ["PRINT", "EBOOK", "AUDIO"];
+
+function FormatSwitch({
+  bookId,
+  value,
+}: {
+  bookId: string;
+  value: ReadingFormat;
+}) {
+  const { pending, run } = useAction();
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Formato da leitura"
+      className="inline-flex p-0.75 rounded-[9px] bg-[rgba(255,248,213,0.08)] border border-[rgba(255,248,213,0.12)]"
+    >
+      {FORMATS.map((f) => (
+        <button
+          key={f}
+          type="button"
+          role="radio"
+          aria-checked={value === f}
+          disabled={pending}
+          onClick={() =>
+            value !== f &&
+            run(
+              () => setReadingFormat(bookId, f),
+              () => toast(`Formato: ${FORMAT_LABEL[f].toLowerCase()}.`),
+              toast,
+            )
+          }
+          className={cn(
+            "h-7 px-2.5 rounded-[7px] text-[11.5px] font-semibold cursor-pointer transition-colors duration-120 disabled:cursor-wait",
+            value === f
+              ? "bg-(--yellow) text-(--ink)"
+              : "text-(--cream-deep) hover:text-(--cream)",
+          )}
+        >
+          {FORMAT_LABEL[f]}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 const ghost =
   "text-[12px] font-medium py-2.25 px-3.5 rounded-[7px] bg-transparent border border-[rgba(255,248,213,0.3)] text-(--cream) cursor-pointer transition-[transform,background] duration-100 hover:bg-[rgba(255,248,213,0.05)] hover:-translate-y-px";
@@ -31,38 +81,53 @@ export default function MyReading({
         <section data-screen-label="02 Sua leitura">
           <div className="bg-(--ink-2) text-(--cream) rounded-[18px] p-6 md:py-7 md:px-8 grid gap-8 xl:grid-cols-[1fr_280px]">
             <div>
-              <div className="font-mono text-[11px] text-(--cream-deep) tracking-[0.06em] uppercase">
-                {v.status === "REREADING" ? "Sua releitura" : "Sua leitura"}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="font-mono text-[11px] text-(--cream-deep) tracking-[0.06em] uppercase">
+                  {v.status === "REREADING" ? "Sua releitura" : "Sua leitura"}
+                </div>
+                <FormatSwitch
+                  bookId={book.id}
+                  value={r.format as ReadingFormat}
+                />
               </div>
               <h3 className="mt-1.5 mb-4 text-[24px] font-bold text-(--yellow) tracking-[-0.015em]">
                 Você está aqui agora
               </h3>
 
               <div className="text-[56px] font-extrabold text-(--yellow) leading-none tracking-[-0.03em]">
-                {r.progress}
-                <span className="text-[28px] ml-1 text-(--cream-deep)">%</span>
+                {r.known ? (
+                  <>
+                    {r.progress}
+                    <span className="text-[28px] ml-1 text-(--cream-deep)">
+                      %
+                    </span>
+                  </>
+                ) : (
+                  r.big
+                )}
               </div>
               <div className="mt-1.5 font-mono text-[12px] text-(--cream-deep) tracking-[0.04em] flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span>
-                  página {r.page}
-                  {r.total ? ` de ${r.total}` : ""}
-                </span>
-                {!r.total && (
+                <span>{r.label}</span>
+                {!r.known && (
                   <button
                     type="button"
                     onClick={() => setModal("progress")}
                     className="font-sans text-[12px] text-(--yellow) underline underline-offset-2 cursor-pointer hover:text-(--cream)"
                   >
-                    Informar total de páginas
+                    {r.format === "AUDIO"
+                      ? "Informar duração do audiolivro"
+                      : "Informar total de páginas"}
                   </button>
                 )}
               </div>
-              <div className="mt-4 h-2 bg-[rgba(255,231,103,0.15)] rounded-sm overflow-hidden">
-                <div
-                  className="h-full bg-(--yellow) rounded-sm transition-[width] duration-300"
-                  style={{ width: r.progress + "%" }}
-                />
-              </div>
+              {r.known && (
+                <div className="mt-4 h-2 bg-[rgba(255,231,103,0.15)] rounded-sm overflow-hidden">
+                  <div
+                    className="h-full bg-(--yellow) rounded-sm transition-[width] duration-300"
+                    style={{ width: r.progress + "%" }}
+                  />
+                </div>
+              )}
 
               <div className="mt-4 flex gap-9 flex-wrap">
                 {[
@@ -134,7 +199,13 @@ export default function MyReading({
                       {s.date}
                     </span>
                     <span className="text-(--cream) font-medium [&_strong]:text-(--yellow) [&_strong]:font-bold">
-                      <strong>{s.pages} pgs</strong> · até pág. {s.pageEnd}
+                      {s.format === "AUDIO" || !s.pages ? (
+                        s.reached
+                      ) : (
+                        <>
+                          <strong>{s.pages} pgs</strong> · {s.reached}
+                        </>
+                      )}
                     </span>
                     <span className="text-(--cream-deep) font-mono text-[11px]">
                       {s.minutes}min
@@ -158,6 +229,10 @@ export default function MyReading({
               title: book.title,
               currentPage: v.currentPage,
               pageCount: book.pageCount,
+              format: r.format as ReadingFormat,
+              progressPercent: r.progressPercent,
+              audioPosition: r.audioPosition,
+              audioLength: r.audioLength,
             },
           ]}
           onReachedEnd={() => setModal("finish")}
@@ -183,6 +258,10 @@ export default function MyReading({
           currentPage={r.page}
           pageCount={book.pageCount}
           startedAt={r.startedPartial}
+          format={r.format as ReadingFormat}
+          progressPercent={r.progressPercent}
+          audioPosition={r.audioPosition}
+          audioLength={r.audioLength}
         />
       )}
     </>

@@ -140,3 +140,31 @@ test("run an import to the end", async ({ page }) => {
   await expect(page).toHaveURL(new RegExp(`/u/${user.handle}`));
   await expect(page.getByRole("button", { name: /clássicos/ })).toBeVisible();
 });
+
+test("track an e-book by percentage", async ({ page }) => {
+  await signUp(page);
+  await page.goto(`/book/${BOOK}`);
+  await page.getByRole("button", { name: "Outros status de leitura" }).click();
+  await page.getByRole("menuitem", { name: "Lendo", exact: true }).click();
+  await page.getByRole("button", { name: "Comecei" }).click();
+  await expect(page.getByText("Você está aqui agora")).toBeVisible();
+  await page.getByRole("radio", { name: "E-book" }).click();
+  await expect(page.getByText("Formato: e-book.")).toBeVisible();
+  await page.getByRole("button", { name: "Editar progresso" }).click();
+  await page.getByLabel("Porcentagem lida").fill("37");
+  await page.getByRole("button", { name: "Salvar" }).click();
+  await expect(page.getByText("37% do e-book")).toBeVisible();
+});
+
+test("search the shelf and export it as csv", async ({ page }) => {
+  const user = await signUp(page);
+  await page.goto(`/book/${BOOK}`);
+  await page.getByRole("button", { name: "Quero ler", exact: true }).click();
+  await expect(page.getByText("Suas tags")).toBeVisible();
+  await page.goto(`/u/${user.handle}?tab=estante`);
+  await page.getByPlaceholder(/Buscar entre/).fill("zzz-nada");
+  await expect(page.getByText("Nada na estante com “zzz-nada”.")).toBeVisible();
+  const csv = await page.request.get("/api/me/export.csv");
+  expect(csv.headers()["content-type"]).toContain("text/csv");
+  expect(await csv.text()).toContain("to-read");
+});

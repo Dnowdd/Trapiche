@@ -14,6 +14,12 @@ import {
 } from "../dates";
 import { fail, withUser } from "./result";
 import { parseReview, upsertReview, type ReviewInput } from "../reviews";
+import {
+  fractionOf,
+  pageFromFraction,
+  parseDuration,
+  type ReadingFormat,
+} from "../progress";
 import type { ActivityKind, Prisma } from "../generated/prisma/client";
 
 type Tx = Prisma.TransactionClient;
@@ -202,7 +208,13 @@ export async function setShelfStatus(
         await closeActive(tx, userId, bookId, entry.currentPage);
         await tx.userBook.update({
           where: { id: entry.id },
-          data: { status, statusChangedAt: new Date(), currentPage: 0 },
+          data: {
+            status,
+            statusChangedAt: new Date(),
+            currentPage: 0,
+            progressPercent: null,
+            audioPosition: null,
+          },
         });
         await logShelfActivity(tx, {
           userId,
@@ -282,6 +294,12 @@ export async function finishBook(
           status: "READ",
           statusChangedAt: new Date(),
           currentPage: book.pageCount ?? entry.currentPage,
+          progressPercent:
+            entry.format === "EBOOK" ? 100 : entry.progressPercent,
+          audioPosition:
+            entry.format === "AUDIO"
+              ? (entry.audioLength ?? entry.audioPosition)
+              : entry.audioPosition,
           abandonReason: null,
         },
       });
@@ -353,7 +371,9 @@ export async function logReadingSession(
   bookId: string,
   input: {
     date: string;
-    pageEnd: number | string;
+    pageEnd?: number | string;
+    percentEnd?: number | string;
+    audioPosition?: number | string;
     minutes: number | string;
     note?: string;
     pageCount?: number | string | null;
@@ -365,7 +385,34 @@ export async function logReadingSession(
     if (!when) fail("Informe quando você leu.");
     const date = when.date;
     const pageCount = await fillPageCount(book, input.pageCount);
-    const pageEnd = parsePage(input.pageEnd, pageCount);
+    const current = await db.userBook.findUnique({
+      where: { userId_bookId: { userId, bookId } },
+      select: { format: true, audioLength: true },
+    });
+    const format: ReadingFormat = current?.format ?? "PRINT";
+    let progressEnd: number | null = null;
+    let pageEnd: number;
+    let audioPosition: number | null = null;
+    if (format === "EBOOK") {
+      const pct = Number(input.percentEnd);
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100)
+        fail("Informe a porcentagem do e-book (de 0 a 100).");
+      progressEnd = pct / 100;
+      pageEnd = pageFromFraction(progressEnd, pageCount);
+    } else if (format === "AUDIO") {
+      const pos = parseDuration(input.audioPosition ?? null);
+      if (pos == null || Number.isNaN(pos) || pos < 0)
+        fail("Informe até onde você ouviu (ex.: 2h15 ou 135).");
+      const length = current?.audioLength ?? null;
+      if (length && pos > length)
+        fail("A posição passou da duração do audiolivro.");
+      audioPosition = pos;
+      progressEnd = length ? pos / length : null;
+      pageEnd =
+        progressEnd != null ? pageFromFraction(progressEnd, pageCount) : 0;
+    } else {
+      pageEnd = parsePage(input.pageEnd, pageCount);
+    }
     const minutes = Number(input.minutes);
     if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440)
       fail("Informe quantos minutos você leu (de 1 a 1440).");
@@ -401,6 +448,8 @@ export async function logReadingSession(
           pages: Math.max(0, pageEnd - startPage),
           minutes,
           pageEnd,
+          format,
+          progressEnd,
           note,
         },
       });
@@ -413,10 +462,19 @@ export async function logReadingSession(
       if (!later) {
         await tx.userBook.update({
           where: { id: entry.id },
-          data: { currentPage: pageEnd },
+          data: {
+            currentPage: pageEnd,
+            ...(format === "EBOOK"
+              ? { progressPercent: progressEnd! * 100 }
+              : format === "AUDIO"
+                ? { audioPosition }
+                : {}),
+          },
         });
       }
-      return Boolean(pageCount && pageEnd >= pageCount);
+      return format === "PRINT"
+        ? Boolean(pageCount && pageEnd >= pageCount)
+        : progressEnd != null && progressEnd >= 1;
     });
     revalidate();
     return { reachedEnd };
@@ -426,7 +484,10 @@ export async function logReadingSession(
 export async function updateProgress(
   bookId: string,
   input: {
-    currentPage: number | string;
+    currentPage?: number | string;
+    percent?: number | string;
+    audioPosition?: number | string;
+    audioLength?: number | string | null;
     startedAt?: string | null;
     pageCount?: number | string | null;
   },
@@ -434,7 +495,47 @@ export async function updateProgress(
   return withUser(async (userId) => {
     const book = await ensureBook(bookId);
     const pageCount = await fillPageCount(book, input.pageCount);
-    const currentPage = parsePage(input.currentPage, pageCount);
+    const current = await db.userBook.findUnique({
+      where: { userId_bookId: { userId, bookId } },
+      select: { format: true, audioLength: true },
+    });
+    const format: ReadingFormat = current?.format ?? "PRINT";
+    const progress: {
+      currentPage: number;
+      progressPercent?: number;
+      audioPosition?: number;
+      audioLength?: number | null;
+    } = { currentPage: 0 };
+    if (format === "EBOOK") {
+      const pct = Number(input.percent);
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100)
+        fail("Informe a porcentagem do e-book (de 0 a 100).");
+      progress.progressPercent = pct;
+      progress.currentPage = pageFromFraction(pct / 100, pageCount);
+    } else if (format === "AUDIO") {
+      const pos = parseDuration(input.audioPosition ?? null);
+      if (pos == null || Number.isNaN(pos) || pos < 0)
+        fail("Informe até onde você ouviu (ex.: 2h15 ou 135).");
+      let length = current?.audioLength ?? null;
+      if (input.audioLength !== undefined) {
+        const parsed = parseDuration(input.audioLength);
+        if (
+          parsed !== null &&
+          (Number.isNaN(parsed) || parsed < 1 || parsed > 6000)
+        )
+          fail("Informe a duração do audiolivro (ex.: 9h30).");
+        length = parsed;
+      }
+      if (length && pos > length)
+        fail("A posição passou da duração do audiolivro.");
+      progress.audioPosition = pos;
+      progress.audioLength = length;
+      progress.currentPage = length
+        ? pageFromFraction(pos / length, pageCount)
+        : 0;
+    } else {
+      progress.currentPage = parsePage(input.currentPage, pageCount);
+    }
     const start = parsePartial(input.startedAt, "a data de início");
     await db.$transaction(async (tx) => {
       const entry = await shelfEntry(tx, userId, bookId);
@@ -457,7 +558,50 @@ export async function updateProgress(
       });
       await tx.userBook.update({
         where: { id: entry.id },
-        data: { currentPage },
+        data: progress,
+      });
+    });
+    revalidate();
+  });
+}
+
+export async function setReadingFormat(
+  bookId: string,
+  format: ReadingFormat,
+  input: { audioLength?: number | string | null } = {},
+) {
+  return withUser(async (userId) => {
+    if (!["PRINT", "EBOOK", "AUDIO"].includes(format))
+      fail("Formato inválido.");
+    const book = await ensureBook(bookId);
+    let audioLength: number | null | undefined;
+    if (input.audioLength !== undefined) {
+      const parsed = parseDuration(input.audioLength);
+      if (
+        parsed !== null &&
+        (Number.isNaN(parsed) || parsed < 1 || parsed > 6000)
+      )
+        fail("Informe a duração do audiolivro (ex.: 9h30).");
+      audioLength = parsed;
+    }
+    await db.$transaction(async (tx) => {
+      const entry = await shelfEntry(tx, userId, bookId);
+      if (entry.format === format && audioLength === undefined) return;
+      const fraction = fractionOf(entry, book.pageCount ?? null) ?? 0;
+      const length =
+        audioLength !== undefined ? audioLength : entry.audioLength;
+      await tx.userBook.update({
+        where: { id: entry.id },
+        data: {
+          format,
+          audioLength: length,
+          ...(format === "EBOOK"
+            ? { progressPercent: Math.round(fraction * 1000) / 10 }
+            : {}),
+          ...(format === "AUDIO"
+            ? { audioPosition: length ? Math.round(fraction * length) : 0 }
+            : {}),
+        },
       });
     });
     revalidate();

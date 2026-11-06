@@ -7,7 +7,7 @@ import { todayISO } from "@/lib/dates";
 import Onboarding from "./onboarding";
 
 const card =
-  "bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-5 sm:p-6";
+  "bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-5 sm:p-6";
 const eyebrow =
   "font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4)";
 const linkCls =
@@ -48,7 +48,7 @@ export default function Dashboard({ data }: { data: Data }) {
           </Link>
           <Link
             href={`/u/${user.handle}`}
-            className="h-10 px-4 rounded-[10px] border border-[rgba(67,62,18,0.2)] text-(--ink-2) text-[13px] font-medium inline-flex items-center hover:bg-(--yellow-soft)"
+            className="h-10 px-4 rounded-[10px] border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) text-[13px] font-medium inline-flex items-center hover:bg-(--yellow-soft)"
           >
             Meu perfil
           </Link>
@@ -94,7 +94,7 @@ export default function Dashboard({ data }: { data: Data }) {
                   <Link
                     key={r.book.id}
                     href={`/book/${r.book.id}`}
-                    className="group bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
+                    className="group bg-(--cream) border border-[rgba(var(--ink-rgb),0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
                   >
                     <BookCover
                       book={r.book}
@@ -111,16 +111,14 @@ export default function Dashboard({ data }: { data: Data }) {
                       <div className="mt-auto pt-2.5">
                         <div className="flex items-baseline justify-between gap-2">
                           <span className="text-[18px] font-extrabold tracking-[-0.02em] text-(--ink) tabular-nums">
-                            {r.total ? `${r.progress}%` : `p. ${r.page}`}
+                            {r.big}
                           </span>
                           <span className="font-mono text-[10px] text-(--ink-4)">
-                            {r.total
-                              ? `${r.page}/${r.total}`
-                              : "sem nº de páginas"}
+                            {r.short}
                           </span>
                         </div>
-                        {r.total > 0 && (
-                          <div className="mt-1 h-1.5 bg-[rgba(67,62,18,0.1)] rounded-full overflow-hidden">
+                        {r.known && (
+                          <div className="mt-1 h-1.5 bg-[rgba(var(--ink-rgb),0.1)] rounded-full overflow-hidden">
                             <div
                               className="h-full bg-(--ink-2) rounded-full"
                               style={{ width: r.progress + "%" }}

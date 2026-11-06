@@ -8,7 +8,9 @@ export const POST = apiRoute<{ bookId: string }>(
     await act(userId, () =>
       logReadingSession(bookId, {
         date: str(b, "date", true)!,
-        pageEnd: num(b, "pageEnd", true)!,
+        pageEnd: num(b, "pageEnd"),
+        percentEnd: num(b, "percentEnd"),
+        audioPosition: num(b, "audioPosition"),
         minutes: num(b, "minutes", true)!,
         note: str(b, "note"),
         pageCount: num(b, "pageCount") ?? null,

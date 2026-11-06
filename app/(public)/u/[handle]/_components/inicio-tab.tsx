@@ -196,7 +196,7 @@ function ShelfCard({
             <span className="text-[13px] text-(--ink-3) group-hover:text-(--ink-2)">
               {r.label}
             </span>
-            <span className="h-1.5 rounded-full bg-[rgba(67,62,18,0.07)] overflow-hidden">
+            <span className="h-1.5 rounded-full bg-[rgba(var(--ink-rgb),0.07)] overflow-hidden">
               <span
                 className="block h-full rounded-full bg-(--ink-2)"
                 style={{ width: `${(shelf[r.id] / max) * 100}%` }}
@@ -255,7 +255,7 @@ function ActivityCard({
         <Link
           href={`/u/${handle}?tab=inicio&historico=${page + 1}`}
           scroll={false}
-          className="mt-4 self-start inline-flex h-9 items-center px-4 rounded-[10px] border border-[rgba(67,62,18,0.18)] text-[13px] font-medium text-(--ink-2) hover:bg-(--yellow-soft)"
+          className="mt-4 self-start inline-flex h-9 items-center px-4 rounded-[10px] border border-[rgba(var(--ink-rgb),0.18)] text-[13px] font-medium text-(--ink-2) hover:bg-(--yellow-soft)"
         >
           Carregar mais
         </Link>
@@ -297,7 +297,7 @@ export default function InicioTab({
 
   if (!isOwner && !Object.values(show).some(Boolean) && !showGoal)
     return (
-      <div className="rounded-[18px] border border-dashed border-[rgba(67,62,18,0.2)] py-16 px-6 text-center">
+      <div className="rounded-[18px] border border-dashed border-[rgba(var(--ink-rgb),0.2)] py-16 px-6 text-center">
         <div className="text-[34px] leading-none" aria-hidden>
           ⚓
         </div>
@@ -333,7 +333,7 @@ export default function InicioTab({
                 {Array.from({ length: 5 }, (_, i) => (
                   <div
                     key={i}
-                    className="aspect-2/3 rounded border border-dashed border-[rgba(67,62,18,0.18)] flex items-center justify-center font-mono text-[11px] text-(--ink-5)"
+                    className="aspect-2/3 rounded border border-dashed border-[rgba(var(--ink-rgb),0.18)] flex items-center justify-center font-mono text-[11px] text-(--ink-5)"
                   >
                     0{i + 1}
                   </div>
@@ -400,7 +400,7 @@ export default function InicioTab({
                 {data.readingNow.map((r) => (
                   <Link
                     href={`/book/${r.book.id}`}
-                    className="bg-(--cream) border border-[rgba(67,62,18,0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
+                    className="bg-(--cream) border border-[rgba(var(--ink-rgb),0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
                     key={r.book.id}
                   >
                     <BookCover
@@ -418,16 +418,14 @@ export default function InicioTab({
                       <div className="mt-auto pt-2.5">
                         <div className="flex items-baseline justify-between gap-2">
                           <span className="text-[18px] font-extrabold tracking-[-0.02em] text-(--ink) tabular-nums">
-                            {r.total ? `${r.progress}%` : `p. ${r.page}`}
+                            {r.big}
                           </span>
                           <span className="font-mono text-[10px] text-(--ink-4) tracking-[0.04em]">
-                            {r.total
-                              ? `${r.page}/${r.total}`
-                              : "sem nº de páginas"}
+                            {r.short}
                           </span>
                         </div>
-                        {r.total > 0 && (
-                          <div className="mt-1 h-1.5 bg-[rgba(67,62,18,0.1)] rounded-full overflow-hidden">
+                        {r.known && (
+                          <div className="mt-1 h-1.5 bg-[rgba(var(--ink-rgb),0.1)] rounded-full overflow-hidden">
                             <div
                               className="h-full bg-(--ink-2) rounded-full"
                               style={{ width: r.progress + "%" }}

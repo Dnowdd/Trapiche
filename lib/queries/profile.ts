@@ -22,6 +22,7 @@ import { finishedCount } from "./stats";
 import { byLine } from "./lists";
 import { privacySelect, profileAccess, type Section } from "../privacy";
 import { countProfileQuotes } from "./quotes";
+import { progressOf } from "../progress";
 import type {
   DatePrecision,
   Prisma,
@@ -213,31 +214,32 @@ export async function getReadingNow(userId: string) {
   return rows.map((r) => {
     const reading = readings.find((x) => x.bookId === r.bookId);
     const total = r.book.pageCount ?? 0;
+    const prog = progressOf(r, r.book.pageCount);
     const started = reading?.startedAt ?? null;
     const elapsed = started
       ? Math.max(1, daysBetween(started, today()) + 1)
       : 0;
-    const pace = elapsed ? r.currentPage / elapsed : 0;
+    const pace = elapsed && prog.fraction ? prog.fraction / elapsed : 0;
     return {
       book: toCover(r.book),
       currentPage: r.currentPage,
       pageCount: r.book.pageCount,
-      progress: total
-        ? Math.min(100, Math.round((r.currentPage / total) * 100))
-        : 0,
+      format: r.format,
+      progressPercent: r.progressPercent,
+      audioPosition: r.audioPosition,
+      audioLength: r.audioLength,
+      progress: prog.percent ?? 0,
+      known: prog.percent != null,
+      big: prog.big,
+      short: prog.short,
       page: r.currentPage,
       total,
       started: reading
         ? fmtPartial(reading.startedAt, reading.startPrecision)
         : null,
       expected:
-        total && pace > 0
-          ? fmtExpected(
-              addDays(
-                today(),
-                Math.ceil(Math.max(0, total - r.currentPage) / pace),
-              ),
-            )
+        pace > 0 && prog.fraction != null
+          ? fmtExpected(addDays(today(), Math.ceil((1 - prog.fraction) / pace)))
           : "sem previsão",
     };
   });
@@ -335,7 +337,7 @@ function shelfDate(
 }
 
 export async function getEstante(userId: string, isOwner: boolean) {
-  const [rows, readings] = await Promise.all([
+  const [rows, readings, reviews] = await Promise.all([
     db.userBook.findMany({
       where: { userId, status: { not: null } },
       orderBy: { statusChangedAt: "desc" },
@@ -360,9 +362,18 @@ export async function getEstante(userId: string, isOwner: boolean) {
         endPage: true,
       },
     }),
+    db.review.findMany({
+      where: { userId, ...(isOwner ? {} : { hiddenAt: null }) },
+      select: { bookId: true, rating: true },
+    }),
   ]);
+  const ratings = new Map(reviews.map((r) => [r.bookId, r.rating]));
   return rows.map((r) => {
     const mine = readings.filter((x) => x.bookId === r.bookId);
+    const lastFinish = mine
+      .filter((x) => x.status === "FINISHED" && x.endedAt)
+      .map((x) => x.endedAt!.getTime())
+      .sort((a, b) => b - a)[0];
     const reads = mine.filter((x) => x.status !== "ABANDONED").length;
     const total = r.book.pageCount ?? 0;
     let abandoned = null;
@@ -383,11 +394,15 @@ export async function getEstante(userId: string, isOwner: boolean) {
       book: toCover(r.book),
       status: r.status!,
       tags: r.tags.map((t) => t.tagId),
+      addedAt: r.createdAt.getTime(),
+      changedAt: (r.statusChangedAt ?? r.createdAt).getTime(),
+      finishedAt: lastFinish ?? null,
+      rating: ratings.get(r.bookId) ?? null,
       date: shelfDate(r.status!, mine),
       reads,
       progress:
-        total && (r.status === "READING" || r.status === "REREADING")
-          ? Math.min(100, Math.round((r.currentPage / total) * 100))
+        r.status === "READING" || r.status === "REREADING"
+          ? progressOf(r, r.book.pageCount).percent
           : null,
       abandoned,
     };
@@ -513,6 +528,7 @@ export async function getDiario(userId: string, entriesLimit: number) {
       book: toCover(e.book),
       pages: e.pages,
       minutes: e.minutes,
+      format: e.format,
       note: e.note,
     })),
     entriesTotal,

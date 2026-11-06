@@ -134,12 +134,17 @@ const WRITES: { method: string; path: string; body: string }[] = [
   {
     method: "POST",
     path: "/shelf/{bookId}/sessions",
-    body: "date (AAAA-MM-DD), pageEnd, minutes; note e pageCount opcionais.",
+    body: "date (AAAA-MM-DD), minutes e, conforme o formato: pageEnd (físico), percentEnd (e-book) ou audioPosition em minutos (audiolivro). note e pageCount opcionais.",
   },
   {
     method: "PUT",
     path: "/shelf/{bookId}/progress",
-    body: "currentPage; startedAt e pageCount opcionais.",
+    body: "currentPage (físico), percent (e-book) ou audioPosition e audioLength em minutos (audiolivro); startedAt e pageCount opcionais.",
+  },
+  {
+    method: "PUT",
+    path: "/shelf/{bookId}/format",
+    body: "format: PRINT, EBOOK ou AUDIO; audioLength (minutos) opcional. O progresso é convertido.",
   },
   {
     method: "PUT",
@@ -247,7 +252,7 @@ function Code({ children, copy }: { children: string; copy?: boolean }) {
 const h2 = "m-0 mt-10 mb-3 text-[18px] font-bold text-(--ink)";
 const p = "m-0 mb-3 text-[14px] text-(--ink-3) leading-[1.6]";
 const inline =
-  "font-mono text-[12.5px] bg-[rgba(67,62,18,0.07)] text-(--ink-2) px-1.5 py-0.5 rounded";
+  "font-mono text-[12.5px] bg-[rgba(var(--ink-rgb),0.07)] text-(--ink-2) px-1.5 py-0.5 rounded";
 
 export default function ApiDocs() {
   const base = appUrl("/api/v1");
@@ -280,7 +285,7 @@ export default function ApiDocs() {
         {ENDPOINTS.map((e) => (
           <div
             key={e.path}
-            className="rounded-[14px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) p-4 sm:p-5"
+            className="rounded-[14px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) p-4 sm:p-5"
           >
             <div className="flex items-center gap-2.5 flex-wrap">
               <span className="font-mono text-[10.5px] font-bold bg-(--ink-2) text-(--yellow) px-2 py-0.5 rounded">
@@ -326,7 +331,7 @@ export default function ApiDocs() {
   -H "Authorization: Bearer trp_live_SUA_CHAVE" \\
   -H "Content-Type: application/json" \\
   -d '{"status":"READING"}'`}</Code>
-      <div className="mt-3 rounded-[14px] border border-[rgba(67,62,18,0.1)] bg-(--cream-card) divide-y divide-(--rule)">
+      <div className="mt-3 rounded-[14px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) divide-y divide-(--rule)">
         {WRITES.map((w) => (
           <div
             key={`${w.method} ${w.path}`}
