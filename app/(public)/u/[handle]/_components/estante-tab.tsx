@@ -12,6 +12,45 @@ import type { getUserTags } from "@/lib/queries/tags";
 import TagChip from "@/components/tags/tag-chip";
 import ManageTags from "@/components/tags/manage-tags";
 import { cn } from "@/lib/utils";
+import { normalize } from "@/lib/editions";
+import { Search, X } from "lucide-react";
+
+const SORTS = {
+  recent: {
+    label: "Mudança mais recente",
+    by: (a: Item, b: Item) => b.changedAt - a.changedAt,
+  },
+  added: {
+    label: "Adicionados por último",
+    by: (a: Item, b: Item) => b.addedAt - a.addedAt,
+  },
+  finished: {
+    label: "Terminados por último",
+    by: (a: Item, b: Item) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0),
+  },
+  rating: {
+    label: "Maior nota",
+    by: (a: Item, b: Item) => (b.rating ?? -1) - (a.rating ?? -1),
+  },
+  title: {
+    label: "Título (A–Z)",
+    by: (a: Item, b: Item) => a.book.title.localeCompare(b.book.title, "pt-BR"),
+  },
+  author: {
+    label: "Autor (A–Z)",
+    by: (a: Item, b: Item) =>
+      a.book.author.localeCompare(b.book.author, "pt-BR"),
+  },
+} as const;
+type SortId = keyof typeof SORTS;
+
+const STATUS_SHORT: Record<string, string> = {
+  READ: "Lido",
+  READING: "Lendo",
+  WANT: "Quero ler",
+  REREADING: "Relendo",
+  ABANDONED: "Abandonado",
+};
 
 type Tags = Awaited<ReturnType<typeof getUserTags>>;
 
@@ -69,9 +108,10 @@ function BackToPile({ bookId }: { bookId: string }) {
   );
 }
 
-function CoverTile({ it }: { it: Item }) {
-  const badge =
-    it.status === "REREADING"
+function CoverTile({ it, withStatus }: { it: Item; withStatus?: boolean }) {
+  const badge = withStatus
+    ? STATUS_SHORT[it.status]
+    : it.status === "REREADING"
       ? `${Math.max(2, it.reads)}ª leitura`
       : it.status === "READ" && it.reads > 1
         ? `lido ${it.reads}×`
@@ -123,7 +163,7 @@ function CoverTile({ it }: { it: Item }) {
 function AbandonedRow({ it, isOwner }: { it: Item; isOwner: boolean }) {
   const a = it.abandoned!;
   return (
-    <article className="bg-(--cream-card) border border-[rgba(67,62,18,0.07)] rounded-[18px] p-4 sm:py-5 sm:px-6 grid grid-cols-[56px_1fr] sm:grid-cols-[72px_1fr_auto] gap-4 sm:gap-6 items-center">
+    <article className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-4 sm:py-5 sm:px-6 grid grid-cols-[56px_1fr] sm:grid-cols-[72px_1fr_auto] gap-4 sm:gap-6 items-center">
       <Link href={`/book/${it.book.id}`}>
         <BookCover
           book={it.book}
@@ -143,7 +183,7 @@ function AbandonedRow({ it, isOwner }: { it: Item; isOwner: boolean }) {
           {it.book.author}
         </div>
         <div className="mt-3 flex items-center gap-2.5 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] [&_strong]:text-(--ink-2)">
-          <div className="flex-1 max-w-60 h-1.25 rounded-[3px] bg-[rgba(67,62,18,0.1)] overflow-hidden">
+          <div className="flex-1 max-w-60 h-1.25 rounded-[3px] bg-[rgba(var(--ink-rgb),0.1)] overflow-hidden">
             <div
               className="h-full bg-(--ink-3) rounded-[3px]"
               style={{ width: a.percent + "%" }}
@@ -179,7 +219,7 @@ function AbandonedRow({ it, isOwner }: { it: Item; isOwner: boolean }) {
             </span>
           )
         ) : (
-          <span className="font-mono text-[10px] py-0.75 px-2 rounded bg-[rgba(67,62,18,0.06)] text-(--ink-4) tracking-[0.04em] uppercase">
+          <span className="font-mono text-[10px] py-0.75 px-2 rounded bg-[rgba(var(--ink-rgb),0.06)] text-(--ink-4) tracking-[0.04em] uppercase">
             sem planos de voltar
           </span>
         )}
@@ -215,9 +255,18 @@ export default function EstanteTab({
   const [filter, setFilter] = useState<Status>(
     FILTERS.some((f) => f.id === initial) ? (initial as Status) : fallback,
   );
-  const shown = activeTag
-    ? items.filter((i) => i.tags.includes(activeTag.id))
-    : items.filter((i) => i.status === filter);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortId>("recent");
+  const term = normalize(query.trim());
+  const searching = term.length > 0;
+  const base = searching
+    ? items.filter((i) =>
+        normalize(`${i.book.title} ${i.book.author}`).includes(term),
+      )
+    : activeTag
+      ? items.filter((i) => i.tags.includes(activeTag.id))
+      : items.filter((i) => i.status === filter);
+  const shown = [...base].sort(SORTS[sort].by);
 
   const sync = (status: string, tagId: string | null) =>
     window.history.replaceState(
@@ -239,7 +288,62 @@ export default function EstanteTab({
 
   return (
     <>
-      {(visibleTags.length > 0 || isOwner) && (
+      {items.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-2.5 mb-4">
+          <label className="relative flex-1">
+            <span className="sr-only">Buscar na estante</span>
+            <Search
+              size={15}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-(--ink-4) pointer-events-none"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={`Buscar entre ${items.length} ${items.length === 1 ? "livro" : "livros"} por título ou autor`}
+              className="w-full h-10 rounded-[10px] border-[1.5px] border-[rgba(var(--ink-rgb),0.14)] bg-(--cream-card) pl-10 pr-9 text-[13.5px] text-(--ink-2) outline-none focus:border-(--ink-3) placeholder:text-(--ink-4) [&::-webkit-search-cancel-button]:hidden"
+            />
+            {query && (
+              <button
+                type="button"
+                aria-label="Limpar busca"
+                onClick={() => setQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 size-6 rounded-full flex items-center justify-center text-(--ink-4) hover:text-(--ink-2) cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </label>
+          <label className="relative sm:w-60">
+            <span className="sr-only">Ordenar</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortId)}
+              className="w-full h-10 appearance-none rounded-[10px] border-[1.5px] border-[rgba(var(--ink-rgb),0.14)] bg-(--cream-card) px-3.5 pr-9 text-[13px] text-(--ink-2) outline-none focus:border-(--ink-3) cursor-pointer"
+            >
+              {(Object.keys(SORTS) as SortId[]).map((id) => (
+                <option key={id} value={id}>
+                  {SORTS[id].label}
+                </option>
+              ))}
+            </select>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-(--ink-4) pointer-events-none"
+              aria-hidden
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </label>
+        </div>
+      )}
+      {!searching && (visibleTags.length > 0 || isOwner) && (
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-(--ink-4) mr-1">
             Tags
@@ -272,7 +376,12 @@ export default function EstanteTab({
           {isOwner && <ManageTags tags={tags} />}
         </div>
       )}
-      {activeTag ? (
+      {searching ? (
+        <div className="mb-[22px] text-[13px] text-(--ink-3)">
+          {shown.length} {shown.length === 1 ? "resultado" : "resultados"} em
+          toda a estante
+        </div>
+      ) : activeTag ? (
         <div className="mb-[22px] flex items-center gap-3 text-[13px] text-(--ink-3)">
           <span>
             {shown.length} {shown.length === 1 ? "livro" : "livros"} com a tag{" "}
@@ -298,12 +407,14 @@ export default function EstanteTab({
         />
       )}
       {shown.length === 0 ? (
-        <div className="rounded-[18px] border border-dashed border-[rgba(67,62,18,0.18)] py-14 px-6 text-center text-[14px] text-(--ink-4)">
-          {activeTag
-            ? "Nenhum livro da estante com essa tag."
-            : EMPTY[filter][isOwner ? "owner" : "visitor"]}
+        <div className="rounded-[18px] border border-dashed border-[rgba(var(--ink-rgb),0.18)] py-14 px-6 text-center text-[14px] text-(--ink-4)">
+          {searching
+            ? `Nada na estante com “${query.trim()}”.`
+            : activeTag
+              ? "Nenhum livro da estante com essa tag."
+              : EMPTY[filter][isOwner ? "owner" : "visitor"]}
         </div>
-      ) : !activeTag && filter === "ABANDONED" ? (
+      ) : !searching && !activeTag && filter === "ABANDONED" ? (
         <div className="flex flex-col gap-3.5">
           {shown.map((it) => (
             <AbandonedRow key={it.book.id} it={it} isOwner={isOwner} />
@@ -312,7 +423,7 @@ export default function EstanteTab({
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4.5 gap-y-6 sm:gap-y-7">
           {shown.map((it) => (
-            <CoverTile key={it.book.id} it={it} />
+            <CoverTile key={it.book.id} it={it} withStatus={searching} />
           ))}
         </div>
       )}
