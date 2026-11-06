@@ -23,10 +23,42 @@ const detectorCtor = () =>
 function useScannerSupport() {
   return useSyncExternalStore(
     () => () => {},
-    () =>
-      Boolean(detectorCtor()) && Boolean(navigator.mediaDevices?.getUserMedia),
+    () => Boolean(navigator.mediaDevices?.getUserMedia),
     () => false,
   );
+}
+
+type Decode = (video: HTMLVideoElement) => Promise<string[]>;
+
+async function zxingDecoder(): Promise<Decode> {
+  const [{ BrowserMultiFormatReader }, { BarcodeFormat, DecodeHintType }] =
+    await Promise.all([import("@zxing/browser"), import("@zxing/library")]);
+  const hints = new Map<number, unknown>([
+    [DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.EAN_13]],
+    [DecodeHintType.TRY_HARDER, true],
+  ]);
+  const reader = new BrowserMultiFormatReader(hints);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  return async (video) => {
+    if (!ctx || !video.videoWidth) return [];
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    try {
+      return [reader.decodeFromCanvas(canvas).getText()];
+    } catch {
+      return [];
+    }
+  };
+}
+
+async function makeDecoder(): Promise<Decode> {
+  const Ctor = detectorCtor();
+  if (!Ctor) return zxingDecoder();
+  const detector = new Ctor({ formats: ["ean_13"] });
+  return async (video) =>
+    (await detector.detect(video).catch(() => [])).map((c) => c.rawValue);
 }
 
 const isIsbn = (v: string) => /^97[89]\d{10}$/.test(v);
@@ -61,43 +93,43 @@ function Scanner({ onClose }: { onClose: () => void }) {
     let stream: MediaStream | null = null;
     let frame = 0;
     let stopped = false;
-    const Ctor = detectorCtor();
-    if (!Ctor) return;
-    const detector = new Ctor({ formats: ["ean_13"] });
 
-    const tick = async () => {
-      if (stopped || !video.current) return;
-      const codes = await detector.detect(video.current).catch(() => []);
-      const hit = codes.map((c) => c.rawValue).find(isIsbn);
-      if (hit) {
-        stopped = true;
-        void resolve(hit);
-        return;
-      }
-      frame = window.setTimeout(tick, 180);
+    const start = async () => {
+      const [decode, media] = await Promise.all([
+        makeDecoder(),
+        navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false,
+        }),
+      ]);
+      if (stopped) return media.getTracks().forEach((t) => t.stop());
+      stream = media;
+      const el = video.current;
+      if (!el) return;
+      el.srcObject = media;
+      await el.play().catch(() => null);
+      setStatus("scanning");
+      const tick = async () => {
+        if (stopped) return;
+        const code = (await decode(el)).find(isIsbn);
+        if (code && !stopped) {
+          stopped = true;
+          void resolve(code);
+          return;
+        }
+        frame = window.setTimeout(tick, 200);
+      };
+      void tick();
     };
 
-    navigator.mediaDevices
-      .getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
-        audio: false,
-      })
-      .then(async (s) => {
-        if (stopped) return s.getTracks().forEach((t) => t.stop());
-        stream = s;
-        if (!video.current) return;
-        video.current.srcObject = s;
-        await video.current.play();
-        setStatus("scanning");
-        tick();
-      })
-      .catch((err: unknown) =>
-        setStatus(
-          err instanceof DOMException && err.name === "NotAllowedError"
-            ? "denied"
-            : "error",
-        ),
+    start().catch((err: unknown) => {
+      if (stopped) return;
+      setStatus(
+        err instanceof DOMException && err.name === "NotAllowedError"
+          ? "denied"
+          : "error",
       );
+    });
 
     return () => {
       stopped = true;
