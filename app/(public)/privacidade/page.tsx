@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <LegalPage
       eyebrow="Trapiche"
       title="Política de Privacidade"
-      updated="6 de novembro de 2026"
+      updated="7 de novembro de 2026"
     >
       <p>
         Esta página explica, em linguagem simples, quais dados o Trapiche
@@ -83,8 +83,9 @@ export default function PrivacyPage() {
         </li>
         <li>
           <strong>Legítimo interesse</strong> (art. 7º, IX): segurança da conta,
-          limite de tentativas contra abuso, moderação de denúncias e
-          monitoramento de erros para manter o site funcionando.
+          limite de tentativas contra abuso, moderação de denúncias,
+          monitoramento de erros e medição agregada de uso e velocidade para
+          manter o site funcionando.
         </li>
         <li>
           <strong>Consentimento</strong> (art. 7º, I): e-mails opcionais (resumo
@@ -116,6 +117,9 @@ export default function PrivacyPage() {
       <ul>
         <li>
           <strong>Vercel:</strong> hospeda o site e processa as requisições.
+          Também mede visitas e velocidade das páginas (Vercel Web Analytics e
+          Speed Insights), de forma agregada, sem cookies e sem identificar
+          você.
         </li>
         <li>
           <strong>Neon:</strong> hospeda o banco de dados, inclusive fotos e
