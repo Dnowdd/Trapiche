@@ -179,7 +179,7 @@ function ShelfCard({
   shelf,
   handle,
 }: {
-  shelf: ProfileData["shelf"];
+  shelf: NonNullable<ProfileData["shelf"]>;
   handle: string;
 }) {
   const max = Math.max(1, ...Object.values(shelf));
@@ -271,11 +271,13 @@ export default function InicioTab({
   handle,
   isOwner,
   page,
+  sections,
   openGoal = false,
 }: {
   data: Data;
   goal: GoalData | null;
-  shelf: ProfileData["shelf"];
+  sections: ProfileData["access"]["sections"];
+  shelf: NonNullable<ProfileData["shelf"]>;
   handle: string;
   isOwner: boolean;
   page: number;
@@ -283,13 +285,14 @@ export default function InicioTab({
 }) {
   if (page > 0) return <ActivityCard data={data} handle={handle} page={page} />;
 
-  const showGoal = goal && (isOwner || goal.target != null || goal.done > 0);
+  const showGoal =
+    sections.goal && goal && (isOwner || goal.target != null || goal.done > 0);
   const shelfTotal = Object.values(shelf).reduce((a, n) => a + n, 0);
   const show = {
     favorites: isOwner || data.favorites.length > 0,
-    reading: isOwner || data.readingNow.length > 0,
-    activity: isOwner || data.activity.length > 0,
-    shelf: shelfTotal > 0,
+    reading: sections.shelf && (isOwner || data.readingNow.length > 0),
+    activity: sections.activity && (isOwner || data.activity.length > 0),
+    shelf: sections.shelf && shelfTotal > 0,
   };
 
   if (!isOwner && !Object.values(show).some(Boolean) && !showGoal)

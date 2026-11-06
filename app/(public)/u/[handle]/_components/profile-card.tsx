@@ -7,6 +7,7 @@ import Avatar from "@/components/shared/avatar";
 import type { ProfileData } from "@/lib/queries/profile";
 import EditProfileModal from "./edit-profile-modal";
 import AvatarEditor from "./avatar-editor";
+import { VISIBILITY_LABEL } from "@/lib/privacy";
 
 const avatarCls = "max-sm:size-20! max-sm:text-[28px]!";
 
@@ -15,13 +16,24 @@ const btn =
 
 export default function ProfileCard({
   profile,
-  autoEdit = false,
+  autoEdit,
+  preview = false,
 }: {
   profile: ProfileData;
-  autoEdit?: boolean;
+  autoEdit?: string;
+  preview?: boolean;
 }) {
-  const [editing, setEditing] = useState(autoEdit);
+  const [editing, setEditing] = useState<
+    false | "perfil" | "privacidade" | "emails" | "conta"
+  >(
+    autoEdit === "privacidade" || autoEdit === "emails" || autoEdit === "conta"
+      ? autoEdit
+      : autoEdit
+        ? "perfil"
+        : false,
+  );
   const u = profile.user;
+  const owner = profile.isOwner && !preview;
 
   return (
     <section
@@ -34,7 +46,7 @@ export default function ProfileCard({
       />
       <div className="relative flex flex-col md:flex-row md:items-end gap-6 md:gap-10 justify-between">
         <div className="flex gap-5 sm:gap-7 items-start sm:items-center min-w-0">
-          {profile.isOwner ? (
+          {owner ? (
             <AvatarEditor
               name={u.name}
               image={u.image}
@@ -63,16 +75,26 @@ export default function ProfileCard({
               )}
               <span className="text-(--ink-5)">·</span>
               <span>no Trapiche desde {u.joined}</span>
+              {owner && profile.privacy && (
+                <button
+                  type="button"
+                  onClick={() => setEditing("privacidade")}
+                  className="ml-1 inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-[rgba(67,62,18,0.07)] text-(--ink-3) hover:bg-(--yellow-soft) hover:text-(--ink-2) cursor-pointer tracking-[0.04em] normal-case"
+                >
+                  <VisibilityIcon visibility={profile.visibility} />
+                  {VISIBILITY_LABEL[profile.visibility]}
+                </button>
+              )}
             </div>
             {u.bio ? (
               <p className="m-0 mt-3 text-[14px] text-(--ink-3) leading-[1.55] max-w-130 whitespace-pre-line">
                 {u.bio}
               </p>
             ) : (
-              profile.isOwner && (
+              owner && (
                 <button
                   type="button"
-                  onClick={() => setEditing(true)}
+                  onClick={() => setEditing("perfil")}
                   className="mt-3 text-[13px] text-(--ink-4) hover:text-(--ink-2) cursor-pointer border-b border-dashed border-(--ink-5) pb-px"
                 >
                   + Escrever uma bio
@@ -82,20 +104,30 @@ export default function ProfileCard({
           </div>
         </div>
         <div className="flex flex-wrap gap-2 shrink-0">
-          {profile.isOwner && (
+          {owner && (
             <button
               className={`${btn} bg-(--ink-2) text-(--cream) hover:bg-(--ink)`}
-              onClick={() => setEditing(true)}
+              onClick={() => setEditing("perfil")}
             >
               Editar perfil
             </button>
           )}
-          <Link
-            href={`/u/${u.handle}/retrospectiva`}
-            className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
-          >
-            Retrospectiva
-          </Link>
+          {owner && (
+            <Link
+              href={`/u/${u.handle}?visitante=1`}
+              className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+            >
+              Ver como visitante
+            </Link>
+          )}
+          {profile.access.sections.diary && (
+            <Link
+              href={`/u/${u.handle}/retrospectiva`}
+              className={`${btn} border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
+            >
+              Retrospectiva
+            </Link>
+          )}
           <button
             aria-label="Compartilhar perfil"
             className={`${btn} px-2.5 border border-[rgba(67,62,18,0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
@@ -119,31 +151,85 @@ export default function ProfileCard({
         </div>
       </div>
 
-      <div className="relative mt-7 grid grid-cols-3 sm:grid-cols-5 rounded-2xl border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden">
-        {profile.stats.map((s, i) => (
-          <Link
-            href={`/u/${u.handle}?tab=${s.href}`}
-            scroll={false}
-            className={`py-3.5 px-4 sm:py-4 sm:px-5 border-[rgba(67,62,18,0.08)] transition-colors duration-150 hover:bg-(--yellow-soft) ${i > 0 ? "sm:border-l" : ""} ${i % 3 !== 0 ? "max-sm:border-l" : ""} ${i >= 3 ? "max-sm:border-t" : ""}`}
-            key={s.label}
-          >
-            <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.03em] text-(--ink) leading-none tabular-nums">
-              {s.value}
+      <div
+        className={`relative mt-7 grid rounded-2xl border border-[rgba(67,62,18,0.1)] bg-(--cream-card) overflow-hidden ${profile.stats.length === 5 ? "grid-cols-3 sm:grid-cols-5" : "grid-cols-2"}`}
+      >
+        {profile.stats.map((s, i) => {
+          const cls = `py-3.5 px-4 sm:py-4 sm:px-5 border-[rgba(67,62,18,0.08)] ${i > 0 ? "sm:border-l" : ""} ${profile.stats.length === 5 ? `${i % 3 !== 0 ? "max-sm:border-l" : ""} ${i >= 3 ? "max-sm:border-t" : ""}` : i > 0 ? "max-sm:border-l" : ""}`;
+          const body = (
+            <>
+              <div className="text-[24px] sm:text-[28px] font-extrabold tracking-[-0.03em] text-(--ink) leading-none tabular-nums">
+                {s.value}
+              </div>
+              <div className="mt-1.5 font-mono text-[9.5px] sm:text-[10px] uppercase tracking-[0.08em] text-(--ink-4) leading-tight">
+                {s.label}
+              </div>
+            </>
+          );
+          return s.href ? (
+            <Link
+              href={`/u/${u.handle}?tab=${s.href}${preview ? "&visitante=1" : ""}`}
+              scroll={false}
+              className={`${cls} transition-colors duration-150 hover:bg-(--yellow-soft)`}
+              key={s.label}
+            >
+              {body}
+            </Link>
+          ) : (
+            <div className={cls} key={s.label}>
+              {body}
             </div>
-            <div className="mt-1.5 font-mono text-[9.5px] sm:text-[10px] uppercase tracking-[0.08em] text-(--ink-4) leading-tight">
-              {s.label}
-            </div>
-          </Link>
-        ))}
+          );
+        })}
       </div>
 
-      {editing && (
+      {editing && profile.privacy && (
         <EditProfileModal
           open
-          onOpenChange={setEditing}
+          onOpenChange={(open) => !open && setEditing(false)}
+          initialTab={editing}
           user={{ name: u.name, handle: u.handle, bio: u.bio, city: u.city }}
+          privacy={profile.privacy}
         />
       )}
     </section>
+  );
+}
+
+export function VisibilityIcon({
+  visibility,
+}: {
+  visibility: ProfileData["visibility"];
+}) {
+  return (
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {visibility === "PUBLIC" ? (
+        <>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+        </>
+      ) : visibility === "MEMBERS" ? (
+        <>
+          <circle cx="9" cy="8" r="3.5" />
+          <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+          <path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5" />
+        </>
+      ) : (
+        <>
+          <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+          <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
+        </>
+      )}
+    </svg>
   );
 }

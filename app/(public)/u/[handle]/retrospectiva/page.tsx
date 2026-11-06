@@ -6,6 +6,7 @@ import Stars from "@/components/shared/stars";
 import { db } from "@/lib/db";
 import { MONTHS_LONG, today } from "@/lib/dates";
 import { getViewerId } from "@/lib/session";
+import { privacySelect, profileAccess } from "@/lib/privacy";
 import {
   fmtMinutes,
   getRetrospective,
@@ -34,7 +35,7 @@ function parsePeriod(sp: { ano?: string; mes?: string }) {
 const userOf = (handle: string) =>
   db.user.findUnique({
     where: { handle },
-    select: { id: true, name: true, handle: true },
+    select: { id: true, name: true, handle: true, ...privacySelect },
   });
 
 export async function generateMetadata({
@@ -45,12 +46,21 @@ export async function generateMetadata({
   const user = await userOf(handle);
   const period = parsePeriod(sp);
   if (!user || !period) return {};
+  const access = profileAccess(user, false, false);
   const label = period.month
     ? `${MONTHS_LONG[period.month - 1]} de ${period.year}`
     : String(period.year);
   return {
     title: `Retrospectiva ${label} · ${user.name}`,
     description: `O que ${user.name} leu em ${label} no Trapiche.`,
+    alternates: {
+      canonical: retroHref(user.handle, period.year, period.month),
+    },
+    robots:
+      access.indexable && access.sections.diary
+        ? undefined
+        : { index: false, follow: false },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -346,8 +356,9 @@ export default async function RetrospectivePage({
   const user = await userOf(handle);
   const period = parsePeriod(sp);
   if (!user || !period) notFound();
-  const data = await getRetrospective(user.id, period.year, period.month);
   const owner = viewerId === user.id;
+  if (!profileAccess(user, owner, viewerId != null).sections.diary) notFound();
+  const data = await getRetrospective(user.id, period.year, period.month);
   const first = user.name.split(" ")[0];
   const t = data.totals;
   const empty = t.books === 0 && t.pages === 0 && t.minutes === 0;

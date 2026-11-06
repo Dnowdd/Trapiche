@@ -17,6 +17,11 @@ import { deleteAccount, updateProfile } from "@/lib/actions/profile";
 import { signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import AccountSettings from "./account-settings";
+import PrivacySettings from "./privacy-settings";
+import EmailSettings from "./email-settings";
+import type { ProfileData } from "@/lib/queries/profile";
+
+type ModalTab = "perfil" | "privacidade" | "emails" | "conta";
 
 interface Props {
   open: boolean;
@@ -27,15 +32,24 @@ interface Props {
     bio: string | null;
     city: string | null;
   };
+  privacy: NonNullable<ProfileData["privacy"]>;
+  initialTab?: ModalTab;
 }
 
-export default function EditProfileModal({ open, onOpenChange, user }: Props) {
+export default function EditProfileModal({
+  open,
+  onOpenChange,
+  user,
+  privacy,
+  initialTab = "perfil",
+}: Props) {
   const router = useRouter();
   const [name, setName] = useState(user.name);
   const [handle, setHandle] = useState(user.handle);
   const [city, setCity] = useState(user.city ?? "");
   const [bio, setBio] = useState(user.bio ?? "");
-  const [tab, setTab] = useState<"perfil" | "conta">("perfil");
+  const [tab, setTab] = useState<ModalTab>(initialTab);
+  const { inactivityReminder, monthlyDigest, ...privacyInput } = privacy;
   const { pending, error, run } = useAction();
   const removing = useAction();
 
@@ -62,12 +76,14 @@ export default function EditProfileModal({ open, onOpenChange, user }: Props) {
     >
       <div
         role="tablist"
-        className="flex gap-1 p-1 mb-5 rounded-[12px] bg-[rgba(67,62,18,0.06)]"
+        className="flex gap-1 p-1 mb-5 rounded-[12px] bg-[rgba(67,62,18,0.06)] overflow-x-auto [scrollbar-width:none]"
       >
         {(
           [
             ["perfil", "Perfil"],
-            ["conta", "Conta e segurança"],
+            ["privacidade", "Privacidade"],
+            ["emails", "E-mails"],
+            ["conta", "Conta"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -77,7 +93,7 @@ export default function EditProfileModal({ open, onOpenChange, user }: Props) {
             aria-selected={tab === id}
             onClick={() => setTab(id)}
             className={cn(
-              "flex-1 h-9 rounded-[9px] text-[13px] font-semibold cursor-pointer transition-colors duration-120",
+              "flex-1 h-9 px-3 whitespace-nowrap rounded-[9px] text-[13px] font-semibold cursor-pointer transition-colors duration-120",
               tab === id
                 ? "bg-(--cream) text-(--ink) shadow-[0_1px_2px_rgba(67,62,18,0.12)]"
                 : "text-(--ink-4) hover:text-(--ink-2)",
@@ -87,7 +103,18 @@ export default function EditProfileModal({ open, onOpenChange, user }: Props) {
           </button>
         ))}
       </div>
-      {tab === "conta" ? (
+      {tab === "privacidade" ? (
+        <PrivacySettings
+          initial={privacyInput}
+          handle={user.handle}
+          onDone={() => onOpenChange(false)}
+        />
+      ) : tab === "emails" ? (
+        <EmailSettings
+          initial={{ inactivityReminder, monthlyDigest }}
+          onDone={() => onOpenChange(false)}
+        />
+      ) : tab === "conta" ? (
         <AccountSettings />
       ) : (
         <form onSubmit={submit}>

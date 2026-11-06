@@ -87,3 +87,47 @@ export async function removeAvatar() {
     refresh();
   });
 }
+
+const VISIBILITIES = ["PUBLIC", "MEMBERS", "PRIVATE"] as const;
+const PRIVACY_FLAGS = [
+  "searchIndexing",
+  "showShelf",
+  "showDiary",
+  "showActivity",
+  "showLikes",
+  "showGoal",
+  "showCity",
+] as const;
+
+export type PrivacyInput = {
+  profileVisibility: (typeof VISIBILITIES)[number];
+} & Record<(typeof PRIVACY_FLAGS)[number], boolean>;
+
+export async function updatePrivacy(input: PrivacyInput) {
+  return withUser(async (userId) => {
+    if (!VISIBILITIES.includes(input.profileVisibility))
+      fail("Escolha quem pode ver seu perfil.");
+    const data: Partial<PrivacyInput> = {
+      profileVisibility: input.profileVisibility,
+    };
+    for (const flag of PRIVACY_FLAGS) data[flag] = input[flag] === true;
+    await db.user.update({ where: { id: userId }, data });
+    refresh();
+  });
+}
+
+export async function updateEmailPreferences(input: {
+  inactivityReminder: boolean;
+  monthlyDigest: boolean;
+}) {
+  return withUser(async (userId) => {
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        inactivityReminder: input.inactivityReminder === true,
+        monthlyDigest: input.monthlyDigest === true,
+      },
+    });
+    refresh();
+  });
+}

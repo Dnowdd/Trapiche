@@ -6,6 +6,7 @@ const LABELS: Record<Tab, string> = {
   estante: "Estante",
   diario: "Diário",
   avaliacoes: "Avaliações",
+  citacoes: "Citações",
   listas: "Listas",
   curtidas: "Curtidas",
 };
@@ -14,10 +15,14 @@ export default function ProfileTabs({
   handle,
   active,
   counts,
+  tabs,
+  suffix = "",
 }: {
   handle: string;
   active: Tab;
-  counts: ProfileData["counts"];
+  counts: NonNullable<ProfileData["counts"]>;
+  tabs: Tab[];
+  suffix?: string;
 }) {
   return (
     <div className="px-4 sm:px-8 lg:px-15 border-b border-[rgba(67,62,18,0.12)]">
@@ -25,10 +30,10 @@ export default function ProfileTabs({
         className="flex gap-6 sm:gap-8 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="tablist"
       >
-        {(Object.keys(LABELS) as Tab[]).map((t) => (
+        {tabs.map((t) => (
           <Link
             key={t}
-            href={`/u/${handle}?tab=${t}`}
+            href={`/u/${handle}?tab=${t}${suffix}`}
             scroll={false}
             role="tab"
             aria-selected={active === t}

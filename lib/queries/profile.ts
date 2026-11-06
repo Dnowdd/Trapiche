@@ -20,6 +20,8 @@ import {
 import { initialsOf } from "./book";
 import { finishedCount } from "./stats";
 import { byLine } from "./lists";
+import { privacySelect, profileAccess, type Section } from "../privacy";
+import { countProfileQuotes } from "./quotes";
 import type {
   DatePrecision,
   Prisma,
@@ -31,10 +33,17 @@ export const TABS = [
   "estante",
   "diario",
   "avaliacoes",
+  "citacoes",
   "listas",
   "curtidas",
 ] as const;
 export type Tab = (typeof TABS)[number];
+
+export const TAB_SECTION: Partial<Record<Tab, Section>> = {
+  estante: "shelf",
+  diario: "diary",
+  curtidas: "likes",
+};
 
 export const SHELF_LABEL: Record<ShelfStatus, string> = {
   READING: "Lendo",
@@ -76,13 +85,52 @@ export async function getProfile(handle: string, viewerId: string | null) {
       city: true,
       image: true,
       createdAt: true,
+      inactivityReminder: true,
+      monthlyDigest: true,
+      ...privacySelect,
     },
   });
   if (!user) return null;
   const userId = user.id;
+  const isOwner = viewerId === userId;
+  const access = profileAccess(user, isOwner, viewerId != null);
+  const base = {
+    user: {
+      id: user.id,
+      name: user.name,
+      handle: user.handle,
+      bio: access.canView ? user.bio : null,
+      city: access.showCity ? user.city : null,
+      image: user.image,
+      createdAt: user.createdAt,
+      initials: initialsOf(user.name),
+      joined: fmtJoined(user.createdAt),
+    },
+    privacy: isOwner
+      ? {
+          profileVisibility: user.profileVisibility,
+          searchIndexing: user.searchIndexing,
+          showShelf: user.showShelf,
+          showDiary: user.showDiary,
+          showActivity: user.showActivity,
+          showLikes: user.showLikes,
+          showGoal: user.showGoal,
+          showCity: user.showCity,
+          inactivityReminder: user.inactivityReminder,
+          monthlyDigest: user.monthlyDigest,
+        }
+      : null,
+    visibility: user.profileVisibility,
+    access,
+    isOwner,
+    loggedIn: viewerId != null,
+  };
+  const sec = access.sections;
+  if (!access.canView)
+    return { ...base, stats: [], shelf: null, counts: null, tabs: [] as Tab[] };
 
   const year = today().getUTCFullYear();
-  const [byStatus, reviews, sessions, lists, likes, readThisYear] =
+  const [byStatus, reviews, sessions, lists, likes, readThisYear, quotes] =
     await Promise.all([
       db.userBook.groupBy({
         by: ["status"],
@@ -94,39 +142,36 @@ export async function getProfile(handle: string, viewerId: string | null) {
       db.list.count({ where: listsWhereForProfile(userId, viewerId) }),
       db.userBook.count({ where: { userId, liked: true } }),
       finishedCount(userId, year),
+      countProfileQuotes(userId, isOwner),
     ]);
 
   const count = (s: ShelfStatus) =>
     byStatus.find((g) => g.status === s)?._count.status ?? 0;
   const shelfTotal = byStatus.reduce((a, g) => a + g._count.status, 0);
 
-  return {
-    user: {
-      ...user,
-      initials: initialsOf(user.name),
-      joined: fmtJoined(user.createdAt),
+  const stats: { value: number; label: string; href: string | null }[] = [
+    {
+      value: count("READ"),
+      label: "lidos",
+      href: sec.shelf ? "estante&status=READ" : null,
     },
-    isOwner: viewerId === userId,
-    loggedIn: viewerId != null,
-    stats: [
-      {
-        value: count("READ"),
-        label: "lidos",
-        href: "estante&status=READ",
-      },
-      {
-        value: readThisYear,
-        label: `em ${year}`,
-        href: "estante&status=READ",
-      },
-      {
-        value: count("READING") + count("REREADING"),
-        label: "lendo",
-        href: "estante&status=READING",
-      },
-      { value: reviews, label: "resenhas", href: "avaliacoes" },
-      { value: lists, label: lists === 1 ? "lista" : "listas", href: "listas" },
-    ],
+    {
+      value: readThisYear,
+      label: `em ${year}`,
+      href: sec.shelf ? "estante&status=READ" : null,
+    },
+    {
+      value: count("READING") + count("REREADING"),
+      label: "lendo",
+      href: sec.shelf ? "estante&status=READING" : null,
+    },
+    { value: reviews, label: "resenhas", href: "avaliacoes" },
+    { value: lists, label: lists === 1 ? "lista" : "listas", href: "listas" },
+  ];
+
+  return {
+    ...base,
+    stats: sec.shelf ? stats : stats.slice(3),
     shelf: {
       READ: count("READ"),
       READING: count("READING"),
@@ -136,12 +181,17 @@ export async function getProfile(handle: string, viewerId: string | null) {
     } satisfies Record<ShelfStatus, number>,
     counts: {
       inicio: null,
-      estante: shelfTotal,
-      diario: sessions,
+      estante: sec.shelf ? shelfTotal : null,
+      diario: sec.diary ? sessions : null,
       avaliacoes: reviews,
+      citacoes: quotes,
       listas: lists,
-      curtidas: likes,
+      curtidas: sec.likes ? likes : null,
     } satisfies Record<Tab, number | null>,
+    tabs: TABS.filter((t) => {
+      const section = TAB_SECTION[t];
+      return !section || sec[section];
+    }),
   };
 }
 
@@ -197,6 +247,7 @@ export async function getInicio(
   userId: string,
   viewerId: string | null,
   limit: number,
+  sections: { shelf: boolean; activity: boolean },
 ) {
   const visibleLists = listsWhereForProfile(userId, viewerId);
   const [favorites, readingNow, activity] = await Promise.all([
@@ -205,34 +256,36 @@ export async function getInicio(
       orderBy: { favoritePosition: "asc" },
       include: { book: { select: bookSummarySelect } },
     }),
-    getReadingNow(userId),
-    db.activity.findMany({
-      where: {
-        userId,
-        OR: [{ listId: null }, { list: visibleLists }],
-      },
-      orderBy: { createdAt: "desc" },
-      take: limit + 1,
-      include: {
-        book: { select: bookSummarySelect },
-        review: { select: { spoiler: true, hiddenAt: true } },
-        reading: {
-          select: {
-            startedAt: true,
-            startPrecision: true,
-            endedAt: true,
-            endPrecision: true,
+    sections.shelf ? getReadingNow(userId) : Promise.resolve([]),
+    !sections.activity
+      ? Promise.resolve([])
+      : db.activity.findMany({
+          where: {
+            userId,
+            OR: [{ listId: null }, { list: visibleLists }],
           },
-        },
-        list: {
-          select: {
-            title: true,
-            id: true,
-            _count: { select: { items: true } },
+          orderBy: { createdAt: "desc" },
+          take: limit + 1,
+          include: {
+            book: { select: bookSummarySelect },
+            review: { select: { spoiler: true, hiddenAt: true } },
+            reading: {
+              select: {
+                startedAt: true,
+                startPrecision: true,
+                endedAt: true,
+                endPrecision: true,
+              },
+            },
+            list: {
+              select: {
+                title: true,
+                id: true,
+                _count: { select: { items: true } },
+              },
+            },
           },
-        },
-      },
-    }),
+        }),
   ]);
   return {
     favorites: favorites.map((f) => toCover(f.book)),
@@ -281,12 +334,18 @@ function shelfDate(
   return null;
 }
 
-export async function getEstante(userId: string) {
+export async function getEstante(userId: string, isOwner: boolean) {
   const [rows, readings] = await Promise.all([
     db.userBook.findMany({
       where: { userId, status: { not: null } },
       orderBy: { statusChangedAt: "desc" },
-      include: { book: { select: bookSummarySelect } },
+      include: {
+        book: { select: bookSummarySelect },
+        tags: {
+          where: isOwner ? {} : { tag: { private: false } },
+          select: { tagId: true },
+        },
+      },
     }),
     db.reading.findMany({
       where: { userId, status: { in: ["FINISHED", "ACTIVE", "ABANDONED"] } },
@@ -323,6 +382,7 @@ export async function getEstante(userId: string) {
     return {
       book: toCover(r.book),
       status: r.status!,
+      tags: r.tags.map((t) => t.tagId),
       date: shelfDate(r.status!, mine),
       reads,
       progress:
