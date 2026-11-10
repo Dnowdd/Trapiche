@@ -10,6 +10,7 @@ import {
   type BookSummary,
 } from "../books";
 import { bestCover } from "../cover-probe";
+import { cachedBlock } from "../api-cache";
 import { editionIds } from "../works";
 import { cleanAuthor, groupWorks, normalize, workKey } from "../editions";
 import {
@@ -37,6 +38,7 @@ import type { ShelfStatus } from "../generated/prisma/client";
 import type { GoogleBooksVolume } from "../types/book";
 
 const ACTIVE_STATUSES: ShelfStatus[] = ["READ", "READING", "REREADING"];
+const BLOCK_TTL = 60 * 60 * 12;
 
 import { initialsOf } from "../utils";
 
@@ -287,6 +289,34 @@ export async function editionsOf(book: BookData) {
       language: languageLabel(row.language),
       fromGoogle: !isOpenLibraryId(row.id),
     })),
+  );
+}
+
+export function cachedEditionsOf(book: BookData) {
+  return cachedBlock(["editions", book.id], () => editionsOf(book), BLOCK_TTL);
+}
+
+export function cachedByAuthor(
+  id: string,
+  title: string,
+  author: string | null,
+) {
+  return cachedBlock(
+    ["by-author", id, title, author ?? ""],
+    () => byAuthor(id, title, author),
+    BLOCK_TTL,
+  );
+}
+
+export function cachedRelatedBooks(
+  id: string,
+  categories: string[],
+  author: string | null,
+) {
+  return cachedBlock(
+    ["related", id, author ?? "", ...categories],
+    () => relatedBooks(id, categories, author),
+    BLOCK_TTL,
   );
 }
 

@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { ensureBook, loadBook } from "@/lib/books";
 import { db } from "@/lib/db";
 import { isOpenLibraryId } from "@/lib/open-library";
-import { byAuthor, editionsOf, relatedBooks } from "@/lib/queries/book";
+import {
+  cachedByAuthor,
+  cachedEditionsOf,
+  cachedRelatedBooks,
+} from "@/lib/queries/book";
 import { getHomePopular } from "@/lib/queries/home";
 import { sendMonthlyDigests, sendReadingReminders } from "@/lib/reminders";
 import { remindOverdueLoans } from "@/lib/queries/loans";
@@ -45,9 +49,9 @@ export async function GET(req: NextRequest) {
     if (!book) return;
     const author = book.authors[0] ?? null;
     await Promise.allSettled([
-      editionsOf(book),
-      byAuthor(book.id, book.title, author),
-      relatedBooks(book.id, book.categories, author),
+      cachedEditionsOf(book),
+      cachedByAuthor(book.id, book.title, author),
+      cachedRelatedBooks(book.id, book.categories, author),
     ]);
   });
 

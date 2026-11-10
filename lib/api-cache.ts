@@ -79,6 +79,14 @@ export async function cachedJson<T>(
   }
 }
 
+export function cachedBlock<T>(
+  key: string[],
+  load: () => Promise<T>,
+  ttl: number,
+) {
+  return runCached(["block", ...key], load, ttl);
+}
+
 export async function cachedValue<T>(
   key: string,
   load: () => Promise<T | null>,

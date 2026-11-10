@@ -1,7 +1,7 @@
 import {
-  byAuthor,
-  editionsOf,
-  relatedBooks,
+  cachedByAuthor,
+  cachedEditionsOf,
+  cachedRelatedBooks,
   type BookPageData,
 } from "@/lib/queries/book";
 import ByAuthor from "./by-author";
@@ -17,7 +17,7 @@ export async function EditionsSlot({
   book: Book;
   languageLabel: string | null;
 }) {
-  const editions = await editionsOf(book).catch(() => []);
+  const editions = await cachedEditionsOf(book).catch(() => []);
   return (
     <Editions book={book} languageLabel={languageLabel} editions={editions} />
   );
@@ -26,8 +26,8 @@ export async function EditionsSlot({
 export async function MoreSlot({ book }: { book: Book }) {
   const author = book.authors[0] ?? null;
   const [authorBlock, related] = await Promise.all([
-    byAuthor(book.id, book.title, author).catch(() => null),
-    relatedBooks(book.id, book.categories, author).catch(() => []),
+    cachedByAuthor(book.id, book.title, author).catch(() => null),
+    cachedRelatedBooks(book.id, book.categories, author).catch(() => []),
   ]);
   if (!authorBlock && related.length === 0) return null;
   return (

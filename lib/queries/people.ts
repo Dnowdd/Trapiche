@@ -1,4 +1,5 @@
 import { toCover, volumeToRow } from "../books";
+import { cachedBlock } from "../api-cache";
 import { bestCover } from "../cover-probe";
 import { cleanAuthor, groupWorks, normalize, workKey } from "../editions";
 import { searchPages } from "../google-books";
@@ -95,7 +96,15 @@ export async function getAuthorPage(name: string) {
   return { name: canonical, profile, works, googleWorks };
 }
 
-export async function getPublisherPage(name: string) {
+export function getPublisherPage(name: string) {
+  return cachedBlock(
+    ["publisher", name],
+    () => loadPublisherPage(name),
+    60 * 60 * 12,
+  );
+}
+
+async function loadPublisherPage(name: string) {
   const key = normalize(publisherCore(name));
   const matches = (publisher?: string) => {
     if (!publisher) return false;
@@ -103,7 +112,7 @@ export async function getPublisherPage(name: string) {
     return n.includes(key) || key.includes(n);
   };
   const [google, openLibrary] = await Promise.all([
-    searchPages(name, 2).then((vols) =>
+    searchPages(name, 1).then((vols) =>
       vols.filter((v) => matches(v.volumeInfo.publisher)),
     ),
     findPublisherWorks(name).catch(() => []),
