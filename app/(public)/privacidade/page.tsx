@@ -27,7 +27,10 @@ export default function PrivacyPage() {
       <p>
         O controlador dos dados é David Queiroz, responsável pelo Trapiche. Para
         qualquer assunto de privacidade, inclusive pedidos da LGPD, fale pelo{" "}
-        <Link href="/suporte">suporte</Link> ou pelo e-mail{" "}
+        <Link prefetch={false} href="/suporte">
+          suporte
+        </Link>{" "}
+        ou pelo e-mail{" "}
         <a href="mailto:david.queiroz@dnowdd.com">david.queiroz@dnowdd.com</a>.
       </p>
 
@@ -209,8 +212,10 @@ export default function PrivacyPage() {
         O assistente só muda a sua conta quando você confirma um cartão. As
         conversas ficam guardadas no Trapiche para você voltar a elas, e só você
         vê. Dá para apagar uma conversa ou todas, quando quiser, na página do{" "}
-        <Link href="/assistente">Prático</Link>. As respostas são automáticas e
-        podem ter erros.
+        <Link prefetch={false} href="/assistente">
+          Prático
+        </Link>
+        . As respostas são automáticas e podem ter erros.
       </p>
 
       <h2>Por quanto tempo</h2>
@@ -258,7 +263,10 @@ export default function PrivacyPage() {
       </ul>
       <p>
         Se precisar de ajuda com qualquer pedido, fale com a gente pelo{" "}
-        <Link href="/suporte">suporte</Link> ou por{" "}
+        <Link prefetch={false} href="/suporte">
+          suporte
+        </Link>{" "}
+        ou por{" "}
         <a href="mailto:david.queiroz@dnowdd.com">david.queiroz@dnowdd.com</a>.
         Respondemos em até 15 dias.
       </p>

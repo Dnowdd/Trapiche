@@ -55,6 +55,7 @@ const Lists = async () => {
             </p>
           </div>
           <Link
+            prefetch={false}
             href="/profile?tab=listas"
             className="shrink-0 self-start sm:self-auto h-10 px-4 rounded-[10px] bg-(--yellow) border border-(--yellow-deep) text-(--ink) text-[13px] font-semibold inline-flex items-center hover:bg-(--yellow-deep)"
           >
@@ -65,6 +66,7 @@ const Lists = async () => {
         <div className="grid gap-4.5 sm:grid-cols-2 lg:grid-cols-4">
           {lists.map((l) => (
             <Link
+              prefetch={false}
               href={`/lists/${l.id}`}
               className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.08)] rounded-[18px] p-4.5 pb-5 flex flex-col gap-3.5 transition-[transform,box-shadow] duration-180 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(var(--shadow-rgb),0.04),0_24px_60px_-28px_rgba(var(--shadow-rgb),0.3)]"
               key={l.id}
@@ -104,6 +106,7 @@ const Lists = async () => {
           ))}
 
           <Link
+            prefetch={false}
             href="/profile?tab=listas"
             className="rounded-[18px] flex flex-col items-center justify-center text-center gap-2 min-h-62 border-[1.5px] border-dashed border-[rgba(var(--ink-rgb),0.25)] transition-[background,border-color] duration-180 hover:bg-(--yellow-soft) hover:border-(--ink-3)"
           >

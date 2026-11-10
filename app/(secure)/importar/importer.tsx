@@ -213,6 +213,7 @@ function Progress({
                     </div>
                   </div>
                   <Link
+                    prefetch={false}
                     href={`/search?q=${encodeURIComponent(p.isbn ?? [p.title, p.author].filter(Boolean).join(" "))}`}
                     target="_blank"
                     className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[rgba(var(--ink-rgb),0.18)] text-[12px] text-(--ink-2) hover:bg-(--yellow-soft)"
@@ -232,6 +233,7 @@ function Progress({
           )}
           {!running && (
             <Link
+              prefetch={false}
               href={`/u/${handle}?tab=estante`}
               className="h-11 px-5 rounded-[12px] bg-(--ink-2) text-(--yellow) text-[14px] font-semibold inline-flex items-center hover:bg-(--ink)"
             >

@@ -9,6 +9,7 @@ const Footer = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
           <Link
+            prefetch={false}
             href="/"
             className="text-[30px] font-extrabold text-(--ink-2) tracking-[-0.02em]"
           >
@@ -21,18 +22,21 @@ const Footer = () => {
         </div>
         <nav className="flex gap-6 text-[14px] font-medium text-(--ink-2)">
           <Link
+            prefetch={false}
             href="/#como-funciona"
             className="hover:underline underline-offset-[3px]"
           >
             Como funciona
           </Link>
           <Link
+            prefetch={false}
             href="/#populares"
             className="hover:underline underline-offset-[3px]"
           >
             Populares
           </Link>
           <Link
+            prefetch={false}
             href="/suporte"
             className="hover:underline underline-offset-[3px]"
           >
@@ -44,10 +48,14 @@ const Footer = () => {
       <div className="flex flex-col sm:flex-row gap-3 justify-between sm:items-center font-mono text-[11px] tracking-[0.04em] text-(--ink-3)">
         <span>© {new Date().getFullYear()} TRAPICHE</span>
         <div className="flex flex-wrap items-center gap-5 uppercase">
-          <Link href="/termos" className="hover:text-(--ink)">
+          <Link prefetch={false} href="/termos" className="hover:text-(--ink)">
             Termos
           </Link>
-          <Link href="/privacidade" className="hover:text-(--ink)">
+          <Link
+            prefetch={false}
+            href="/privacidade"
+            className="hover:text-(--ink)"
+          >
             Privacidade
           </Link>
         </div>

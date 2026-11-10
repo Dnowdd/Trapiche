@@ -89,6 +89,7 @@ export default function ReviewsSection({ data }: { data: BookPageData }) {
         action={
           reviews.total > reviews.items.length ? (
             <Link
+              prefetch={false}
               className="text-[12px] text-(--ink-3) border-b border-(--ink-4) hover:text-(--ink)"
               href={`/book/${data.book.id}/resenhas`}
             >

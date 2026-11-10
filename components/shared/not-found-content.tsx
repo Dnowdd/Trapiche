@@ -8,10 +8,10 @@ export default function NotFoundContent() {
       title="Essa página saiu da estante"
       actions={
         <>
-          <Link href="/" className={primaryBtn}>
+          <Link prefetch={false} href="/" className={primaryBtn}>
             Voltar ao início
           </Link>
-          <Link href="/search" className={ghostBtn}>
+          <Link prefetch={false} href="/search" className={ghostBtn}>
             Buscar um livro
           </Link>
         </>

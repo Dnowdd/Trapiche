@@ -114,6 +114,7 @@ export default function ProfileCard({
           )}
           {owner && (
             <Link
+              prefetch={false}
               href={`/u/${u.handle}?visitante=1`}
               className={`${btn} border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
             >
@@ -122,6 +123,7 @@ export default function ProfileCard({
           )}
           {profile.access.sections.diary && (
             <Link
+              prefetch={false}
               href={`/u/${u.handle}/retrospectiva`}
               className={`${btn} border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) hover:bg-(--yellow-soft)`}
             >
@@ -168,6 +170,7 @@ export default function ProfileCard({
           );
           return s.href ? (
             <Link
+              prefetch={false}
               href={`/u/${u.handle}?tab=${s.href}${preview ? "&visitante=1" : ""}`}
               scroll={false}
               className={`${cls} transition-colors duration-150 hover:bg-(--yellow-soft)`}

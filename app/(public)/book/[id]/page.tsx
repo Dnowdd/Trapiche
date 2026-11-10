@@ -143,6 +143,7 @@ export default async function BookDetailPage({ params }: Props) {
       <div className="pt-7 md:pt-10 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15">
         <nav className="hidden md:flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
           <Link
+            prefetch={false}
             href="/"
             className="text-(--ink-4) transition-colors duration-120 hover:text-(--ink-2)"
           >
@@ -154,6 +155,7 @@ export default async function BookDetailPage({ params }: Props) {
             <>
               <span className="text-(--ink-5)">/</span>
               <Link
+                prefetch={false}
                 href={authorHref(data.book.authors[0])}
                 className="text-(--ink-4) transition-colors duration-120 hover:text-(--ink-2)"
               >

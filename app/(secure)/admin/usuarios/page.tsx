@@ -56,6 +56,7 @@ export default async function AdminUsers({
               className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3.5 border-b border-(--rule) last:border-b-0"
             >
               <Link
+                prefetch={false}
                 href={`/u/${u.handle}`}
                 className="flex items-center gap-3 flex-1 min-w-0 group"
               >
@@ -101,6 +102,7 @@ export default async function AdminUsers({
         <div className="mt-5 flex items-center justify-between text-[13px]">
           {page > 0 ? (
             <Link
+              prefetch={false}
               href={pageHref(page - 1)}
               className="font-semibold text-(--ink-2) hover:underline"
             >
@@ -114,6 +116,7 @@ export default async function AdminUsers({
           </span>
           {page + 1 < pages ? (
             <Link
+              prefetch={false}
               href={pageHref(page + 1)}
               className="font-semibold text-(--ink-2) hover:underline"
             >

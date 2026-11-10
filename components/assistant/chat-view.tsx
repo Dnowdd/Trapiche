@@ -274,6 +274,7 @@ function EmptyState({
       <p className="m-0 mt-4 text-[11.5px] leading-normal text-(--ink-4)">
         O {ASSISTANT_NAME} usa a OpenAI e pode errar.{" "}
         <Link
+          prefetch={false}
           href="/privacidade#assistente"
           onClick={onNavigate}
           className="underline underline-offset-2 hover:text-(--ink-2)"
@@ -649,6 +650,7 @@ export default function ChatView({
                   <span>
                     {remaining ?? `O ${ASSISTANT_NAME} pode errar.`}{" "}
                     <Link
+                      prefetch={false}
                       href="/privacidade#assistente"
                       onClick={onNavigate}
                       className="underline underline-offset-2 hover:text-(--ink-2)"

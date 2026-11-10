@@ -6,6 +6,7 @@ export default function NotificationRow({ n }: { n: NotificationItem }) {
   return (
     <li>
       <Link
+        prefetch={false}
         href={n.href}
         className="flex gap-3 px-3 py-2.5 rounded-[8px] hover:bg-[rgba(var(--ink-rgb),0.06)]"
       >

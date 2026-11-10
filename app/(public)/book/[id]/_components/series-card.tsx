@@ -157,6 +157,7 @@ export default function SeriesCard({ series }: { series: BookSeries }) {
               : `Série · ${series.total} ${series.total === 1 ? "livro" : "livros"}`}
           </div>
           <Link
+            prefetch={false}
             href={`/serie/${series.slug}`}
             className="mt-1 block text-[17px] font-bold tracking-[-0.01em] leading-tight hover:underline"
           >
@@ -177,6 +178,7 @@ export default function SeriesCard({ series }: { series: BookSeries }) {
       <div className="relative mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
         {series.items.map((item) => (
           <Link
+            prefetch={false}
             key={item.workId}
             href={`/book/${item.book.id}`}
             title={`${fmtPos(item.position)}. ${item.book.title}`}
@@ -234,6 +236,7 @@ export default function SeriesCard({ series }: { series: BookSeries }) {
           </div>
           {series.next && !series.next.current && (
             <Link
+              prefetch={false}
               href={`/book/${series.next.book.id}`}
               className="mt-3 flex items-center gap-2 text-[12.5px] text-(--cream) hover:underline"
             >

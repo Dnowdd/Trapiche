@@ -46,11 +46,12 @@ export default async function QuotesPage({ params, searchParams }: Props) {
     >
       <div className="pt-7 md:pt-12.5 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15 max-w-240">
         <div className="flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
-          <Link href="/" className="hover:text-(--ink-2)">
+          <Link prefetch={false} href="/" className="hover:text-(--ink-2)">
             Trapiche
           </Link>
           <span className="text-(--ink-5)">/</span>
           <Link
+            prefetch={false}
             href={`/book/${id}`}
             className="hover:text-(--ink-2) truncate max-w-80"
           >
@@ -69,7 +70,11 @@ export default async function QuotesPage({ params, searchParams }: Props) {
         {quotes.items.length === 0 ? (
           <p className="text-[14px] text-(--ink-3)">
             Ninguém guardou uma citação pública desse livro ainda.{" "}
-            <Link href={`/book/${id}#citacoes`} className="underline">
+            <Link
+              prefetch={false}
+              href={`/book/${id}#citacoes`}
+              className="underline"
+            >
               Seja a primeira pessoa.
             </Link>
           </p>
@@ -90,6 +95,7 @@ export default async function QuotesPage({ params, searchParams }: Props) {
           <div className="mt-8 flex items-center justify-between font-mono text-[11px] text-(--ink-3) tracking-[0.04em]">
             {page > 1 ? (
               <Link
+                prefetch={false}
                 href={`/book/${id}/citacoes?pagina=${page - 1}`}
                 className="border-b border-(--ink-4) hover:text-(--ink)"
               >
@@ -103,6 +109,7 @@ export default async function QuotesPage({ params, searchParams }: Props) {
             </span>
             {page < quotes.pages ? (
               <Link
+                prefetch={false}
                 href={`/book/${id}/citacoes?pagina=${page + 1}`}
                 className="border-b border-(--ink-4) hover:text-(--ink)"
               >

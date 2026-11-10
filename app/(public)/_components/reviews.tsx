@@ -40,6 +40,7 @@ const Reviews = async () => {
             key={r.id}
           >
             <Link
+              prefetch={false}
               href={`/book/${r.book.id}`}
               className="flex items-center gap-3 group"
             >
@@ -69,6 +70,7 @@ const Reviews = async () => {
 
             <div className="mt-auto flex items-center justify-between border-t border-(--rule) pt-3 text-[11px]">
               <Link
+                prefetch={false}
                 href={`/u/${r.handle}`}
                 className="flex items-center gap-2 text-(--ink-3) min-w-0 hover:text-(--ink)"
               >

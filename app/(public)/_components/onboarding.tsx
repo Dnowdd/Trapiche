@@ -75,7 +75,7 @@ function Pick({
 
   return (
     <div className="flex flex-col gap-2 min-w-0">
-      <Link href={`/book/${id}`} className="block">
+      <Link prefetch={false} href={`/book/${id}`} className="block">
         <BookCover
           book={book}
           size="md"
@@ -177,6 +177,7 @@ export default function Onboarding({
             {STEPS.map((s) => (
               <li key={s.id}>
                 <Link
+                  prefetch={false}
                   href={href[s.id]}
                   className={cn(
                     "flex items-center gap-2.5 rounded-lg px-2 py-1.5 -mx-2 text-[13px] hover:bg-[rgba(var(--ink-rgb),0.05)]",
@@ -204,6 +205,7 @@ export default function Onboarding({
                 Comece por aqui — marque o que você já leu ou quer ler:
               </span>
               <Link
+                prefetch={false}
                 href="/importar"
                 className="text-[12.5px] font-semibold text-(--ink-2) border-b border-(--ink-4) pb-px hover:text-(--ink)"
               >

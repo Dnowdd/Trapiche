@@ -137,6 +137,7 @@ function Highlights({ h }: { h: Retrospective["highlights"] }) {
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {items.map(({ label, data }) => (
           <Link
+            prefetch={false}
             key={label}
             href={`/book/${data!.book.id}`}
             className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[16px] p-4 flex gap-3.5 transition-colors duration-150 hover:bg-(--yellow-soft)"
@@ -277,6 +278,7 @@ function MonthGrid({ data, handle }: { data: Retrospective; handle: string }) {
             </div>
           ) : (
             <Link
+              prefetch={false}
               key={m.month}
               href={retroHref(handle, data.year, m.month)}
               className={`${cls} bg-(--cream-card) transition-[background-color,transform] duration-150 hover:bg-(--yellow-soft) hover:-translate-y-0.5`}
@@ -317,17 +319,29 @@ function PeriodNav({ data, handle }: { data: Retrospective; handle: string }) {
     <nav className="flex flex-wrap items-center gap-2">
       {m ? (
         <>
-          <Link href={retroHref(handle, data.year)} className={idle}>
+          <Link
+            prefetch={false}
+            href={retroHref(handle, data.year)}
+            className={idle}
+          >
             ← {data.year} inteiro
           </Link>
           {hasPrev && (
-            <Link href={retroHref(handle, prev!.y, prev!.m)} className={idle}>
+            <Link
+              prefetch={false}
+              href={retroHref(handle, prev!.y, prev!.m)}
+              className={idle}
+            >
               {MONTHS_LONG[prev!.m - 1]}
             </Link>
           )}
           <span className={active}>{MONTHS_LONG[m - 1]}</span>
           {hasNext && (
-            <Link href={retroHref(handle, next!.y, next!.m)} className={idle}>
+            <Link
+              prefetch={false}
+              href={retroHref(handle, next!.y, next!.m)}
+              className={idle}
+            >
               {MONTHS_LONG[next!.m - 1]}
             </Link>
           )}
@@ -339,7 +353,12 @@ function PeriodNav({ data, handle }: { data: Retrospective; handle: string }) {
               {y}
             </span>
           ) : (
-            <Link key={y} href={retroHref(handle, y)} className={idle}>
+            <Link
+              prefetch={false}
+              key={y}
+              href={retroHref(handle, y)}
+              className={idle}
+            >
               {y}
             </Link>
           ),
@@ -386,6 +405,7 @@ export default async function RetrospectivePage({
       <div className="pt-7 md:pt-10 px-4 sm:px-8 lg:px-15 pb-12 md:pb-15">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <Link
+            prefetch={false}
             href={`/u/${user.handle}`}
             className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
           >
@@ -543,6 +563,7 @@ export default async function RetrospectivePage({
                 <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-7 gap-3 sm:gap-4">
                   {data.books.map((b, i) => (
                     <Link
+                      prefetch={false}
                       key={`${b.id}-${i}`}
                       href={`/book/${b.id}`}
                       className="flex flex-col gap-1.5 transition-transform duration-120 hover:-translate-y-0.5"

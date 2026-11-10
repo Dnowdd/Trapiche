@@ -54,6 +54,7 @@ export default async function AdminHome() {
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {queues.map((q) => (
           <Link
+            prefetch={false}
             key={q.href}
             href={q.href}
             className={`flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 transition-colors ${q.value > 0 ? "border-(--yellow-deep) bg-(--yellow-soft) hover:bg-(--yellow)" : "border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) hover:bg-(--yellow-soft)"}`}
@@ -78,6 +79,7 @@ export default async function AdminHome() {
           Cadastros recentes
         </h2>
         <Link
+          prefetch={false}
           href="/admin/usuarios"
           className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
         >
@@ -87,6 +89,7 @@ export default async function AdminHome() {
       <div className="rounded-[18px] border border-[rgba(var(--ink-rgb),0.1)] bg-(--cream-card) overflow-hidden">
         {data.recent.map((u) => (
           <Link
+            prefetch={false}
             key={u.id}
             href={`/u/${u.handle}`}
             className="flex items-center gap-3 px-5 py-3 border-b border-(--rule) last:border-b-0 hover:bg-(--yellow-soft)"

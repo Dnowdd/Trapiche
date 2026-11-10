@@ -189,6 +189,7 @@ export default function AuthContent({
       <div className="flex flex-col py-8 md:py-10 px-5 sm:px-10 md:px-14 relative min-h-screen">
         <div className="flex items-center justify-end gap-3 text-[13px] text-(--ink-3)">
           <Link
+            prefetch={false}
             href="/"
             className="mr-auto text-[22px] font-extrabold tracking-[-0.02em] text-(--ink-2) min-[921px]:hidden"
           >
@@ -297,6 +298,7 @@ export default function AuthContent({
                       <>
                         Com o Google, você concorda com os{" "}
                         <Link
+                          prefetch={false}
                           href="/termos"
                           target="_blank"
                           className="underline"
@@ -305,6 +307,7 @@ export default function AuthContent({
                         </Link>{" "}
                         e a{" "}
                         <Link
+                          prefetch={false}
                           href="/privacidade"
                           target="_blank"
                           className="underline"
@@ -354,10 +357,18 @@ export default function AuthContent({
         <div className="flex items-center justify-between font-mono text-[10px] text-(--ink-4) tracking-[0.06em] uppercase">
           <span>© {new Date().getFullYear()} Trapiche</span>
           <div className="flex gap-4.5">
-            <Link href="/termos" className="hover:text-(--ink-2)">
+            <Link
+              prefetch={false}
+              href="/termos"
+              className="hover:text-(--ink-2)"
+            >
               Termos
             </Link>
-            <Link href="/privacidade" className="hover:text-(--ink-2)">
+            <Link
+              prefetch={false}
+              href="/privacidade"
+              className="hover:text-(--ink-2)"
+            >
               Privacidade
             </Link>
           </div>

@@ -103,6 +103,7 @@ export default function QuotesSection({
               </div>
               {quotes.communityTotal > quotes.community.length && (
                 <Link
+                  prefetch={false}
                   href={`/book/${bookId}/citacoes`}
                   className="mt-4 inline-flex text-[13px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
                 >

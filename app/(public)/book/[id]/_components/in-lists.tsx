@@ -17,7 +17,12 @@ export default function InLists({ lists }: { lists: BookPageData["lists"] }) {
       />
       <div className="grid gap-2 sm:grid-cols-2">
         {lists.mine.map((l) => (
-          <Link href={`/lists/${l.id}`} className={card} key={l.id}>
+          <Link
+            prefetch={false}
+            href={`/lists/${l.id}`}
+            className={card}
+            key={l.id}
+          >
             <div className="min-w-0">
               <div className="text-[14px] font-semibold text-(--ink-2) truncate">
                 {l.title}
@@ -33,7 +38,12 @@ export default function InLists({ lists }: { lists: BookPageData["lists"] }) {
           </Link>
         ))}
         {lists.community.map((l) => (
-          <Link href={`/lists/${l.id}`} className={card} key={l.id}>
+          <Link
+            prefetch={false}
+            href={`/lists/${l.id}`}
+            className={card}
+            key={l.id}
+          >
             <div className="min-w-0">
               <div className="text-[14px] font-semibold text-(--ink-2) truncate">
                 {l.title}

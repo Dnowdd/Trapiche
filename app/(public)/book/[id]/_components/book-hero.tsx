@@ -130,6 +130,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
     data.languageLabel,
     book.publisher ? (
       <Link
+        prefetch={false}
         href={publisherHref(book.publisher)}
         className="hover:text-(--ink) hover:underline underline-offset-2"
       >
@@ -184,6 +185,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
               <span key={a}>
                 {i > 0 && ", "}
                 <Link
+                  prefetch={false}
                   href={authorHref(a)}
                   className="text-(--ink-2) font-medium border-b border-(--ink-5) pb-px hover:border-(--ink-2)"
                 >
@@ -344,6 +346,7 @@ export default function BookHero({ data, today }: BookHeroProps) {
                 <span key={o.id}>
                   {i > 0 && ", "}
                   <Link
+                    prefetch={false}
                     href={`/book/${o.id}`}
                     className="font-semibold text-(--ink-2) border-b border-(--ink-4) hover:border-(--ink-2)"
                   >

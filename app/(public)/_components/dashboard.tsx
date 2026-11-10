@@ -44,12 +44,14 @@ export default function Dashboard({ data }: { data: Data }) {
         </div>
         <div className="flex gap-2 shrink-0">
           <Link
+            prefetch={false}
             href="/search"
             className="h-10 px-4 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[13px] font-semibold inline-flex items-center hover:bg-(--ink)"
           >
             Buscar livro
           </Link>
           <Link
+            prefetch={false}
             href={`/u/${user.handle}`}
             className="h-10 px-4 rounded-[10px] border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) text-[13px] font-medium inline-flex items-center hover:bg-(--yellow-soft)"
           >
@@ -81,7 +83,11 @@ export default function Dashboard({ data }: { data: Data }) {
                 </h2>
               </div>
               {reading.length > 0 && (
-                <Link href={`/u/${user.handle}?tab=diario`} className={linkCls}>
+                <Link
+                  prefetch={false}
+                  href={`/u/${user.handle}?tab=diario`}
+                  className={linkCls}
+                >
                   Diário →
                 </Link>
               )}
@@ -95,6 +101,7 @@ export default function Dashboard({ data }: { data: Data }) {
               <div className="grid gap-3 sm:grid-cols-2">
                 {reading.map((r) => (
                   <Link
+                    prefetch={false}
                     key={r.book.id}
                     href={`/book/${r.book.id}`}
                     className="group bg-(--cream) border border-[rgba(var(--ink-rgb),0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
@@ -152,12 +159,14 @@ export default function Dashboard({ data }: { data: Data }) {
                 </div>
                 <div className="flex items-center gap-4">
                   <Link
+                    prefetch={false}
                     href={`/u/${user.handle}?tab=estante&status=WANT&sortear=1`}
                     className={linkCls}
                   >
                     Sortear um
                   </Link>
                   <Link
+                    prefetch={false}
                     href={`/u/${user.handle}?tab=estante&status=WANT`}
                     className={linkCls}
                   >
@@ -168,6 +177,7 @@ export default function Dashboard({ data }: { data: Data }) {
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
                 {data.pile.map(({ book }) => (
                   <Link
+                    prefetch={false}
                     key={book.id}
                     href={`/book/${book.id}`}
                     className="group flex flex-col gap-1.5 min-w-0"
@@ -199,6 +209,7 @@ export default function Dashboard({ data }: { data: Data }) {
                 {data.loans.map((l) => (
                   <li key={l.id}>
                     <Link
+                      prefetch={false}
                       href={`/book/${l.book.id}#emprestimo`}
                       className="flex items-center gap-3 py-2.5 group"
                     >

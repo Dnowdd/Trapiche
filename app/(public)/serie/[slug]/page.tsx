@@ -75,7 +75,7 @@ export default async function SeriesPage({ params }: Props) {
       />
       <div className="pt-7 md:pt-10 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15">
         <nav className="hidden md:flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
-          <Link href="/" className="hover:text-(--ink-2)">
+          <Link prefetch={false} href="/" className="hover:text-(--ink-2)">
             Trapiche
           </Link>
           <span className="text-(--ink-5)">/</span>
@@ -119,6 +119,7 @@ export default async function SeriesPage({ params }: Props) {
               </div>
               {series.next ? (
                 <Link
+                  prefetch={false}
                   href={`/book/${series.next.book.id}`}
                   className="mt-3 block text-[12.5px] hover:underline"
                 >
@@ -127,6 +128,7 @@ export default async function SeriesPage({ params }: Props) {
               ) : (
                 series.read === 0 && (
                   <Link
+                    prefetch={false}
                     href={`/book/${series.items[0].book.id}`}
                     className="mt-3 block text-[12.5px] hover:underline"
                   >
@@ -154,6 +156,7 @@ export default async function SeriesPage({ params }: Props) {
                 {fmtPos(item.position)}
               </span>
               <Link
+                prefetch={false}
                 href={`/book/${item.book.id}`}
                 className="transition-transform duration-150 hover:-translate-y-1"
               >
@@ -165,6 +168,7 @@ export default async function SeriesPage({ params }: Props) {
               </Link>
               <div className="min-w-0">
                 <Link
+                  prefetch={false}
                   href={`/book/${item.book.id}`}
                   className="text-[17px] sm:text-[19px] font-bold tracking-[-0.01em] text-(--ink) hover:underline leading-tight"
                 >

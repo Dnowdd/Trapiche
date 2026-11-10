@@ -155,6 +155,7 @@ export default function GoalCard({
       )}
 
       <Link
+        prefetch={false}
         href={`/u/${handle}/retrospectiva?ano=${goal.year}`}
         className="mt-5 pt-4 border-t border-(--rule) flex items-center justify-between text-[12px] font-medium text-(--ink-3) hover:text-(--ink)"
       >

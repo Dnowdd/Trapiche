@@ -62,6 +62,7 @@ export default function ByAuthor({ data }: { data: ByAuthorData }) {
               />
             )}
             <Link
+              prefetch={false}
               href={authorHref(data.author)}
               className="text-[12px] text-(--ink-3) border-b border-(--ink-4) hover:text-(--ink) whitespace-nowrap"
             >
@@ -101,6 +102,7 @@ export default function ByAuthor({ data }: { data: ByAuthorData }) {
       >
         {data.items.map(({ cover, year }) => (
           <Link
+            prefetch={false}
             href={`/book/${cover.id}`}
             key={cover.id}
             className="w-32 sm:w-36 lg:w-[calc((100%-5*1rem)/6)] shrink-0 snap-start flex flex-col gap-2 transition-transform duration-120 hover:-translate-y-0.5"

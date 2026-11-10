@@ -152,7 +152,7 @@ export default function PilePicker({
                 key={spin}
                 className="flex flex-col items-center text-center animate-[pileIn_0.45s_cubic-bezier(0.2,0.8,0.2,1)]"
               >
-                <Link href={`/book/${pick.book.id}`}>
+                <Link prefetch={false} href={`/book/${pick.book.id}`}>
                   <BookCover
                     book={pick.book}
                     size="md"

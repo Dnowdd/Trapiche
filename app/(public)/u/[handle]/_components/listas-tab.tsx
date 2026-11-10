@@ -28,6 +28,7 @@ const stackStyle = (i: number): React.CSSProperties => ({
 
 const ListCardRich = ({ list }: { list: ListItem }) => (
   <Link
+    prefetch={false}
     href={`/lists/${list.id}`}
     className={`bg-(--cream-card) border rounded-[18px] p-4.5 flex flex-col gap-3.5 transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(var(--shadow-rgb),0.04),0_24px_60px_-28px_rgba(var(--shadow-rgb),0.3)] ${list.pinned ? "border-(--ink-2)" : "border-[rgba(var(--ink-rgb),0.08)]"}`}
   >

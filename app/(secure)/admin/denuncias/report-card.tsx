@@ -32,6 +32,7 @@ export default function ReportCard({
           <>
             <span>·</span>
             <Link
+              prefetch={false}
               href={`/u/${r.author.handle}`}
               className="hover:text-(--ink-2)"
             >
@@ -42,7 +43,11 @@ export default function ReportCard({
         {r.book && (
           <>
             <span>·</span>
-            <Link href={`/book/${r.book.id}`} className="hover:text-(--ink-2)">
+            <Link
+              prefetch={false}
+              href={`/book/${r.book.id}`}
+              className="hover:text-(--ink-2)"
+            >
               {r.book.title}
             </Link>
           </>

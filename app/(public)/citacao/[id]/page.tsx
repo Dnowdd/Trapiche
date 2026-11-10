@@ -89,6 +89,7 @@ export default async function QuotePage({ params }: Props) {
 
         <div className="relative mt-10 md:mt-14 flex flex-col sm:flex-row sm:items-center gap-6 justify-between border-t border-(--rule) pt-7">
           <Link
+            prefetch={false}
             href={`/book/${quote.book.id}`}
             className="group flex items-center gap-4 min-w-0"
           >
@@ -109,6 +110,7 @@ export default async function QuotePage({ params }: Props) {
           </Link>
           <div className="flex items-center gap-3">
             <Link
+              prefetch={false}
               href={`/u/${quote.user.handle}`}
               className="flex items-center gap-2 text-[12.5px] text-(--ink-3) hover:text-(--ink)"
             >

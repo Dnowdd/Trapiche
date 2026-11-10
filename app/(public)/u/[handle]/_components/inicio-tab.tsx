@@ -63,12 +63,20 @@ function ActivityIcon({ kind }: { kind: ActivityItem["kind"] }) {
 
 function verb(a: ActivityItem) {
   const book = a.book && (
-    <Link href={`/book/${a.book.id}`} className="hover:underline">
+    <Link
+      prefetch={false}
+      href={`/book/${a.book.id}`}
+      className="hover:underline"
+    >
       <strong>{a.book.title}</strong>
     </Link>
   );
   const list = a.list && (
-    <Link href={`/lists/${a.list.id}`} className="hover:underline">
+    <Link
+      prefetch={false}
+      href={`/lists/${a.list.id}`}
+      className="hover:underline"
+    >
       <strong>{a.list.title}</strong>
     </Link>
   );
@@ -136,7 +144,7 @@ function ActivityRow({ a }: { a: ActivityItem }) {
         <ActivityIcon kind={a.kind} />
       </div>
       {a.book ? (
-        <Link href={`/book/${a.book.id}`} className="shrink-0">
+        <Link prefetch={false} href={`/book/${a.book.id}`} className="shrink-0">
           <BookCover
             book={a.book}
             size="sm"
@@ -190,6 +198,7 @@ function ShelfCard({
       <div className="flex flex-col gap-1 -mx-2">
         {SHELF_ROWS.map((r) => (
           <Link
+            prefetch={false}
             key={r.id}
             href={`/u/${handle}?tab=estante&status=${r.id}`}
             scroll={false}
@@ -230,11 +239,17 @@ function ActivityCard({
       title={full ? "Histórico completo" : "Atividade recente"}
       action={
         full ? (
-          <Link href={`/u/${handle}`} scroll={false} className={linkCls}>
+          <Link
+            prefetch={false}
+            href={`/u/${handle}`}
+            scroll={false}
+            className={linkCls}
+          >
             ← Voltar
           </Link>
         ) : data.hasMoreActivity ? (
           <Link
+            prefetch={false}
             href={`/u/${handle}?tab=inicio&historico=1`}
             scroll={false}
             className={linkCls}
@@ -255,6 +270,7 @@ function ActivityCard({
       )}
       {full && data.hasMoreActivity && (
         <Link
+          prefetch={false}
           href={`/u/${handle}?tab=inicio&historico=${page + 1}`}
           scroll={false}
           className="mt-4 self-start inline-flex h-9 items-center px-4 rounded-[10px] border border-[rgba(var(--ink-rgb),0.18)] text-[13px] font-medium text-(--ink-2) hover:bg-(--yellow-soft)"
@@ -355,6 +371,7 @@ export default function InicioTab({
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-5">
                 {data.favorites.map((b, i) => (
                   <Link
+                    prefetch={false}
                     href={`/book/${b.id}`}
                     className="group flex flex-col gap-2 min-w-0"
                     key={b.id}
@@ -388,6 +405,7 @@ export default function InicioTab({
             title="Lendo agora"
             action={
               <Link
+                prefetch={false}
                 href={`/u/${handle}?tab=estante&status=WANT`}
                 scroll={false}
                 className={linkCls}
@@ -406,6 +424,7 @@ export default function InicioTab({
               <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                 {data.readingNow.map((r) => (
                   <Link
+                    prefetch={false}
                     href={`/book/${r.book.id}`}
                     className="bg-(--cream) border border-[rgba(var(--ink-rgb),0.07)] rounded-xl p-4 flex gap-4 transition-colors duration-150 hover:bg-(--yellow-soft)"
                     key={r.book.id}

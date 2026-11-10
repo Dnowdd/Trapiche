@@ -68,11 +68,12 @@ export default async function ListPage({ params }: Props) {
       )}
       <div className="pt-7 md:pt-12.5 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15">
         <div className="flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
-          <Link href="/" className="hover:text-(--ink-2)">
+          <Link prefetch={false} href="/" className="hover:text-(--ink-2)">
             Trapiche
           </Link>
           <span className="text-(--ink-5)">/</span>
           <Link
+            prefetch={false}
             href={`/u/${list.owner.handle}?tab=listas`}
             className="hover:text-(--ink-2)"
           >
@@ -115,6 +116,7 @@ export default async function ListPage({ params }: Props) {
                 />
                 Por{" "}
                 <Link
+                  prefetch={false}
                   href={`/u/${list.owner.handle}`}
                   className="text-(--ink-2) font-semibold hover:underline"
                 >
@@ -156,6 +158,7 @@ export default async function ListPage({ params }: Props) {
             {list.items.map((it) => (
               <div key={it.book.id} className="relative group">
                 <Link
+                  prefetch={false}
                   href={`/book/${it.book.id}`}
                   className="flex flex-col gap-2 transition-transform duration-120 hover:-translate-y-0.5"
                 >

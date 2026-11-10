@@ -13,6 +13,7 @@ export default function WorksGrid({
     <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4.5 gap-y-6 sm:gap-y-8">
       {works.map(({ cover, year, editions }) => (
         <Link
+          prefetch={false}
           href={`/book/${cover.id}`}
           key={cover.id}
           className="flex flex-col gap-2 transition-transform duration-120 hover:-translate-y-0.5"

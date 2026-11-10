@@ -43,6 +43,7 @@ function EditionCard({
   if (current) return <div className={className}>{body}</div>;
   return (
     <Link
+      prefetch={false}
       href={`/book/${edition.cover.id}`}
       className={`${className} transition-transform duration-120 hover:-translate-y-0.5`}
     >

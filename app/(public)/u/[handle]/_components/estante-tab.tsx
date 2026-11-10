@@ -121,6 +121,7 @@ function CoverTile({ it, withStatus }: { it: Item; withStatus?: boolean }) {
           : null;
   return (
     <Link
+      prefetch={false}
       href={`/book/${it.book.id}`}
       className="group flex flex-col gap-2 min-w-0"
     >
@@ -167,7 +168,7 @@ function AbandonedRow({ it, isOwner }: { it: Item; isOwner: boolean }) {
   const a = it.abandoned!;
   return (
     <article className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-4 sm:py-5 sm:px-6 grid grid-cols-[56px_1fr] sm:grid-cols-[72px_1fr_auto] gap-4 sm:gap-6 items-center">
-      <Link href={`/book/${it.book.id}`}>
+      <Link prefetch={false} href={`/book/${it.book.id}`}>
         <BookCover
           book={it.book}
           size="sm"
@@ -177,6 +178,7 @@ function AbandonedRow({ it, isOwner }: { it: Item; isOwner: boolean }) {
       </Link>
       <div className="min-w-0">
         <Link
+          prefetch={false}
           href={`/book/${it.book.id}`}
           className="text-[16px] font-bold text-(--ink) tracking-[-0.01em] hover:underline"
         >

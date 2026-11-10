@@ -39,6 +39,7 @@ export default async function ReportsPage({
         <nav className="flex gap-2 mb-6">
           {TABS.map((t) => (
             <Link
+              prefetch={false}
               key={t.status}
               href={`/admin/denuncias?status=${t.status}`}
               aria-current={t.status === status ? "page" : undefined}

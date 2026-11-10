@@ -39,6 +39,7 @@ export default function CurtidasTab({ items }: { items: Item[] }) {
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4.5 gap-y-6 sm:gap-y-7">
           {shown.map((it) => (
             <Link
+              prefetch={false}
               href={`/book/${it.book.id}`}
               className="flex flex-col gap-2 transition-transform duration-120 relative hover:-translate-y-0.5"
               key={it.book.id}

@@ -25,6 +25,7 @@ export default function VisitorPreviewBar({ handle }: { handle: string }) {
         </span>
       </div>
       <Link
+        prefetch={false}
         href={`/u/${handle}`}
         className="h-8 px-3 rounded-lg bg-(--yellow) text-(--ink) text-[12px] font-semibold inline-flex items-center hover:brightness-95"
       >

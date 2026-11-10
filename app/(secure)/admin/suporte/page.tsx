@@ -34,6 +34,7 @@ export default async function StaffSupportPage({
       <nav className="flex gap-2 mb-6 flex-wrap">
         {TABS.map((t) => (
           <Link
+            prefetch={false}
             key={t.status}
             href={`/admin/suporte?status=${t.status}`}
             aria-current={t.status === status ? "page" : undefined}

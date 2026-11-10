@@ -55,12 +55,14 @@ export default function PrivateProfile({ profile }: { profile: ProfileData }) {
         {members && (
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             <Link
+              prefetch={false}
               href={loginHref(`/u/${u.handle}`)}
               className="h-10 px-4 rounded-[10px] bg-(--ink-2) text-(--cream) text-[13px] font-semibold inline-flex items-center hover:bg-(--ink)"
             >
               Entrar
             </Link>
             <Link
+              prefetch={false}
               href={loginHref(`/u/${u.handle}`, "register")}
               className="h-10 px-4 rounded-[10px] border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) text-[13px] font-semibold inline-flex items-center hover:bg-(--yellow-soft)"
             >

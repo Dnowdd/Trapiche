@@ -19,7 +19,10 @@ export default function TermsPage() {
         O Trapiche é um diário de leituras: você registra o que lê, guarda
         citações, escreve resenhas e monta listas. Ao criar uma conta ou usar o
         site, você concorda com estes termos. Eles valem junto com a{" "}
-        <Link href="/privacidade">Política de Privacidade</Link>.
+        <Link prefetch={false} href="/privacidade">
+          Política de Privacidade
+        </Link>
+        .
       </p>
 
       <h2>Quem pode usar</h2>
@@ -124,7 +127,10 @@ export default function TermsPage() {
         </li>
         <li>
           Como seus dados são usados no assistente está na{" "}
-          <Link href="/privacidade#assistente">Política de Privacidade</Link>.
+          <Link prefetch={false} href="/privacidade#assistente">
+            Política de Privacidade
+          </Link>
+          .
         </li>
       </ul>
 
@@ -168,7 +174,10 @@ export default function TermsPage() {
       <h2>Contato</h2>
       <p>
         Dúvidas, pedidos ou avisos de direitos autorais: pelo{" "}
-        <Link href="/suporte">suporte</Link> ou por{" "}
+        <Link prefetch={false} href="/suporte">
+          suporte
+        </Link>{" "}
+        ou por{" "}
         <a href="mailto:david.queiroz@dnowdd.com">david.queiroz@dnowdd.com</a>.
         Estes termos seguem as leis do Brasil.
       </p>

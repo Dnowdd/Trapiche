@@ -28,7 +28,7 @@ export default function ErrorPage({
           <button type="button" onClick={reset} className={primaryBtn}>
             Tentar de novo
           </button>
-          <Link href="/" className={ghostBtn}>
+          <Link prefetch={false} href="/" className={ghostBtn}>
             Voltar ao início
           </Link>
         </>

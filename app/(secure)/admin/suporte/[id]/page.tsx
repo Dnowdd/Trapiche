@@ -51,6 +51,7 @@ export default async function StaffTicketPage({
                 {u.name}
               </div>
               <Link
+                prefetch={false}
                 href={`/u/${u.handle}`}
                 className="font-mono text-[11px] text-(--ink-4) hover:text-(--ink-2)"
               >

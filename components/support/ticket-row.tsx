@@ -15,6 +15,7 @@ export default function TicketRow({
 }) {
   return (
     <Link
+      prefetch={false}
       href={href}
       className="group flex gap-3.5 items-start px-4 sm:px-5 py-4 border-b border-(--rule) last:border-b-0 transition-colors duration-150 hover:bg-(--yellow-soft)"
     >

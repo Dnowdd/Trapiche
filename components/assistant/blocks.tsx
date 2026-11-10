@@ -54,6 +54,7 @@ function BookTile({
   return (
     <li className="w-26 shrink-0 snap-start">
       <Link
+        prefetch={false}
         href={`/book/${book.id}`}
         onClick={onNavigate}
         className="group block rounded-md"
@@ -257,6 +258,7 @@ export function ActionCardView({
           <span className="min-w-0">{action.result}</span>
           {action.href && (
             <Link
+              prefetch={false}
               href={action.href}
               onClick={onNavigate}
               className="ml-auto shrink-0 text-(--ink-2) underline underline-offset-[3px] decoration-[rgba(var(--ink-rgb),0.35)] hover:decoration-(--ink-2)"

@@ -24,6 +24,7 @@ const Popular = async () => {
       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-4 gap-y-6">
         {items.map(({ book, readers }) => (
           <Link
+            prefetch={false}
             href={`/book/${book.googleId ?? book.id}`}
             className="flex flex-col gap-2 transition-transform duration-120 hover:-translate-y-0.5"
             key={book.id}

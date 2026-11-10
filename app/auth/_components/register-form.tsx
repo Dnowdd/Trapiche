@@ -122,6 +122,7 @@ export default function RegisterForm({
         <span>
           Li e aceito os{" "}
           <Link
+            prefetch={false}
             href="/termos"
             target="_blank"
             className="text-(--ink-2) font-semibold border-b border-(--ink-4) hover:border-(--ink-2)"
@@ -130,6 +131,7 @@ export default function RegisterForm({
           </Link>{" "}
           e a{" "}
           <Link
+            prefetch={false}
             href="/privacidade"
             target="_blank"
             className="text-(--ink-2) font-semibold border-b border-(--ink-4) hover:border-(--ink-2)"

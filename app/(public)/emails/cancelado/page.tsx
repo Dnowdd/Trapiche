@@ -43,12 +43,14 @@ export default async function UnsubscribedPage({
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
+            prefetch={false}
             href={settings}
             className="h-11 px-5 rounded-[12px] bg-(--ink-2) text-(--yellow) text-[14px] font-semibold inline-flex items-center hover:bg-(--ink)"
           >
             {session ? "Ver minhas preferências" : "Entrar"}
           </Link>
           <Link
+            prefetch={false}
             href="/"
             className="h-11 px-5 rounded-[12px] border border-[rgba(var(--ink-rgb),0.2)] text-(--ink-2) text-[14px] font-semibold inline-flex items-center hover:bg-(--yellow-soft)"
           >

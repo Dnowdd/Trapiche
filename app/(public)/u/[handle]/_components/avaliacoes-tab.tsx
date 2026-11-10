@@ -36,7 +36,7 @@ export default function AvaliacoesTab({
           className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] p-5 sm:py-6.5 sm:px-7 grid grid-cols-[72px_1fr] sm:grid-cols-[120px_1fr] gap-4 sm:gap-7"
           key={r.id}
         >
-          <Link href={`/book/${r.book.id}`}>
+          <Link prefetch={false} href={`/book/${r.book.id}`}>
             <BookCover
               book={r.book}
               size="md"
@@ -48,6 +48,7 @@ export default function AvaliacoesTab({
             <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 mb-2">
               <div>
                 <Link
+                  prefetch={false}
                   href={`/book/${r.book.id}`}
                   className="text-[16px] sm:text-[18px] font-bold text-(--ink) tracking-[-0.01em] hover:underline"
                 >
@@ -93,6 +94,7 @@ export default function AvaliacoesTab({
                 {r.likes === 1 ? "curtida" : "curtidas"}
               </span>
               <Link
+                prefetch={false}
                 href={`/book/${r.book.id}/resenhas`}
                 className="inline-flex items-center gap-1.5 hover:text-(--ink)"
               >

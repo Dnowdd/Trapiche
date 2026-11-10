@@ -49,7 +49,11 @@ export default function QuoteCard({
       )}
     >
       {book && (
-        <Link href={`/book/${book.id}`} className="shrink-0 hidden sm:block">
+        <Link
+          prefetch={false}
+          href={`/book/${book.id}`}
+          className="shrink-0 hidden sm:block"
+        >
           <BookCover book={book} size="sm" style={{ width: 56, height: 84 }} />
         </Link>
       )}
@@ -87,6 +91,7 @@ export default function QuoteCard({
         <figcaption className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
           {showAuthor && (
             <Link
+              prefetch={false}
               href={`/u/${quote.user.handle}`}
               className="flex items-center gap-2 min-w-0 group"
             >
@@ -102,6 +107,7 @@ export default function QuoteCard({
           )}
           {book && (
             <Link
+              prefetch={false}
               href={`/book/${book.id}`}
               className="text-[12.5px] font-semibold text-(--ink-2) hover:underline truncate"
             >

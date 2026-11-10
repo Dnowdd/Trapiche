@@ -32,6 +32,7 @@ export default function TechDetails({
   const report = (
     <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
       <Link
+        prefetch={false}
         href={`/suporte/novo?livro=${encodeURIComponent(book.id)}`}
         className="text-[12px] text-(--ink-3) border-b border-(--ink-4) pb-px hover:text-(--ink)"
       >
@@ -67,6 +68,7 @@ export default function TechDetails({
             >
               {"href" in r && r.href ? (
                 <Link
+                  prefetch={false}
                   href={r.href}
                   className="hover:underline underline-offset-2"
                 >

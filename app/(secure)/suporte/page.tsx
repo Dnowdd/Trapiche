@@ -17,6 +17,7 @@ export default async function SupportPage() {
       title="Suporte"
       aside={
         <Link
+          prefetch={false}
           href="/suporte/novo"
           className="h-10.5 px-4.5 rounded-[10px] bg-(--ink-2) text-(--yellow) text-[13px] font-semibold inline-flex items-center gap-2 self-start sm:self-auto hover:bg-(--ink)"
         >
@@ -37,6 +38,7 @@ export default async function SupportPage() {
             Quando você abrir um, a conversa aparece aqui.
           </p>
           <Link
+            prefetch={false}
             href="/suporte/novo"
             className="mt-5 h-10 px-4 rounded-[10px] bg-(--yellow) border border-(--yellow-deep) text-(--ink) text-[13px] font-semibold inline-flex items-center hover:bg-(--yellow-deep)"
           >

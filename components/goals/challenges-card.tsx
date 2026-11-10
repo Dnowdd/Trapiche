@@ -288,7 +288,12 @@ function ChallengeRow({ c, isOwner }: { c: ChallengeItem; isOwner: boolean }) {
       {c.books.length > 0 && (
         <div className="mt-2 flex gap-1.5">
           {c.books.map((b) => (
-            <Link key={b.id} href={`/book/${b.id}`} title={b.title}>
+            <Link
+              prefetch={false}
+              key={b.id}
+              href={`/book/${b.id}`}
+              title={b.title}
+            >
               <BookCover book={b} size="sm" style={{ width: 22, height: 33 }} />
             </Link>
           ))}

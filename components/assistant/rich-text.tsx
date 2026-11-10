@@ -40,6 +40,7 @@ function inline(nodes: Inline[], ctx: Ctx): ReactNode {
           return <Fragment key={i}>{inline(n.children, ctx)}</Fragment>;
         return (
           <Link
+            prefetch={false}
             key={i}
             href={n.href}
             onClick={ctx.onNavigate}

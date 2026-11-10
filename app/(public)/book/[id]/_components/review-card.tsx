@@ -74,7 +74,7 @@ export default function ReviewCard({
   return (
     <article className="bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.07)] rounded-[18px] py-5.5 px-6.5">
       <div className="flex items-center gap-3.5 mb-3">
-        <Link href={`/u/${r.handle}`} className="shrink-0">
+        <Link prefetch={false} href={`/u/${r.handle}`} className="shrink-0">
           <Avatar
             name={r.user}
             image={r.image}
@@ -84,6 +84,7 @@ export default function ReviewCard({
         </Link>
         <div className="flex-1 min-w-0">
           <Link
+            prefetch={false}
             href={`/u/${r.handle}`}
             className="text-[14px] font-semibold text-(--ink-2) hover:underline"
           >
@@ -172,7 +173,11 @@ export default function ReviewCard({
             <ul className="m-0 p-0 list-none flex flex-col gap-3 mb-4">
               {comments.map((c) => (
                 <li key={c.id} className="flex gap-3">
-                  <Link href={`/u/${c.handle}`} className="shrink-0">
+                  <Link
+                    prefetch={false}
+                    href={`/u/${c.handle}`}
+                    className="shrink-0"
+                  >
                     <Avatar
                       name={c.user}
                       image={c.image}
@@ -183,6 +188,7 @@ export default function ReviewCard({
                   <div className="flex-1 min-w-0">
                     <div className="text-[12px] text-(--ink-4)">
                       <Link
+                        prefetch={false}
                         href={`/u/${c.handle}`}
                         className="font-semibold text-(--ink-2) hover:underline"
                       >
@@ -242,6 +248,7 @@ export default function ReviewCard({
             </form>
           ) : (
             <Link
+              prefetch={false}
               href={loginHref(pathname)}
               className="text-[12px] text-(--ink-3) border-b border-(--ink-4)"
             >

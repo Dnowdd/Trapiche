@@ -75,6 +75,7 @@ export default async function SearchPage({ searchParams }: Props) {
               {works.length} {works.length === 1 ? "obra" : "obras"}
             </span>
             <Link
+              prefetch={false}
               href={toggleHref}
               className={[
                 "h-8 px-3 rounded-full border inline-flex items-center text-[12px] font-medium",
@@ -96,6 +97,7 @@ export default async function SearchPage({ searchParams }: Props) {
             <div className="flex flex-wrap gap-3">
               {result.authors.map((a) => (
                 <Link
+                  prefetch={false}
                   key={a.name}
                   href={authorHref(a.name)}
                   className="flex items-center gap-3 bg-(--cream-card) border border-[rgba(var(--ink-rgb),0.08)] rounded-[12px] py-2.5 pl-2.5 pr-4 hover:bg-(--yellow-soft)"

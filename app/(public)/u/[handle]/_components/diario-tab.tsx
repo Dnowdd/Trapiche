@@ -379,7 +379,7 @@ export default function DiarioTab({
               <div className="hidden sm:block font-mono text-[11px] text-(--ink-3) tracking-[0.04em] uppercase">
                 {e.date}
               </div>
-              <Link href={`/book/${e.book.id}`}>
+              <Link prefetch={false} href={`/book/${e.book.id}`}>
                 <BookCover
                   book={e.book}
                   size="sm"
@@ -393,6 +393,7 @@ export default function DiarioTab({
               </Link>
               <div className="min-w-0">
                 <Link
+                  prefetch={false}
                   href={`/book/${e.book.id}`}
                   className="text-[14px] font-semibold text-(--ink-2) tracking-[-0.005em] hover:underline"
                 >
@@ -432,6 +433,7 @@ export default function DiarioTab({
         {data.entriesTotal > data.entries.length && (
           <div className="pt-4 text-center">
             <Link
+              prefetch={false}
               href={`/u/${handle}?tab=diario&entradas=${limit + 40}`}
               scroll={false}
               className="text-[12px] text-(--ink-3) border-b border-(--ink-4) hover:text-(--ink)"

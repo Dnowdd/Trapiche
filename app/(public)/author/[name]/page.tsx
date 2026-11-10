@@ -82,7 +82,7 @@ export default async function AuthorPage({ params }: Props) {
       />
       <div className="pt-7 md:pt-10 px-4 sm:px-8 lg:px-18.75 pb-12 md:pb-15">
         <nav className="hidden md:flex items-center gap-2 font-mono text-[11px] text-(--ink-4) tracking-[0.04em] mb-7 uppercase">
-          <Link href="/" className="hover:text-(--ink-2)">
+          <Link prefetch={false} href="/" className="hover:text-(--ink-2)">
             Trapiche
           </Link>
           <span className="text-(--ink-5)">/</span>

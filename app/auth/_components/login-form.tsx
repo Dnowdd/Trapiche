@@ -113,6 +113,7 @@ export default function LoginForm({
       <div className="mt-5.5 text-center text-[12px] text-(--ink-4) leading-normal">
         Ao entrar você concorda com os{" "}
         <Link
+          prefetch={false}
           href="/termos"
           target="_blank"
           className="text-(--ink-3) border-b border-(--ink-4) hover:text-(--ink-2)"
@@ -121,6 +122,7 @@ export default function LoginForm({
         </Link>{" "}
         e a{" "}
         <Link
+          prefetch={false}
           href="/privacidade"
           target="_blank"
           className="text-(--ink-3) border-b border-(--ink-4) hover:text-(--ink-2)"
